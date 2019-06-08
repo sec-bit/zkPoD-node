@@ -244,40 +244,44 @@ func readKeyStore(config BasicConfig, password string) (*keystore.Key, error) {
 	Log := Logger.NewSessionLogger()
 
 	var key *keystore.Key
-	//read keystore
+
+	if password == "" {
+		Log.Warnf("no password to read!")
+		return nil, fmt.Errorf("no keystore password!")
+	}
 	rs, err := pathExists(config.KeyStoreFile)
 	if err != nil {
-		Log.Warnf("failed to check keystore file. keystore file=%v, err=%v", config.KeyStoreFile, err)
-		return nil, fmt.Errorf("failed to read keystore file")
+		Log.Errorf("failed to check key store file. err=%v", err)
+		return nil, errors.New("failed to check key store file")
 	}
-	if rs {
-		if password == "" {
-			Log.Warnf("no password to read!")
-			return key, nil
-		}
 
-		key, err = initKeyStore(config.KeyStoreFile, password, Log)
+	if !rs {
+		ks := keystore.NewKeyStore(config.KeyStoreFile, keystore.StandardScryptN, keystore.StandardScryptP)
+		account, err := ks.NewAccount(password)
 		if err != nil {
-			Log.Errorf("failed to initialize key store file. err=%v", err)
-			return nil, errors.New("invalid key store file")
+			Log.Warnf("failed to create a account. err=%v", err)
+			return nil, errors.New("failed to create a account")
 		}
-		Log.Infof("initialize key store finish. ethaddr=%v.", key.Address.Hex())
-
-		if config.ContractAddr == "" {
-			Log.Warnf("invalid contract addr. contract=%v", config.ContractAddr)
-			return nil, errors.New("invalid contract addr")
-		}
-		err = ConnectToProvider(key, config.ContractAddr, Log)
-		if err != nil {
-			Log.Warnf("failed to connect to provider for contract. err=%v", err)
-			return nil, errors.New("failed to connect to provider for contract")
-		}
-		Log.Infof("success to connect to provider for contract")
-
-	} else {
-		//TODO: generate a new keystore
-		Log.Warnf("no key to read!")
+		Log.Infof("create a new account finish. keystore file=%v, ethaddr=%v.", config.KeyStoreFile, account.Address.Hex())
 	}
+
+	key, err = initKeyStore(config.KeyStoreFile, password, Log)
+	if err != nil {
+		Log.Errorf("failed to initialize key store file. err=%v", err)
+		return nil, errors.New("invalid key store file")
+	}
+	Log.Infof("initialize key store finish. ethaddr=%v.", key.Address.Hex())
+
+	if config.ContractAddr == "" {
+		Log.Warnf("invalid contract addr. contract=%v", config.ContractAddr)
+		return nil, errors.New("invalid contract addr")
+	}
+	err = ConnectToProvider(key, config.ContractAddr, Log)
+	if err != nil {
+		Log.Warnf("failed to connect to provider for contract. err=%v", err)
+		return nil, errors.New("failed to connect to provider for contract")
+	}
+	Log.Infof("success to connect to provider for contract")
 
 	return key, nil
 }

@@ -102,7 +102,7 @@ func SetupNode(Log ILogger) {
 
 	Log.Infof("setup node...")
 	for {
-		if GAdminAuth == nil || ZkPoDExchangeClient == nil || ETHKey == nil {
+		if GAdminAuth == nil || ZkPoDExchangeClient == nil {
 			time.Sleep(2 * time.Second)
 			continue
 		}
@@ -112,7 +112,7 @@ func SetupNode(Log ILogger) {
 		break
 	}
 	for {
-		if BConf.NetIP == "" || GAdminAuth == nil || ZkPoDExchangeClient == nil || ETHKey == nil {
+		if BConf.NetIP == "" || GAdminAuth == nil || ZkPoDExchangeClient == nil {
 			time.Sleep(2 * time.Second)
 			continue
 		}
