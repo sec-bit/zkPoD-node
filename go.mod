@@ -25,6 +25,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/uber/jaeger-client-go v2.16.0+incompatible // indirect
 	github.com/uber/jaeger-lib v2.0.0+incompatible // indirect
+	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
 	golang.org/x/net v0.0.0-20190607181551-461777fb6f67
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect

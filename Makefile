@@ -9,7 +9,7 @@ ifndef $(GOPATH)
 endif
 
 # test params
-POD_CORE_DIR :=  $(GOPATH)/src/github.com/sec-bit/zkPoD-lib/pod-core
+POD_CORE_DIR :=  $(GOPATH)/src/github.com/sec-bit/zkPoD-lib/pod_core
 CGO_LDFLAGS := -L$(POD_CORE_DIR)
 KEYSTORE_FILE := ./keystore
 KEYSTORE_PASSWORD := 123456
