@@ -79,6 +79,10 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 	Log.Debugf("start connect with buyer node....")
 	defer func() {
 		wg.Done()
+		if err := recover(); err != nil {
+			Log.Errorf("exception unexpected: error=%v", err)
+			return
+		}
 	}()
 
 	node, rkey, params, err := preSellerTxAndConn(conn, key, Log)
