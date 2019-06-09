@@ -19,7 +19,7 @@ INIT_FILE := ./testdata/init_plain.json
 MERKLE_ROOT := a5135a3a7806f2434c384ad531a3c3e94b206d409ef3ad90ccc332cbae5cea38 
 ETH_VALUE := 200
 ETH_ADDR := 0x4eC1B88456547e3Fe169510D3FfE2EC7de757B6f
-CONFIG_FAILE := config.json
+CONFIG_FILE := config.json
 
 all:
 	CGO_LDFLAGS=$(CGO_LDFLAGS) \
@@ -69,7 +69,7 @@ run-withdraw:
 run-purchase:
 	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
 	$(PROJ_HOME)/$(BIN) -o purchase \
-	-c $(CONFIG_FAILE)
+	-c $(CONFIG_FILE)
 
 clean:
 	@rm -f $(BIN)

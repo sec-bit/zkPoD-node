@@ -197,7 +197,7 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var config InitPublishConfig
 	err := json.Unmarshal([]byte(request_data), &config)
 	if err != nil {
-		Log.Warnf("failed to parse parameters")
+		Log.Warnf("failed to parse parameters. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 		return
 	}

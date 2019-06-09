@@ -585,7 +585,10 @@ func copyDir(src string, dest string) error {
 		}
 		if f.IsDir() {
 
-			copyDir(f.Name(), dest+"/"+f.Name())
+			err = copyDir(f.Name(), dest+"/"+f.Name())
+			if err != nil {
+				return err
+			}
 		} else {
 
 			dest_new := dest + "/" + f.Name()
