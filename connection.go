@@ -53,7 +53,6 @@ func SellerStartNode(sellerIPAddr string, key *keystore.Key, Log ILogger) error 
 	fmt.Printf("===>>>Listen to %v\n\n", serveAddr)
 
 	for {
-		//TODO: reload
 		conn, err := l.Accept()
 		if err != nil {
 			Log.Errorf("failed to accept connection on %s: %v",
@@ -644,6 +643,13 @@ func preBuyerConn(params BuyerConnParam, key *keystore.Key, Log ILogger) (*pod_n
 		Log.Warnf("failed to create net session. err=%v", err)
 		return node, conn, params, errors.New("failed to create net session")
 	}
+	dir := BConf.BuyerDir + "/transaction/" + params.SessionID
+	err = os.Mkdir(dir, os.ModePerm)
+	if err != nil {
+		Log.Errorf("create folder %v error. err=%v", dir, err)
+		return node, conn, params, errors.New("failed to create folder")
+	}
+	Log.Debugf("success to create folder. dir=%v", dir)
 	return node, conn, params, nil
 }
 

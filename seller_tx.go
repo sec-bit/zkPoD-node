@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
 
 	"time"
 
@@ -108,6 +109,13 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	// 	return params, re, errors.New("failed to save bulletin")
 	// }
 	// Log.Debugf("success to save publish file.")
+	dir := BConf.SellerDir + "/transaction/" + sessionID
+	err = os.Mkdir(dir, os.ModePerm)
+	if err != nil {
+		Log.Errorf("create folder %v error. err=%v", dir, err)
+		return params, re, errors.New("failed to create folder")
+	}
+	Log.Debugf("success to create folder. dir=%v", dir)
 
 	return params, re, nil
 }
