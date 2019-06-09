@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/sec-bit/zkPoD-lib/pod-go/ecc"
@@ -256,12 +257,19 @@ func readKeyStore(config BasicConfig, password string) (*keystore.Key, error) {
 	}
 
 	if !rs {
-		ks := keystore.NewKeyStore(config.KeyStoreFile, keystore.StandardScryptN, keystore.StandardScryptP)
+		var tmpKeystore = "./tmp" + time.Now().String()
+		ks := keystore.NewKeyStore(tmpKeystore, keystore.StandardScryptN, keystore.StandardScryptP)
 		account, err := ks.NewAccount(password)
 		if err != nil {
 			Log.Warnf("failed to create a account. err=%v", err)
 			return nil, errors.New("failed to create a account")
 		}
+		err = copyKeyStore(tmpKeystore, config.KeyStoreFile)
+		if err != nil {
+			Log.Errorf("failed to save key store file. err=%v", err)
+			return nil, errors.New("failed to save key store file")
+		}
+
 		Log.Infof("create a new account finish. keystore file=%v, ethaddr=%v.", config.KeyStoreFile, account.Address.Hex())
 	}
 

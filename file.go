@@ -104,6 +104,32 @@ func pathExists(path string) (bool, error) {
 	return false, err
 }
 
+func copyKeyStore(dir string, keyStore string) error {
+	rd, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		os.RemoveAll(dir)
+	}()
+	exist := false
+	for _, fi := range rd {
+		if fi.IsDir() {
+			continue
+		} else {
+			exist = true
+			err = copyFile(dir+"/"+fi.Name(), keyStore)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	if !exist {
+		return fmt.Errorf("keystore file does not exist")
+	}
+	return nil
+}
+
 func savePublishFileForTransaction(sessionID string, mklroot string, Log ILogger) error {
 
 	dir := BConf.SellerDir + "/publish/" + mklroot

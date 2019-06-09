@@ -192,7 +192,7 @@ func HandleCmdReq(config Config) {
 		}
 		BuyerUnDepositETH(config.SellerAddress, Log)
 	default:
-		Log.Warnf("invalid operation. Please input 'publish','close' or 'withdraw'")
+		Log.Warnf("invalid operation. operation=%v", config.Operation)
 		panic("invalid operation")
 	}
 }

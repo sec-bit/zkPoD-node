@@ -27,7 +27,7 @@ all:
 
 run:
 	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o start\
+	$(PROJ_HOME)/$(BIN) -o start \
 	-k $(KEYSTORE_FILE) -pass $(KEYSTORE_PASSWORD) \
 	-port $(PORT) -ip $(NETIP)
 
