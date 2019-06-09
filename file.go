@@ -581,18 +581,24 @@ func copyDir(src string, dest string) error {
 
 	err := filepath.Walk(src, func(src string, f os.FileInfo, err error) error {
 		if f == nil {
+			fmt.Printf("filepath Walk err=%v\n", err)
 			return err
 		}
 		if f.IsDir() {
 
 			err = copyDir(f.Name(), dest+"/"+f.Name())
 			if err != nil {
+				fmt.Printf("copyDir err=%v\n", err)
 				return err
 			}
 		} else {
 
 			dest_new := dest + "/" + f.Name()
-			copyFile(src, dest_new)
+			err = copyFile(src, dest_new)
+			if err != nil {
+				fmt.Printf("copyFile err=%v\n", err)
+				return err
+			}
 		}
 		return nil
 	})
