@@ -117,7 +117,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 		return
 	}
 
-	publishPath := BConf.SellerDir + "/transaction/" + params.SessionID
+	publishPath := BConf.SellerDir + "/publish/" + tx.Bulletin.SigmaMKLRoot
 
 	if tx.Mode == TRANSACTION_MODE_PLAIN_POD {
 		switch tx.SubMode {
@@ -397,10 +397,6 @@ func preSellerConn(node *pod_net.Node, key *keystore.Key, params SellerConnParam
 		return
 	}
 	Log.Debugf("success to send session ack...")
-	// if node.state != pod_net.stateSessionAckWait {
-	// 	return mode,mklroot,sessionID,fmt.Errorf(
-	// 		"server node not in stateSessionAckWait state")
-	// }
 
 	/////////////////////////RecvSessionAck/////////////////////////
 	ack, err := node.RecvSessionAck(false)
@@ -417,19 +413,6 @@ func preSellerConn(node *pod_net.Node, key *keystore.Key, params SellerConnParam
 		return
 	}
 	Log.Debugf("success to receive session ack...")
-	// if node.session.id != sessionIDInt {
-	// 	return mode, mklroot, sessionID, fmt.Errorf(
-	// 		"server session ID %d != %d",
-	// 		node.session.id, sessionID)
-	// }
-	// if node.session.mode != req.Mode {
-	// 	return mode, mklroot, sessionID, fmt.Errorf(
-	// 		"server session mode %d != %d",
-	// 		node.session.mode, req.Mode)
-	// }
-	// if node.state != pod_net.stateSessionEstablished {
-	// 	return mode,mklroot,sessionID,fmt.Errorf("server node not in stateSessionEstablished state")
-	// }
 	return
 }
 
@@ -518,9 +501,6 @@ func sellerRcvPODReq(node *pod_net.Node, requestFile string) error {
 	if _, err := node.RecvTxRequest(reqBuf); err != nil {
 		return err
 	}
-	// if node.state != pod_net.stateTxRequestRecvd {
-	// 	return fmt.Errorf("server node not in TxRequestRecvd state")
-	// }
 
 	reqf, err := os.OpenFile(requestFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -545,10 +525,6 @@ func sellerSendPODResp(node *pod_net.Node, responseFile string) error {
 	); err != nil {
 		return err
 	}
-	// if node.state != pod_net.stateTxReceiptWait {
-	// 	return fmt.Errorf(
-	// 		"server node not in TxReceiptWait state")
-	// }
 	return nil
 }
 
@@ -631,10 +607,6 @@ func sellerRcvNegoResp(node *pod_net.Node, buyerNegoResponseFile string) error {
 		return fmt.Errorf(
 			"failed to receive nego ack: %v", err)
 	}
-	// if node.state != pod_net.stateNegotiated {
-	// 	return fmt.Errorf(
-	// 		"server node not in Negotiated state")
-	// }
 
 	reqf, err := os.OpenFile(buyerNegoResponseFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -740,10 +712,6 @@ func buyerCreateSess(node *pod_net.Node, mklroot string, mode string, subMode st
 			err)
 	}
 	Log.Debugf("success to send session request...")
-	// if node.state != pod_net.stateSessionAckWait {
-	// 	return fmt.Errorf(
-	// 		"client node not in SessionAckWait state")
-	// }
 
 	/////////////////////////RecvSessionAck/////////////////////////
 	ack, err := node.RecvSessionAck(true)
@@ -761,10 +729,6 @@ func buyerCreateSess(node *pod_net.Node, mklroot string, mode string, subMode st
 			ack.Mode)
 	}
 
-	// if node.state != pod_net.stateSessionAckRecvd {
-	// 	return fmt.Errorf("client node not in stateSessionAckRecvd state")
-	// }
-
 	/////////////////////////SendSessionAck/////////////////////////
 	if err := node.SendSessionAck(
 		ack.ID, ack.Mode, mklrootByte, ack.ExtraInfo, false,
@@ -774,20 +738,6 @@ func buyerCreateSess(node *pod_net.Node, mklroot string, mode string, subMode st
 			err)
 	}
 	Log.Debugf("success to send session ack...")
-	// if node.session.id != ack.ID {
-	// 	return fmt.Errorf(
-	// 		"client session ID %d != %d",
-	// 		node.session.id, ack.ID)
-	// }
-	// if node.session.mode != ack.Mode {
-	// 	return fmt.Errorf(
-	// 		"client session mode %d != %d",
-	// 		node.session.mode, ack.Mode)
-	// }
-	// if node.state != pod_net.stateSessionEstablished {
-	// 	return fmt.Errorf(
-	// 		"client node not in stateSessionEstablished state")
-	// }
 
 	sessionID := fmt.Sprintf("%x", ack.ID)
 	return sessionID, mode, subMode, ot, nil
@@ -802,10 +752,6 @@ func buyerSendPODReq(node *pod_net.Node, requestFile string) error {
 		return fmt.Errorf(
 			"failed to send Tx request: %v", err)
 	}
-	// if node.state != pod_net.stateTxResponseWait {
-	// 	return fmt.Errorf(
-	// 		"client node not in TxResponse state")
-	// }
 	return nil
 }
 
@@ -816,10 +762,6 @@ func buyerRcvPODResp(node *pod_net.Node, responseFile string) error {
 	if err != nil {
 		return err
 	}
-	// if node.state != pod_net.stateTxResponseRecvd {
-	// 	return fmt.Errorf(
-	// 		"client node not in TxResponseRecvd state")
-	// }
 	respf, err := os.OpenFile(responseFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to save file")

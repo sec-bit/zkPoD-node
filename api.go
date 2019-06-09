@@ -640,12 +640,18 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	plog.Detail = fmt.Sprintf("%v, sessionID=%v,", plog.Detail, params.SessionID)
 	plog.SessionId = params.SessionID
 
-	tx, err := preBuyerTx(params, data.BulletinFile, data.PubPath, bulletin, Log)
-	if err != nil {
-		Log.Warnf("failed to prepare for transaction. err=%v", err)
-		fmt.Fprintf(w, RESPONSE_PURCHASE_FAILED)
-		return
-	}
+	var tx BuyerTransaction
+	tx.SessionID = params.SessionID
+	tx.Status = TRANSACTION_STATUS_START
+	tx.Bulletin = bulletin
+	tx.SellerIP = params.SellerIPAddr
+	tx.SellerAddr = params.SellerAddr
+	tx.Mode = params.Mode
+	tx.SubMode = params.SubMode
+	tx.OT = params.OT
+	tx.UnitPrice = params.UnitPrice
+	tx.BuyerAddr = fmt.Sprintf("%v", ETHKey.Address.Hex())
+
 	Log.Debugf("[%v]step0: success to prepare for transaction...", params.SessionID)
 	tx.Status = TRANSACTION_STATUS_START
 	err = insertBuyerTxToDB(tx)
@@ -660,28 +666,28 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_BATCH1:
 			if tx.OT {
-				response = buyerTxForPOB1(node, ETHKey, tx, data.Demands, data.Phantoms, Log)
+				response = buyerTxForPOB1(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForPB1(node, ETHKey, tx, data.Demands, Log)
+				response = buyerTxForPB1(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
 		case TRANSACTION_SUB_MODE_BATCH2:
-			response = buyerTxForPB2(node, ETHKey, tx, data.Demands, Log)
+			response = buyerTxForPB2(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		}
 	} else if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_BATCH1:
 			if tx.OT {
-				response = buyerTxForTOB1(node, ETHKey, tx, data.Demands, data.Phantoms, Log)
+				response = buyerTxForTOB1(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForTB1(node, ETHKey, tx, data.Demands, Log)
+				response = buyerTxForTB1(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
 		case TRANSACTION_SUB_MODE_BATCH2:
-			response = buyerTxForTB2(node, ETHKey, tx, data.Demands, Log)
+			response = buyerTxForTB2(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		case TRANSACTION_SUB_MODE_VRF:
 			if tx.OT {
-				response = buyerTxForTOQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.PhantomKeyValue, Log)
+				response = buyerTxForTOQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.PhantomKeyValue, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForTQ(node, ETHKey, tx, data.KeyName, data.KeyValue, Log)
+				response = buyerTxForTQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.BulletinFile, data.PubPath, Log)
 			}
 		}
 	}

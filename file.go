@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -70,28 +69,28 @@ type Bulletin struct {
 	SigmaMKLRoot string `json:"sigma_mkl_root"`
 }
 
-func preBuyerTx(params BuyerConnParam, bulletinPath string, PubPath string, bulletin Bulletin, Log ILogger) (BuyerTransaction, error) {
-	var tx BuyerTransaction
-	dir := BConf.BuyerDir + "/transaction/" + params.SessionID
-	err := saveBulletinAndPublic(dir, bulletinPath, PubPath, Log)
-	if err != nil {
-		Log.Warnf("failed to save bulletin for buyer. err=%v", err)
-		return tx, errors.New("failed to save file")
-	}
-	Log.Debugf("[%v]success to save bulletin and public information...", params.SessionID)
+// func preBuyerTx(params BuyerConnParam, bulletinPath string, PubPath string, bulletin Bulletin, Log ILogger) (BuyerTransaction, error) {
+// 	var tx BuyerTransaction
+// 	dir := BConf.BuyerDir + "/transaction/" + params.SessionID
+// 	// err := saveBulletinAndPublic(dir, bulletinPath, PubPath, Log)
+// 	// if err != nil {
+// 	// 	Log.Warnf("failed to save bulletin for buyer. err=%v", err)
+// 	// 	return tx, errors.New("failed to save file")
+// 	// }
+// 	// Log.Debugf("[%v]success to save bulletin and public information...", params.SessionID)
 
-	tx.SessionID = params.SessionID
-	tx.Status = TRANSACTION_STATUS_START
-	tx.Bulletin = bulletin
-	tx.SellerIP = params.SellerIPAddr
-	tx.SellerAddr = params.SellerAddr
-	tx.Mode = params.Mode
-	tx.SubMode = params.SubMode
-	tx.OT = params.OT
-	tx.UnitPrice = params.UnitPrice
-	tx.BuyerAddr = fmt.Sprintf("%v", ETHKey.Address.Hex())
-	return tx, nil
-}
+// 	tx.SessionID = params.SessionID
+// 	tx.Status = TRANSACTION_STATUS_START
+// 	tx.Bulletin = bulletin
+// 	tx.SellerIP = params.SellerIPAddr
+// 	tx.SellerAddr = params.SellerAddr
+// 	tx.Mode = params.Mode
+// 	tx.SubMode = params.SubMode
+// 	tx.OT = params.OT
+// 	tx.UnitPrice = params.UnitPrice
+// 	tx.BuyerAddr = fmt.Sprintf("%v", ETHKey.Address.Hex())
+// 	return tx, nil
+// }
 
 func pathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
@@ -127,115 +126,6 @@ func copyKeyStore(dir string, keyStore string) error {
 	if !exist {
 		return fmt.Errorf("keystore file does not exist")
 	}
-	return nil
-}
-
-func savePublishFileForTransaction(sessionID string, mklroot string, Log ILogger) error {
-
-	dir := BConf.SellerDir + "/publish/" + mklroot
-	txDir := BConf.SellerDir + "/transaction"
-
-	rs, err := pathExists(txDir)
-	if err != nil {
-		Log.Errorf("check path exist error. err=%v", err)
-		return errors.New("save publish file error")
-	}
-	if !rs {
-		err = os.Mkdir(txDir, os.ModePerm)
-		if err != nil {
-			Log.Errorf("create dictionary %v error. err=%v", txDir, err)
-			return errors.New("save publish file error")
-		}
-		Log.Debugf("success to create dictionary. dir=%v", txDir)
-	}
-
-	txPath := txDir + "/" + sessionID
-	err = os.Mkdir(txPath, os.ModePerm)
-	if err != nil {
-		Log.Errorf("create dictionary %v error. err=%v", txPath, err)
-		return errors.New("save publish file error")
-	}
-	Log.Debugf("success to create dictionary. dir=%v", txPath)
-
-	err = copyFile(dir+"/bulletin", txPath+"/bulletin")
-	if err != nil {
-		Log.Warnf("failed to copy bulletin file. err=%v", err)
-		return errors.New("failed to copy bulletin file")
-	}
-	Log.Debugf("success to copy bulletin file to %v", txPath+"/bulletin")
-
-	err = os.Mkdir(txPath+"/public", os.ModePerm)
-	if err != nil {
-		Log.Errorf("create dictionary %v error. err=%v", txPath+"/public", err)
-		return errors.New("save public file error")
-	}
-	Log.Debugf("success to create dictionary. dir=%v", txPath+"/public")
-
-	err = copyDir(dir+"/public", txPath+"/public")
-	if err != nil {
-		Log.Warnf("failed to copy public file. err=%v", err)
-		return errors.New("Failed to copy public file")
-	}
-	Log.Debugf("success to copy public dictionary to %v", txPath+"/public")
-
-	err = os.Mkdir(txPath+"/private", os.ModePerm)
-	if err != nil {
-		Log.Errorf("create dictionary %v error. err=%v", txPath+"/private", err)
-		return errors.New("save private file error")
-	}
-	Log.Debugf("success to create dictionary. dir=%v", txPath+"/private")
-
-	err = copyDir(dir+"/private", txPath+"/private")
-	if err != nil {
-		Log.Warnf("failed to copy private file. err=%v", err)
-		return errors.New("Failed to copy private file")
-	}
-	Log.Debugf("success to copy private dictionary to %v", txPath+"/private")
-
-	err = copyFile(dir+"/extra.json", txPath+"/extra.json")
-	if err != nil {
-		Log.Warnf("failed to copy extra file. err=%v", err)
-		return errors.New("Failed to copy extra file")
-	}
-	Log.Debugf("success to copy extra file to %v", txPath+"/extra.json")
-
-	return nil
-}
-
-func saveBulletinAndPublic(dir string, bulletin string, PubPath string, Log ILogger) error {
-
-	rs, err := pathExists(dir)
-	if err != nil {
-		Log.Errorf("check dictionary %v error. err=%v", dir, err)
-		return errors.New("Save bulletin file error")
-	}
-	if !rs {
-		err := os.Mkdir(dir, os.ModePerm)
-		if err != nil {
-			Log.Errorf("create dictionary %v error. err=%v", dir, err)
-			return errors.New("Save bulletin file error")
-		}
-	}
-
-	err = copyFile(bulletin, dir+"/bulletin")
-	if err != nil {
-		Log.Warnf("Failed to copy bulletin file. err=%v", err)
-		return errors.New("Failed to copy bulletin file")
-	}
-	Log.Debugf("success to save bulletin. path=%v", dir+"/bulletin")
-
-	err = os.Mkdir(dir+"/public", os.ModePerm)
-	if err != nil {
-		Log.Errorf("create dictionary %v error. err=%v", dir+"/public", err)
-		return errors.New("Save bulletin file error")
-	}
-	err = copyDir(PubPath, dir+"/public")
-	if err != nil {
-		Log.Warnf("Failed to copy public file. err=%v", err)
-		return errors.New("Failed to copy public file")
-	}
-	Log.Debugf("success to save public file. path=%v", dir+"/public")
-
 	return nil
 }
 
@@ -571,37 +461,6 @@ func copyFile(src string, dest string) error {
 	}
 
 	err = ioutil.WriteFile(dest, inputSrc, 0644)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func copyDir(src string, dest string) error {
-
-	err := filepath.Walk(src, func(src string, f os.FileInfo, err error) error {
-		if f == nil {
-			fmt.Printf("filepath Walk err=%v\n", err)
-			return err
-		}
-		if f.IsDir() {
-
-			err = copyDir(f.Name(), dest+"/"+f.Name())
-			if err != nil {
-				fmt.Printf("copyDir err=%v\n", err)
-				return err
-			}
-		} else {
-
-			dest_new := dest + "/" + f.Name()
-			err = copyFile(src, dest_new)
-			if err != nil {
-				fmt.Printf("copyFile err=%v\n", err)
-				return err
-			}
-		}
-		return nil
-	})
 	if err != nil {
 		return err
 	}

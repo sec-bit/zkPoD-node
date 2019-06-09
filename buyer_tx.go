@@ -42,11 +42,11 @@ type BuyerTransaction struct {
 // step6: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, Log ILogger) string {
+func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicPath := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicPath := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -225,11 +225,11 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step7: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, Log ILogger) string {
+func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicFile := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -252,7 +252,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.PlainOTBatch1, err = buyerNewSessForPOB1(demands, phantoms, bulletinFile, publicFile, Log)
+	tx.PlainOTBatch1, err = buyerNewSessForPOB1(demands, phantoms, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -471,11 +471,11 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 // step6: decrypt data.
 //
 // return: response string for api request.
-func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, Log ILogger) string {
+func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicPath := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicPath := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -634,11 +634,11 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step6: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, Log ILogger) string {
+func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicFile := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -657,7 +657,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableBatch1, err = buyerNewSessForTB1(demands, bulletinFile, publicFile, Log)
+	tx.TableBatch1, err = buyerNewSessForTB1(demands, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -816,11 +816,11 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step7: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, Log ILogger) string {
+func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicFile := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -843,7 +843,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableOTBatch1, err = buyerNewSessForTOB1(demands, phantoms, bulletinFile, publicFile, Log)
+	tx.TableOTBatch1, err = buyerNewSessForTOB1(demands, phantoms, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1063,10 +1063,10 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 // step6: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, Log ILogger) string {
+func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicFile := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -1084,7 +1084,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableBatch2, err = buyerNewSessForTB2(demands, bulletinFile, publicFile, Log)
+	tx.TableBatch2, err = buyerNewSessForTB2(demands, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1224,11 +1224,11 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step6: verify secrypt and decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, keyName string, keyValue []string, Log ILogger) string {
+func buyerTxForTQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, keyName string, keyValue []string, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicFile := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -1246,7 +1246,7 @@ func buyerTxForTQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, ke
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableVRF, err = buyerNewSessForTQ(keyName, keyValue, bulletinFile, publicFile, Log)
+	tx.TableVRF, err = buyerNewSessForTQ(keyName, keyValue, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1380,10 +1380,10 @@ func buyerTxForTQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, ke
 // step7: verify secret and decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, keyName string, keyValue []string, phantomKeyValue []string, Log ILogger) string {
+func buyerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, keyName string, keyValue []string, phantomKeyValue []string, bulletinFile string, publicPath string, Log ILogger) string {
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
-	bulletinFile := dir + "/bulletin"
-	publicFile := dir + "/public"
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
@@ -1406,7 +1406,7 @@ func buyerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, k
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableOTVRF, err = buyerNewSessForTOQ(keyName, keyValue, phantomKeyValue, bulletinFile, publicFile, Log)
+	tx.TableOTVRF, err = buyerNewSessForTOQ(keyName, keyValue, phantomKeyValue, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx

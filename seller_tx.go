@@ -102,12 +102,12 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	Log.Debugf("success to create session ID. sessionID=%v", sessionID)
 
 	params.SessionID = sessionID
-	err = savePublishFileForTransaction(sessionID, bulletin.SigmaMKLRoot, Log)
-	if err != nil {
-		Log.Warnf("Failed to save bulletin for seller. err=%v", err)
-		return params, re, errors.New("failed to save bulletin")
-	}
-	Log.Debugf("success to save publish file.")
+	// err = savePublishFileForTransaction(sessionID, bulletin.SigmaMKLRoot, Log)
+	// if err != nil {
+	// 	Log.Warnf("Failed to save bulletin for seller. err=%v", err)
+	// 	return params, re, errors.New("failed to save bulletin")
+	// }
+	// Log.Debugf("success to save publish file.")
 
 	return params, re, nil
 }

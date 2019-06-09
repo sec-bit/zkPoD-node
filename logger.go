@@ -209,18 +209,6 @@ func GetCallChainUtilTop(topFunc string) string {
 	return callChain
 }
 
-// func (l *SimpleLogger) NewLogger(appendedPrefix string) *SimpleLogger {
-// 	return &SimpleLogger{
-// 		LogLevel:    l.LogLevel,
-// 		flag:        l.flag,
-// 		FuncTop:  "",
-// 		Prefix1:     l.Prefix1 + " " + appendedPrefix,
-// 		AttachedInfo: make([]Field, 0),
-// 		Logger:      stdLogger,
-// 		Formatter:   l.Formatter,
-// 	}
-// }
-
 func (l *SimpleLogger) AddAttachedInfo(key string, val string) {
 	l.AttachedInfo = append(l.AttachedInfo, Field{
 		key: key,
