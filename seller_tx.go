@@ -214,6 +214,10 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -242,7 +246,6 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -410,6 +413,10 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -438,7 +445,6 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -534,10 +540,13 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
+		Log.Warnf("no enough deposit eth.")
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
@@ -567,7 +576,6 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -669,6 +677,10 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -697,7 +709,6 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -865,6 +876,10 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -893,7 +908,6 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -995,6 +1009,10 @@ func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -1023,7 +1041,6 @@ func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -1124,6 +1141,10 @@ func sellerTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -1152,7 +1173,6 @@ func sellerTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
@@ -1320,6 +1340,10 @@ func sellerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 			"no enough deposit eth")
 	}
 
+	defer func() {
+		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+	}()
+
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		SellerTxMap[tx.SessionID] = tx
@@ -1348,7 +1372,6 @@ func sellerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 		return fmt.Errorf(
 			"failed to send secret")
 	}
-	DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
 	SellerTxMap[tx.SessionID] = tx
