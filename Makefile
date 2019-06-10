@@ -22,6 +22,19 @@ ETH_ADDR := 0x4eC1B88456547e3Fe169510D3FfE2EC7de757B6f
 CONFIG_FILE := config.json
 LIBRARY_PATH := $(POD_CORE_DIR)
 
+ifeq ($(OS),Windows_NT)
+	OS_TYPE := Windows
+else
+	UNAME := $(shell uname -s)
+	ifeq ($(UNAME),Linux)
+		OS_TYPE := Linux
+	else ifeq ($(UNAME),Darwin)
+		OS_TYPE := Darwin
+	else
+		OS_TYPE := Unknown
+	endif
+endif
+
 all:
 	CGO_LDFLAGS=$(CGO_LDFLAGS) \
 	$(GO) build -o $(BIN)
