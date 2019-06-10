@@ -70,9 +70,22 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	}
 	params.UnitPrice = re.Price
 	re.Mode = bulletin.Mode
-	re.SubMode = extra.SubMode
+	var subMode string
+	if len(extra.SubMode) == 0 {
+		return params, re, fmt.Errorf("no subMode")
+	}
+	for _, s := range extra.SubMode {
+		if re.SubMode == s && s != "" {
+			subMode = s
+			break
+		}
+	}
+	if subMode == "" {
+		subMode = extra.SubMode[0]
+	}
+	re.SubMode = subMode
 	params.Mode = bulletin.Mode
-	params.SubMode = extra.SubMode
+	params.SubMode = subMode
 	if params.SubMode == TRANSACTION_SUB_MODE_BATCH2 {
 		re.Ot = false
 	}

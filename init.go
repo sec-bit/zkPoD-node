@@ -47,7 +47,7 @@ type RequestData struct {
 	PubPath      string `json:"pub_path"`
 	BulletinFile string `json:"bulletin_file"`
 	// Mode            string    `json:"mode"`
-	// SubMode         string    `json:"sub_mode"`
+	SubMode         string    `json:"sub_mode"`
 	OT              bool      `json:"ot"`
 	Demands         []Demand  `json:"demands"`
 	Phantoms        []Phantom `json:"phantoms"`

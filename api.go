@@ -156,22 +156,22 @@ func ReLoadConfigAPIHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type PublishExtraInfo struct {
-	MerkleRoot   string `json:"mklroot"`
-	Mode         string `json:"mode"`
-	SubMode      string `json:"sub_mode"`
-	UnitPrice    int64  `json:"uprice"`
-	Description  string `json:"description"`
-	ContractAddr string `json:"contract_addr"`
+	MerkleRoot   string   `json:"mklroot"`
+	Mode         string   `json:"mode"`
+	SubMode      []string `json:"sub_mode"`
+	UnitPrice    int64    `json:"uprice"`
+	Description  string   `json:"description"`
+	ContractAddr string   `json:"contract_addr"`
 }
 
 type InitPublishConfig struct {
-	Mode        string `json:"mode"`
-	SubMode     string `json:"sub_mode"`
-	Column      string `json:"column"`
-	Keys        []int  `json:"keys"`
-	UnitPrice   int64  `json:"unit_price"`
-	Description string `json:"description"`
-	FilePath    string `json:"file_path"`
+	Mode        string   `json:"mode"`
+	SubMode     []string `json:"sub_mode"`
+	Column      string   `json:"column"`
+	Keys        []int    `json:"keys"`
+	UnitPrice   int64    `json:"unit_price"`
+	Description string   `json:"description"`
+	FilePath    string   `json:"file_path"`
 }
 
 //InitPublishDataAPIHandler is a api handler for seller to initializing data for publishing.
@@ -202,11 +202,28 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (config.Mode == "plain" && (config.SubMode == "table1" || config.SubMode == "table2") && config.Column != "") ||
-		(config.Mode == "table" && (config.SubMode == "table1" || config.SubMode == "table2" || config.SubMode == "vrf") && len(config.Keys) != 0) {
-		Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
+	if len(config.SubMode) == 0 {
+		Log.Warnf("parameters are incomplete, submode is nil. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 		fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 		return
+	}
+
+	if config.Mode == TRANSACTION_MODE_PLAIN_POD {
+		for _, s := range config.SubMode {
+			if s != TRANSACTION_SUB_MODE_BATCH1 && s != TRANSACTION_SUB_MODE_BATCH2 {
+				Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
+				fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
+				return
+			}
+		}
+	} else if config.Mode == TRANSACTION_MODE_TABLE_POD {
+		for _, s := range config.SubMode {
+			if s != TRANSACTION_SUB_MODE_BATCH1 && s != TRANSACTION_SUB_MODE_BATCH2 && s != TRANSACTION_SUB_MODE_VRF {
+				Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
+				fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
+				return
+			}
+		}
 	}
 	Log.Debugf("parameter verified. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 	plog.Detail = fmt.Sprintf("mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
@@ -621,7 +638,7 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	plog.Detail = fmt.Sprintf("%v, merkle root=%v,", plog.Detail, bulletin.SigmaMKLRoot)
 
 	Log.Debugf("step0: prepare for transaction...")
-	var params = BuyerConnParam{data.SellerIP, data.SellerAddr, bulletin.Mode, "", data.OT, data.UnitPrice, "", bulletin.SigmaMKLRoot}
+	var params = BuyerConnParam{data.SellerIP, data.SellerAddr, bulletin.Mode, data.SubMode, data.OT, data.UnitPrice, "", bulletin.SigmaMKLRoot}
 	node, conn, params, err := preBuyerConn(params, ETHKey, Log)
 	if err != nil {
 		Log.Warnf("failed to prepare net for transaction. err=%v", err)

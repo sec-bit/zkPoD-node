@@ -608,7 +608,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	} else {
-		Log.Warnf("[%v]step6: start decrypt data...", tx.SessionID)
+		Log.Debugf("[%v]step6: start decrypt data...", tx.SessionID)
 		rs = tx.PlainBatch2.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
