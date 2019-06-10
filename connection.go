@@ -701,6 +701,7 @@ func buyerCreateSess(node *pod_net.Node, mklroot string, mode string, subMode st
 	extra.Price = unitPrice
 	extra.Mode = mode
 	extra.Ot = ot
+	extra.SubMode = subMode
 	extraByte, err := json.Marshal(&extra)
 	if err != nil {
 		return "", mode, subMode, ot, fmt.Errorf(
