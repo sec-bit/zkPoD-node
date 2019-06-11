@@ -1,6 +1,6 @@
 GO ?= $(shell which go)
-BIN := "zkPoD-node"
-LOG := "pod.log"
+BIN := zkPoD-node
+LOG := pod.log
 PROJ_HOME=${PWD}
 
 ifndef $(GOPATH)
@@ -9,7 +9,7 @@ ifndef $(GOPATH)
 endif
 
 # test params
-POD_CORE_DIR :=  $(GOPATH)/src/github.com/sec-bit/zkPoD-lib/pod_core
+POD_CORE_DIR := $(PWD)/../zkPoD-lib/pod_core
 CGO_LDFLAGS := -L$(POD_CORE_DIR)
 KEYSTORE_FILE := ./keystore
 KEYSTORE_PASSWORD := 123456
@@ -35,110 +35,54 @@ else
 	endif
 endif
 
+ifeq ($(OS_TYPE), Darwin)
+	LIBRARY_PATH := DYLD_LIBRARY_PATH=$(POD_CORE_DIR)
+else
+	LIBRARY_PATH := LD_LIBRARY_PATH=$(POD_CORE_DIR)
+endif
+
 all:
 	CGO_LDFLAGS=$(CGO_LDFLAGS) \
 	$(GO) build -o $(BIN)
 
+POD_NODE_BIN := $(LIBRARY_PATH) $(PROJ_HOME)/$(BIN)
+
 run:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o start \
+	$(POD_NODE_BIN) -o start \
 	-k $(KEYSTORE_FILE) -pass $(KEYSTORE_PASSWORD) \
 	-port $(PORT) -ip $(NETIP)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o start \
-	-k $(KEYSTORE_FILE) -pass $(KEYSTORE_PASSWORD) \
-	-port $(PORT) -ip $(NETIP)
-endif
 
 run-initdata:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o initdata \
+	$(POD_NODE_BIN) -o initdata \
 	-init $(INIT_FILE)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o initdata \
-	-init $(INIT_FILE)
-endif
 
 run-publish:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o publish \
+	$(POD_NODE_BIN) -o publish \
 	-mkl $(MERKLE_ROOT) -eth $(ETH_VALUE)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o publish \
-	-mkl $(MERKLE_ROOT) -eth $(ETH_VALUE)
-endif
 	
 run-close:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o close \
+	$(POD_NODE_BIN) -o close \
 	-mkl $(MERKLE_ROOT)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o close \
-	-mkl $(MERKLE_ROOT)
-endif
 	
 run-seller-withdraw:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o withdraw \
+	$(POD_NODE_BIN) -o withdraw \
 	-mkl $(MERKLE_ROOT)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o withdraw \
-	-mkl $(MERKLE_ROOT)
-endif
 
 run-deposit:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o deposit \
+	$(POD_NODE_BIN) -o deposit \
 	-eth $(ETH_VALUE) -addr $(ETH_ADDR)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o deposit \
-	-eth $(ETH_VALUE) -addr $(ETH_ADDR)
-endif
 
 run-undeposit:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o undeposit \
+	$(POD_NODE_BIN) -o undeposit \
 	-addr $(ETH_ADDR)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o undeposit \
-	-addr $(ETH_ADDR)
-endif
 
 run-withdraw:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o withdraw \
+	$(POD_NODE_BIN) -o withdraw \
 	-addr $(ETH_ADDR)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o withdraw \
-	-addr $(ETH_ADDR)
-endif
 
 run-purchase:
-ifeq ($(OS_TYPE), Darwin)
-	DYLD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o purchase \
+	$(POD_NODE_BIN) -o purchase \
 	-c $(CONFIG_FILE)
-else
-	LD_LIBRARY_PATH=$(POD_CORE_DIR) \
-	$(PROJ_HOME)/$(BIN) -o purchase \
-	-c $(CONFIG_FILE)
-endif
 
 clean:
 	@rm -f $(BIN)
