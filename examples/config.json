@@ -1,0 +1,26 @@
+{
+    "merkle_root":"12f66b3d75891853035b63dad37f9547f96737f1197d187c7c57fceec353ece7",
+    "seller_ip":"127.0.0.1:4321",
+    "seller_addr":"0xc871e471c098f032f17783f9902d939cae5191f7",
+    "pub_path":"./public",
+    "bulletin_file":"./bulletin",
+    "mode":"plain",
+    "sub_mode":"batch2",
+    "ot":false,
+    "demands":[
+        { "demand_start":0, "demand_count":2},
+        { "demand_start":5, "demand_count":3},
+        { "demand_start":10,"demand_count":1}
+    ],
+    "phantoms":[
+        {"phantom_start":0,"phantom_count":14}
+    ],
+    "key_name":"date (UTC)",
+    "key_value":["20190417", "20190415", "20180105", "20170818"],
+    "phantom_key_value":[
+        "20190417", "20190415", "20180105", "20170818",
+                "20190411", "20190407", "20190331", "20181101",
+                "20181026", "20181022", "20181018", "20181010"
+    ],
+    "unit_price": 200
+}
