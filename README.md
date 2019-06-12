@@ -19,6 +19,8 @@ A cryptographic protocol, PoD (proof of delivery), is developed to try to solve 
 
 zkPoD is practical and efficient. It supports data to size up to 10GB on an ordinary PC (in complaint mode), and it could deliver data with TBs (ongoing work) in theory. See the performance evaluation below.
 
+[![asciicast](https://asciinema.org/a/251110.svg)](https://asciinema.org/a/251110?autoplay=1&speed=2.71828182846)
+
 ## Highlights 
 
 + Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchanging is moderate, and the size of data can be up to TBs.
