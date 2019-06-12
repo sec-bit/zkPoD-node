@@ -19,7 +19,7 @@ A cryptographic protocol, PoD (proof of delivery), is developed to try to solve 
 
 zkPoD is practical and efficient. It supports data to size up to 10GB on an ordinary PC (in complaint mode), and it could deliver data with TBs (ongoing work) in theory. See the performance evaluation below.
 
-[![asciicast](https://asciinema.org/a/251240.svg)](https://asciinema.org/a/251240?autoplay=1&speed=2.71828182846)
+[![asciicast-gif](img/demo.min.gif)](https://asciinema.org/a/251240?autoplay=1&speed=2.71828182846)
 
 ## Highlights 
 
