@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
-var Logger = NewSimpleLogger("SECBIT-POD-NODE")
+var Logger = NewSimpleLogger("zkPoD-node")
 
 var ETHKey *keystore.Key
 var BConf BasicConfig
