@@ -60,16 +60,19 @@ func main() {
 	}
 }
 
-// SetupPOD setups api server and node.
+// SetupPOD setups api server and node-
 func SetupPOD() {
 
 	Log := Logger.NewSessionLogger()
-	fmt.Printf("██████╗  ██████╗ ██████╗ ███████╗██╗  ██╗\n")
-	fmt.Printf("██╔══██╗██╔═══██╗██╔══██╗██╔════╝╚██╗██╔╝\n")
-	fmt.Printf("██████╔╝██║   ██║██║  ██║█████╗   ╚███╔╝\n")
-	fmt.Printf("██╔═══╝ ██║   ██║██║  ██║██╔══╝   ██╔██╗\n")
-	fmt.Printf("██║     ╚██████╔╝██████╔╝███████╗██╔╝ ██╗\n")
-	fmt.Printf("╚═╝      ╚═════╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝\n")
+	fmt.Printf("         ██╗      ████████╗             ████████╗ \n")
+	fmt.Printf("         ██║      ██╔════██╗            ██╔════███╗\n")
+	fmt.Printf("███████╗ ██║  ██╗ ██║    ██║    ███╗    ██║      ██║\n")
+	fmt.Printf("╚══███╔╝ ██║ ██╔╝ ████████╔╝  ██╔══██╗  ██║      ██║\n")
+	fmt.Printf("  ███╔╝  █████╔╝  ██╔═════╝  ██╔╝   ██║ ██║      ██║\n")
+	fmt.Printf(" ███╔╝   ██╔═██╗  ██║         ██╗  ██╔╝ ██║    ███╔╝\n")
+	fmt.Printf("███████╗ ██║  ██╗ ██║          ╚███╔═╝  ████████╔═╝\n")
+	fmt.Printf("╚══════╝ ╚═╝  ╚═╝ ╚═╝           ╚══╝    ╚═══════╝\n")
+
 	go SetupAPIServe(Log)
 	SetupNode(Log)
 }

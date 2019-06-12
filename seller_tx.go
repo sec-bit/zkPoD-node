@@ -59,8 +59,8 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	extraPath := BConf.SellerDir + "/publish/" + mklroot + "/extra.json"
 	extra, err := readExtraFile(extraPath)
 	if err != nil {
-		Log.Warnf("failed to read bulletin. err=%v", err)
-		return params, re, fmt.Errorf("failed to read bulletin")
+		Log.Warnf("failed to extra file. err=%v", err)
+		return params, re, fmt.Errorf("failed to extra file")
 	}
 	Log.Debugf("read extra info...%v", extra)
 
