@@ -29,7 +29,7 @@ func connectSQLite(dbpath string) (*xorm.Engine, error) {
 	}
 	Log.Debugf("ping db success")
 	db.SetMapper(core.SnakeMapper{})
-	db.ShowSQL(true)
+	db.ShowSQL(false)
 	db.Logger().SetLevel(core.LOG_DEBUG)
 
 	err = db.CreateTables(&BuyerTx{})
