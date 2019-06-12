@@ -60,7 +60,7 @@ For data delivery, zkPoD supports two trading mode.
 5. Alice checks the receipt and then reveals the key (for encrypting  the data)
 6. Contract (blockchain) verifies if the key matches the receipt and output "accept"/"reject."
 
-+ Complain mode (inspired by Fairswap)
++ Complaint mode (inspired by Fairswap)
 
 1. Bob sends request w.r.t. a data tag
 2. Alice sends encrypted data to Bob (by a one-time random key)
@@ -96,7 +96,7 @@ cd zkPoD-lib
 make
 
 # These files should be generated after successful build.
-# pod_publish/pod_setup
+# pod_setup/pod_setup
 # pod_publish/pod_publish
 # pod_core/libpod_core.so
 # pod_core/pod_core
@@ -166,7 +166,7 @@ wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 
 ./zkPoD-node -o initdata -init init.json
 # You should get the sigma_mkl_root from logs
-
+# export sigma_mkl_root=<YOUR_SIGMA_MKL_ROOT>
 ./zkPoD-node -o publish -mkl $sigma_mkl_root -eth 200
 # You should get the publish transaction hash
 ```
@@ -185,7 +185,7 @@ Here is everything that you need to let others know.
 - Data public info 
 ```
 
-You could get `bulletin` and `public info` of your data for publishing in path `zkPoD-node/seller/publish/<sigma_mkl_root>/`.
+You could get `bulletin` and `public info` of your data for publishing in path `zkPoD-node/seller/publish/$sigma_mkl_root/`.
 
 ```
 ├── bulletin
@@ -213,6 +213,9 @@ You want to buy some data you interested in from a seller. You could deposit som
 You'll make a purchase request to a seller. For convenience, you could fill in some basic info of the seller in the config file.
 
 ```shell
+# For test, you could simply copy public info of data from seller folder to project root path.
+# cp seller/publish/$sigma_mkl_root/bulletin .
+# cp -r seller/publish/$sigma_mkl_root/public .
 ./zkPoD-node -o purchase -c config.json
 # You should get the decrypted data in buyer/transaction/<session_id> folder
 ```
