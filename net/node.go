@@ -48,15 +48,15 @@ const (
 	// XXX: Always add new modes at the end of existing modes in order to
 	//      to keep the backwards compatibility.
 
-	ModePlainBatchPoD = iota
-	ModePlainOTBatchPoD
-	ModePlainBatch2PoD
+	ModePlainComplaintPoD = iota
+	ModePlainOTComplaintPoD
+	ModePlainAtomicSwapPoD
 
 	ModeTableVRFQuery
 	ModeTableOTVRFQuery
-	ModeTableBatchPoD
-	ModeTableOTBatchPoD
-	ModeTableBatch2PoD
+	ModeTableComplaintPoD
+	ModeTableOTComplaintPoD
+	ModeTableAtomicSwapPoD
 
 	modeMax // Leave at the end intentionally
 )
@@ -312,9 +312,9 @@ func (node *Node) recvMsgWithCheck(dst io.Writer, typ uint16, length uint64) err
 
 func (node *Node) isOTMode() bool {
 	switch node.session.mode {
-	case ModePlainOTBatchPoD:
+	case ModePlainOTComplaintPoD:
 		return true
-	case ModeTableOTBatchPoD:
+	case ModeTableOTComplaintPoD:
 		return true
 	case ModeTableOTVRFQuery:
 		return true

@@ -120,54 +120,54 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 
 	if tx.Mode == TRANSACTION_MODE_PLAIN_POD {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				tx.PlainOTBatch1, err = sellerNewSessForPOB1(publishPath, Log)
+				tx.PlainOTComplaint, err = sellerNewSessForPOC(publishPath, Log)
 				if err != nil {
 					Log.Warnf("failed to prepare for seller's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.PlainOTBatch1.SellerSession.Free()
+					tx.PlainOTComplaint.SellerSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for plain_ot_batch1")
+				Log.Debugf("success to prepare seller session for plain_ot_complaint")
 
-				err = sellerTxForPOB1(node, key, tx, Log)
+				err = sellerTxForPOC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.PlainBatch1, err = sellerNewSessForPB1(publishPath, Log)
+				tx.PlainComplaint, err = sellerNewSessForPC(publishPath, Log)
 				if err != nil {
 					Log.Warnf("failed to prepare for seller's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.PlainBatch1.SellerSession.Free()
+					tx.PlainComplaint.SellerSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for plain_batch1")
+				Log.Debugf("success to prepare seller session for plain_complaint")
 
-				err = sellerTxForPB1(node, key, tx, Log)
+				err = sellerTxForPC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			tx.PlainBatch2, err = sellerNewSessForPB2(publishPath, Log)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			tx.PlainAtomicSwap, err = sellerNewSessForPAS(publishPath, Log)
 			if err != nil {
 				Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 				return
 			}
 			defer func() {
-				tx.PlainBatch2.SellerSession.Free()
+				tx.PlainAtomicSwap.SellerSession.Free()
 			}()
-			Log.Debugf("success to prepare seller session for plain_batch2")
+			Log.Debugf("success to prepare seller session for plain_atomic_swap")
 
-			err = sellerTxForPB2(node, key, tx, Log)
+			err = sellerTxForPAS(node, key, tx, Log)
 			if err != nil {
 				Log.Warnf("transaction error. err=%v", err)
 				return
@@ -176,54 +176,54 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 		}
 	} else if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				tx.TableOTBatch1, err = sellerNewSessForTOB1(publishPath, Log)
+				tx.TableOTComplaint, err = sellerNewSessForTOC(publishPath, Log)
 				if err != nil {
 					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.TableOTBatch1.SellerSession.Free()
+					tx.TableOTComplaint.SellerSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for table_ot_batch1")
+				Log.Debugf("success to prepare seller session for table_ot_complaint1")
 
-				err = sellerTxForTOB1(node, key, tx, Log)
+				err = sellerTxForTOC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.TableBatch1, err = sellerNewSessForTB1(publishPath, Log)
+				tx.TableComplaint, err = sellerNewSessForTC(publishPath, Log)
 				if err != nil {
 					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.TableBatch1.SellerSession.Free()
+					tx.TableComplaint.SellerSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for table_batch1")
+				Log.Debugf("success to prepare seller session for table_complaint")
 
-				err = sellerTxForTB1(node, key, tx, Log)
+				err = sellerTxForTC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			tx.TableBatch2, err = sellerNewSessForTB2(publishPath, Log)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			tx.TableAtomicSwap, err = sellerNewSessForTAS(publishPath, Log)
 			if err != nil {
 				Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 				return
 			}
 			defer func() {
-				tx.TableBatch2.SellerSession.Free()
+				tx.TableAtomicSwap.SellerSession.Free()
 			}()
-			Log.Debugf("success to prepare seller session for table_batch2")
+			Log.Debugf("success to prepare seller session for table_atomic_swap")
 
-			err = sellerTxForTB2(node, key, tx, Log)
+			err = sellerTxForTAS(node, key, tx, Log)
 			if err != nil {
 				Log.Warnf("transaction error. err=%v", err)
 				return
@@ -419,27 +419,27 @@ func modeToInt(mode string, subMode string, ot bool) (netMode uint8, err error) 
 
 	if mode == TRANSACTION_MODE_PLAIN_POD {
 		switch subMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if !ot {
-				netMode = pod_net.ModePlainBatchPoD
+				netMode = pod_net.ModePlainComplaintPoD
 			} else {
-				netMode = pod_net.ModePlainOTBatchPoD
+				netMode = pod_net.ModePlainOTComplaintPoD
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			netMode = pod_net.ModePlainBatch2PoD
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			netMode = pod_net.ModePlainAtomicSwapPoD
 		default:
 			err = errors.New("invalid mode")
 		}
 	} else if mode == TRANSACTION_MODE_TABLE_POD {
 		switch subMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if !ot {
-				netMode = pod_net.ModeTableBatchPoD
+				netMode = pod_net.ModeTableComplaintPoD
 			} else {
-				netMode = pod_net.ModeTableOTBatchPoD
+				netMode = pod_net.ModeTableOTComplaintPoD
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			netMode = pod_net.ModeTableBatch2PoD
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			netMode = pod_net.ModeTableAtomicSwapPoD
 		case TRANSACTION_SUB_MODE_VRF:
 			if !ot {
 				netMode = pod_net.ModeTableVRFQuery
@@ -457,29 +457,29 @@ func modeToInt(mode string, subMode string, ot bool) (netMode uint8, err error) 
 
 func modeFromInt(netMode uint8) (mode string, subMode string, ot bool, err error) {
 	switch netMode {
-	case pod_net.ModePlainBatchPoD:
+	case pod_net.ModePlainComplaintPoD:
 		mode = TRANSACTION_MODE_PLAIN_POD
-		subMode = TRANSACTION_SUB_MODE_BATCH1
+		subMode = TRANSACTION_SUB_MODE_COMPLAINT
 		ot = false
-	case pod_net.ModePlainOTBatchPoD:
+	case pod_net.ModePlainOTComplaintPoD:
 		mode = TRANSACTION_MODE_PLAIN_POD
-		subMode = TRANSACTION_SUB_MODE_BATCH1
+		subMode = TRANSACTION_SUB_MODE_COMPLAINT
 		ot = true
-	case pod_net.ModePlainBatch2PoD:
+	case pod_net.ModePlainAtomicSwapPoD:
 		mode = TRANSACTION_MODE_PLAIN_POD
-		subMode = TRANSACTION_SUB_MODE_BATCH2
+		subMode = TRANSACTION_SUB_MODE_ATOMIC_SWAP
 		ot = false
-	case pod_net.ModeTableBatchPoD:
+	case pod_net.ModeTableComplaintPoD:
 		mode = TRANSACTION_MODE_TABLE_POD
-		subMode = TRANSACTION_SUB_MODE_BATCH1
+		subMode = TRANSACTION_SUB_MODE_COMPLAINT
 		ot = false
-	case pod_net.ModeTableOTBatchPoD:
+	case pod_net.ModeTableOTComplaintPoD:
 		mode = TRANSACTION_MODE_TABLE_POD
-		subMode = TRANSACTION_SUB_MODE_BATCH1
+		subMode = TRANSACTION_SUB_MODE_COMPLAINT
 		ot = true
-	case pod_net.ModeTableBatch2PoD:
+	case pod_net.ModeTableAtomicSwapPoD:
 		mode = TRANSACTION_MODE_TABLE_POD
-		subMode = TRANSACTION_SUB_MODE_BATCH2
+		subMode = TRANSACTION_SUB_MODE_ATOMIC_SWAP
 		ot = false
 	case pod_net.ModeTableVRFQuery:
 		mode = TRANSACTION_MODE_TABLE_POD

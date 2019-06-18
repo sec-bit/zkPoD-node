@@ -22,7 +22,7 @@ require (
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rs/cors v1.6.0 // indirect
-	github.com/sec-bit/zkPoD-lib/pod-go v0.0.0
+	github.com/sec-bit/zkPoD-lib/pod_go v0.0.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/uber/jaeger-client-go v2.16.0+incompatible // indirect
 	github.com/uber/jaeger-lib v2.0.0+incompatible // indirect
@@ -32,4 +32,4 @@ require (
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 )
 
-replace github.com/sec-bit/zkPoD-lib/pod-go v0.0.0 => ../zkPoD-lib/pod-go
+replace github.com/sec-bit/zkPoD-lib/pod_go v0.0.0 => ../zkPoD-lib/pod-go

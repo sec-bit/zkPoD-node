@@ -2,13 +2,12 @@ package main
 
 import (
 	"errors"
-	
 
-	tableotvrf "github.com/sec-bit/zkPoD-lib/pod-go/table/otvrfq"
+	table_ot_vrf "github.com/sec-bit/zkPoD-lib/pod_go/table/ot_vrfq"
 )
 
 type PoDSellerTOQ struct {
-	SellerSession *tableotvrf.SellerSession `json:"sellerSession"`
+	SellerSession *table_ot_vrf.SellerSession `json:"sellerSession"`
 }
 
 // sellerNewSessForTOQ prepares seller's session while mode is table_ot_vrf_query.
@@ -31,7 +30,7 @@ func sellerNewSessForTOQ(publishPath string, Log ILogger) (PoDSellerTOQ, error) 
 	}
 	Log.Debugf("publishPath=%v", publishPath)
 
-	toq.SellerSession, err = tableotvrf.NewSellerSession(publishPath, sellerID, buyerID)
+	toq.SellerSession, err = table_ot_vrf.NewSellerSession(publishPath, sellerID, buyerID)
 	if err != nil {
 		Log.Warnf("failed to create session for seller. err=%v", err)
 		return toq, errors.New("failed to create session for seller")
@@ -129,10 +128,10 @@ func (toq PoDSellerTOQ) sellerVerifyReceipt(receiptFile string, secretFile strin
 }
 
 type PoDBuyerTOQ struct {
-	BuyerSession    *tableotvrf.BuyerSession `json:"buyerSession"`
-	KeyName         string                   `json:"keyName"`
-	KeyValue        []string                 `json:"keyValue"`
-	PhantomKeyValue []string                 `json:"phantomKeyValue"`
+	BuyerSession    *table_ot_vrf.BuyerSession `json:"buyerSession"`
+	KeyName         string                     `json:"keyName"`
+	KeyValue        []string                   `json:"keyValue"`
+	PhantomKeyValue []string                   `json:"phantomKeyValue"`
 }
 
 // buyerNewSessForTOQ prepares buyer's session while mode is table_ot_vrf_query.
@@ -144,7 +143,7 @@ type PoDBuyerTOQ struct {
 //  Otherwise, return a nil session and the non-nil error.
 func buyerNewSessForTOQ(keyName string, keyValue []string, phantomKeyValue []string, tableBulletin string, tablePublicPath string, Log ILogger) (PoDBuyerTOQ, error) {
 	var toq PoDBuyerTOQ
-	session, err := tableotvrf.NewBuyerSession(tableBulletin, tablePublicPath, sellerID, buyerID, keyName, keyValue, phantomKeyValue)
+	session, err := table_ot_vrf.NewBuyerSession(tableBulletin, tablePublicPath, sellerID, buyerID, keyName, keyValue, phantomKeyValue)
 	if err != nil {
 		Log.Warnf("failed to create session for buyer. err=%v", err)
 		return toq, errors.New("failed to create session for buyer")

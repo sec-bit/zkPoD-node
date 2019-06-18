@@ -16,26 +16,26 @@ import (
 
 //Transaction shows the transaction data for seller.
 type Transaction struct {
-	SessionID     string           `json:"sessionId"`
-	Status        string           `json:"status"`
-	Bulletin      Bulletin         `json:"bulletin"`
-	BuyerPubKey   *ecdsa.PublicKey `json:"buyerPubkey"`
-	BuyerAddr     string           `json:"buyerAddr"`
-	SellerAddr    string           `json:"sellerAddr"`
-	Mode          string           `json:"mode"`
-	SubMode       string           `json:"sub_mode"`
-	OT            bool             `json:"ot"`
-	Price         int64            `json:"price"`
-	UnitPrice     int64            `json:"unitPrice"`
-	ExpireAt      int64            `json:"expireAt"`
-	PlainBatch1   PoDSellerPB1     `json:"plainBatch1"`
-	PlainOTBatch1 PoDSellerPOB1    `json:"plainOTBatch1"`
-	PlainBatch2   PoDSellerPB2     `json:"Tablebatch2"`
-	TableBatch1   PoDSellerTB1     `json:"Tablebatch1"`
-	TableOTBatch1 PoDSellerTOB1    `json:"TableOTBatch1"`
-	TableBatch2   PoDSellerTB2     `json:"Tablebatch2"`
-	TableVRF      PoDSellerTQ      `json:"Tablevrf"`
-	TableOTVRF    PoDSellerTOQ     `json:"TableOTvrf"`
+	SessionID        string           `json:"sessionId"`
+	Status           string           `json:"status"`
+	Bulletin         Bulletin         `json:"bulletin"`
+	BuyerPubKey      *ecdsa.PublicKey `json:"buyerPubkey"`
+	BuyerAddr        string           `json:"buyerAddr"`
+	SellerAddr       string           `json:"sellerAddr"`
+	Mode             string           `json:"mode"`
+	SubMode          string           `json:"sub_mode"`
+	OT               bool             `json:"ot"`
+	Price            int64            `json:"price"`
+	UnitPrice        int64            `json:"unitPrice"`
+	ExpireAt         int64            `json:"expireAt"`
+	PlainComplaint   PoDSellerPC      `json:"PlainComplaint"`
+	PlainOTComplaint PoDSellerPOC     `json:"PlainOTComplaint"`
+	PlainAtomicSwap  PoDSellerPAS     `json:"TableAtomicSwap"`
+	TableComplaint   PoDSellerTC      `json:"TableComplaint"`
+	TableOTComplaint PoDSellerTOC     `json:"TableOTComplaint"`
+	TableAtomicSwap  PoDSellerTAS     `json:"TableAtomicSwap"`
+	TableVRF         PoDSellerTQ      `json:"Tablevrf"`
+	TableOTVRF       PoDSellerTOQ     `json:"TableOTvrf"`
 }
 
 func newSessID() (string, error) {
@@ -86,7 +86,7 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	re.SubMode = subMode
 	params.Mode = bulletin.Mode
 	params.SubMode = subMode
-	if params.SubMode == TRANSACTION_SUB_MODE_BATCH2 {
+	if params.SubMode == TRANSACTION_SUB_MODE_ATOMIC_SWAP {
 		re.Ot = false
 	}
 	params.OT = re.Ot
@@ -133,8 +133,8 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	return params, re, nil
 }
 
-//sellerTxForPB1 is the transaction while mode is plain_range.
-func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//sellerTxForPC is the transaction while mode is plain_range.
+func sellerTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 
 	requestFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/request"
 	responseFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/response"
@@ -162,7 +162,7 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	SellerTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive transaction request for seller.")
 
-	rs := tx.PlainBatch1.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.PlainComplaint.sellerVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		SellerTxMap[tx.SessionID] = tx
@@ -199,7 +199,7 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	SellerTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive transaction receipt.")
 
-	rs = tx.PlainBatch1.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.PlainComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -241,7 +241,7 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 
 	Log.Debugf("start send transaction to submit contract from contract...")
 	t := time.Now()
-	txid, err := submitScrtForBatch1(tx, sign, Log)
+	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -251,7 +251,7 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -266,8 +266,8 @@ func sellerTxForPB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	return nil
 }
 
-//sellerTxForPOB1 is the transaction while mode is plain_ot_range.
-func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//sellerTxForPOC is the transaction while mode is plain_ot_range.
+func sellerTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
@@ -297,7 +297,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("success to receive transaction nego request.")
 
-	rs := tx.PlainOTBatch1.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
+	rs := tx.PlainOTComplaint.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -307,7 +307,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("success to verify nego request and generate nego response.")
 
-	rs = tx.PlainOTBatch1.sellerGeneNegoReq(sellerNegoRequestFile, Log)
+	rs = tx.PlainOTComplaint.sellerGeneNegoReq(sellerNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -337,7 +337,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("success to receive transaction nego response.")
 
-	rs = tx.PlainOTBatch1.sellerDealNegoResp(buyerNegoResponseFile, Log)
+	rs = tx.PlainOTComplaint.sellerDealNegoResp(buyerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -361,7 +361,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	SellerTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainOTBatch1.sellerVerifyReq(requestFile, responseFile, Log)
+	rs = tx.PlainOTComplaint.sellerVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		SellerTxMap[tx.SessionID] = tx
@@ -398,7 +398,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	SellerTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainOTBatch1.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.PlainOTComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -440,7 +440,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 
 	Log.Debugf("start send transaction to submit contract from contract...")
 	t := time.Now()
-	txid, err := submitScrtForBatch1(tx, sign, Log)
+	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -450,7 +450,7 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -465,8 +465,8 @@ func sellerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	return nil
 }
 
-//sellerTxForPB2 is the transaction while mode is plain_range.
-func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//sellerTxForPAS is the transaction while mode is plain_range.
+func sellerTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	requestFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/request"
 	responseFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/response"
 	receiptFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/receipt"
@@ -493,7 +493,7 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	SellerTxMap[tx.SessionID] = tx
 
-	rs := tx.PlainBatch2.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.PlainAtomicSwap.sellerVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		SellerTxMap[tx.SessionID] = tx
@@ -530,7 +530,7 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	SellerTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainBatch2.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.PlainAtomicSwap.sellerVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -571,7 +571,7 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 
 	Log.Debugf("start send transaction to submit contract from contract...")
 	t := time.Now()
-	txid, err := submitScrtForBatch2(tx, sign, Log)
+	txid, err := submitScrtForAtomicSwap(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -581,7 +581,7 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForBatch2(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForAtomicSwap(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -596,8 +596,8 @@ func sellerTxForPB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	return nil
 }
 
-//sellerTxForTB1 is the transaction while mode is plain_range.
-func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//sellerTxForTC is the transaction while mode is plain_range.
+func sellerTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
@@ -625,7 +625,7 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	SellerTxMap[tx.SessionID] = tx
 
-	rs := tx.TableBatch1.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.TableComplaint.sellerVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		SellerTxMap[tx.SessionID] = tx
@@ -662,7 +662,7 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	SellerTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt from buyer.")
 
-	rs = tx.TableBatch1.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -704,7 +704,7 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 
 	Log.Debugf("start send transaction to submit contract from contract...")
 	t := time.Now()
-	txid, err := submitScrtForBatch1(tx, sign, Log)
+	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -714,7 +714,7 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -729,8 +729,8 @@ func sellerTxForTB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	return nil
 }
 
-//sellerTxForTOB1 is the transaction while mode is plain_range.
-func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//sellerTxForTOC is the transaction while mode is plain_range.
+func sellerTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
@@ -760,7 +760,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("receive transaction nego request...")
 
-	rs := tx.TableOTBatch1.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
+	rs := tx.TableOTComplaint.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -770,7 +770,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("generate nego request file or nego response file...")
 
-	rs = tx.TableOTBatch1.sellerGeneNegoReq(sellerNegoRequestFile, Log)
+	rs = tx.TableOTComplaint.sellerGeneNegoReq(sellerNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -800,7 +800,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("receive transaction nego response...")
 
-	rs = tx.TableOTBatch1.sellerDealNegoResp(buyerNegoResponseFile, Log)
+	rs = tx.TableOTComplaint.sellerDealNegoResp(buyerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -824,7 +824,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	SellerTxMap[tx.SessionID] = tx
 	Log.Debugf("receive transaction request for seller...")
 
-	rs = tx.TableOTBatch1.sellerVerifyReq(requestFile, responseFile, Log)
+	rs = tx.TableOTComplaint.sellerVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		SellerTxMap[tx.SessionID] = tx
@@ -861,7 +861,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	SellerTxMap[tx.SessionID] = tx
 	Log.Debugf("receive transaction receipt...")
 
-	rs = tx.TableOTBatch1.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableOTComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -903,7 +903,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 
 	Log.Debugf("start send transaction to submit contract from contract...")
 	t := time.Now()
-	txid, err := submitScrtForBatch1(tx, sign, Log)
+	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -913,7 +913,7 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -928,8 +928,8 @@ func sellerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	return nil
 }
 
-//sellerTxForTB2 is the transaction while mode is plain_range.
-func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//sellerTxForTAS is the transaction while mode is plain_range.
+func sellerTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
@@ -957,7 +957,7 @@ func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	SellerTxMap[tx.SessionID] = tx
 
-	rs := tx.TableBatch2.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.TableAtomicSwap.sellerVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		SellerTxMap[tx.SessionID] = tx
@@ -994,7 +994,7 @@ func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	SellerTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt from buyer.")
 
-	rs = tx.TableBatch2.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableAtomicSwap.sellerVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -1036,7 +1036,7 @@ func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 
 	Log.Debugf("start send transaction to submit contract from contract...")
 	t := time.Now()
-	txid, err := submitScrtForBatch2(tx, sign, Log)
+	txid, err := submitScrtForAtomicSwap(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx
@@ -1046,7 +1046,7 @@ func sellerTxForTB2(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForBatch2(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForAtomicSwap(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		SellerTxMap[tx.SessionID] = tx

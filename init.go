@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/sec-bit/zkPoD-lib/pod-go/ecc"
+	"github.com/sec-bit/zkPoD-lib/pod_go/ecc"
 	"github.com/urfave/cli"
 )
 
@@ -41,12 +41,11 @@ type BasicConfig struct {
 
 // RequestData is the struct of buyer's request data
 type RequestData struct {
-	MerkleRoot   string `json:"merkle_root"`
-	SellerIP     string `json:"seller_ip"`
-	SellerAddr   string `json:"seller_addr"`
-	PubPath      string `json:"pub_path"`
-	BulletinFile string `json:"bulletin_file"`
-	// Mode            string    `json:"mode"`
+	MerkleRoot      string    `json:"merkle_root"`
+	SellerIP        string    `json:"seller_ip"`
+	SellerAddr      string    `json:"seller_addr"`
+	PubPath         string    `json:"pub_path"`
+	BulletinFile    string    `json:"bulletin_file"`
 	SubMode         string    `json:"sub_mode"`
 	OT              bool      `json:"ot"`
 	Demands         []Demand  `json:"demands"`
@@ -57,13 +56,13 @@ type RequestData struct {
 	UnitPrice       int64     `json:"unit_price"`
 }
 
-// Demand is the struct of demand for batch
+// Demand is the struct of demand
 type Demand struct {
 	DemandStart uint64 `json:"demand_start"`
 	DemandCount uint64 `json:"demand_count"`
 }
 
-// Phantom is the struct of phantom for ot batch
+// Phantom is the struct of phantom for ot mode
 type Phantom struct {
 	PhantomStart uint64 `json:"phantom_start"`
 	PhantomCount uint64 `json:"phantom_count"`

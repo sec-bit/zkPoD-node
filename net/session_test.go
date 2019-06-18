@@ -39,10 +39,10 @@ func TestNewSessionRequest(t *testing.T) {
 					"session ID (%d) not zero", req.ID)
 			}
 
-			if req.Mode != ModePlainBatchPoD {
+			if req.Mode != ModePlainComplaintPoD {
 				return fmt.Errorf(
 					"mismatch session mode, get %d, expect %d",
-					req.Mode, ModePlainBatchPoD)
+					req.Mode, ModePlainComplaintPoD)
 			}
 
 			if !bytes.Equal(mklroot, req.SigmaMklRoot) {
@@ -67,7 +67,7 @@ func TestNewSessionRequest(t *testing.T) {
 	go startClient(t, &wg, serverAddr, clientKey,
 		func(node *Node, key *ecdsa.PrivateKey) error {
 			if err := node.SendNewSessionRequest(
-				ModePlainBatchPoD, mklroot,
+				ModePlainComplaintPoD, mklroot,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session request: %v",
@@ -155,7 +155,7 @@ func TestSessionAck(t *testing.T) {
 	go startClient(t, &wg, serverAddr, clientKey,
 		func(node *Node, key *ecdsa.PrivateKey) error {
 			if err := node.SendNewSessionRequest(
-				ModePlainBatchPoD, mklroot,
+				ModePlainComplaintPoD, mklroot,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session request: %v",
@@ -178,7 +178,7 @@ func TestSessionAck(t *testing.T) {
 			}
 
 			if err := node.SendSessionAck(
-				ack.ID, ModePlainBatchPoD, mklroot, false,
+				ack.ID, ModePlainComplaintPoD, mklroot, false,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session ack from client: %v",

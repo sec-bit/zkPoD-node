@@ -145,11 +145,11 @@ func buyerWithdrawETHFromContract(sellerAddr string) (string, bool, error) {
 	return ctx.Hash().Hex(), true, nil
 }
 
-func submitScrtForBatch1(tx Transaction, receiptSign []byte, Log ILogger) (string, error) {
+func submitScrtForComplaint(tx Transaction, receiptSign []byte, Log ILogger) (string, error) {
 	seed0Path := BConf.SellerDir + "/transaction/" + tx.SessionID + "/secret"
 	receiptPath := BConf.SellerDir + "/transaction/" + tx.SessionID + "/receipt"
 
-	_, receipt, err := readBatch1Receipt(receiptPath, Log)
+	_, receipt, err := readReceiptForComplaint(receiptPath, Log)
 	if err != nil {
 		Log.Warnf("failed to read receipt. err=%v", err)
 		return "", errors.New("failed to read receipt")
@@ -172,13 +172,13 @@ func submitScrtForBatch1(tx Transaction, receiptSign []byte, Log ILogger) (strin
 		return "", errors.New("failed to convert sessionId")
 	}
 
-	err = verifySigntureForBatch1(tx, sessionInt, receiptSign, receipt, Log)
+	err = verifySigntureForComplaint(tx, sessionInt, receiptSign, receipt, Log)
 	if err != nil {
 		Log.Warnf("verify signature error! err=%v", err)
 		return "", errors.New("verify signature error")
 	}
 
-	secret, err := readSeed0ForBatch1(seed0Path, Log)
+	secret, err := readSeed0ForComplaint(seed0Path, Log)
 	if err != nil {
 		Log.Warnf("failed to read seed0. err=%v", err)
 		return "", errors.New("failed to read seed0")
@@ -201,7 +201,7 @@ func submitScrtForBatch1(tx Transaction, receiptSign []byte, Log ILogger) (strin
 	return ctx.Hash().Hex(), nil
 }
 
-func verifySigntureForBatch1(tx Transaction, sessionInt *big.Int, receiptSign []byte, receipt Batch1Receipt, Log ILogger) error {
+func verifySigntureForComplaint(tx Transaction, sessionInt *big.Int, receiptSign []byte, receipt ComplaintReceipt, Log ILogger) error {
 
 	if len(receiptSign) != 65 {
 		Log.Warnf("invalid signature. sig=%v, len(sig)=%v", hexutil.Encode(receiptSign), len(receiptSign))
@@ -239,9 +239,9 @@ func verifySigntureForBatch1(tx Transaction, sessionInt *big.Int, receiptSign []
 	return nil
 }
 
-func readScrtForBatch1(sessionID string, sellerAddr string, buyerAddr string, Log ILogger) (Batch1Secret, error) {
+func readScrtForComplaint(sessionID string, sellerAddr string, buyerAddr string, Log ILogger) (ComplaintSecret, error) {
 
-	var secret Batch1Secret
+	var secret ComplaintSecret
 	for i := 0; i < 20; i++ {
 		Log.Debugf("round %v, read secret from contract. sessionId=%v", i+1, sessionID)
 		sessionInt := new(big.Int)
@@ -269,7 +269,7 @@ func readScrtForBatch1(sessionID string, sellerAddr string, buyerAddr string, Lo
 	return secret, errors.New("No secret to be read")
 }
 
-func claimToContractForBatch1(sessionID string, bulletin Bulletin, claimFile string, sellerAddr string, Log ILogger) (string, error) {
+func claimToContractForComplaint(sessionID string, bulletin Bulletin, claimFile string, sellerAddr string, Log ILogger) (string, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -328,7 +328,7 @@ func claimToContractForBatch1(sessionID string, bulletin Bulletin, claimFile str
 	return ctx.Hash().Hex(), nil
 }
 
-func settleDealForBatch1(sessionID string, sellerAddr string, buyerAddr string) (string, error) {
+func settleDealForComplaint(sessionID string, sellerAddr string, buyerAddr string) (string, error) {
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
 	if !rs {
@@ -336,12 +336,12 @@ func settleDealForBatch1(sessionID string, sellerAddr string, buyerAddr string) 
 	}
 	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SettleBatch1Deal(GAdminAuth, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
 	if err != nil {
-		return "", fmt.Errorf("failed to settle deal for batch1. sessionID=%v, err=%v", sessionID, err)
+		return "", fmt.Errorf("failed to settle deal. sessionID=%v, err=%v", sessionID, err)
 	}
 	return ctx.Hash().Hex(), nil
 }
 
-func submitScrtForBatch2(tx Transaction, receiptSign []byte, Log ILogger) (string, error) {
+func submitScrtForAtomicSwap(tx Transaction, receiptSign []byte, Log ILogger) (string, error) {
 	seed0Path := BConf.SellerDir + "/transaction/" + tx.SessionID + "/secret"
 	receiptPath := BConf.SellerDir + "/transaction/" + tx.SessionID + "/receipt"
 
@@ -352,7 +352,7 @@ func submitScrtForBatch2(tx Transaction, receiptSign []byte, Log ILogger) (strin
 		return "", errors.New("failed to convert sessionId")
 	}
 
-	_, receipt, err := readBatch2Receipt(receiptPath, Log)
+	_, receipt, err := readReceiptForAtomicSwap(receiptPath, Log)
 	if err != nil {
 		Log.Warnf("failed to read receipt. err=%v", err)
 		return "", errors.New("failed to read receipt")
@@ -372,13 +372,13 @@ func submitScrtForBatch2(tx Transaction, receiptSign []byte, Log ILogger) (strin
 	Log.Debugf(" _sessionId=%v, buyer address=%v, seed2=%v, vwInt=%v, _count=%v,",
 		sessionInt, tx.BuyerAddr, seed2Byte, vwInt, receipt.C)
 
-	err = verifySigntureForBatch2(tx, sessionInt, vwInt, receiptSign, receipt, Log)
+	err = verifySigntureForAtomicSwap(tx, sessionInt, vwInt, receiptSign, receipt, Log)
 	if err != nil {
 		Log.Warnf("verify signature error! err=%v", err)
 		return "", errors.New("verify signature error")
 	}
 
-	secret, err := readSeed0ForBatch2(seed0Path, Log)
+	secret, err := readSeed0ForAtomicSwap(seed0Path, Log)
 	if err != nil {
 		Log.Warnf("failed to read seed0. err=%v", err)
 		return "", errors.New("failed to read seed0")
@@ -410,7 +410,7 @@ func submitScrtForBatch2(tx Transaction, receiptSign []byte, Log ILogger) (strin
 	return ctx.Hash().Hex(), nil
 }
 
-func verifySigntureForBatch2(tx Transaction, sessionInt *big.Int, vwInt *big.Int, receiptSign []byte, receipt Batch2Receipt, Log ILogger) error {
+func verifySigntureForAtomicSwap(tx Transaction, sessionInt *big.Int, vwInt *big.Int, receiptSign []byte, receipt AtomicSwapReceipt, Log ILogger) error {
 
 	if len(receiptSign) != 65 {
 		Log.Warnf("invalid signature. sig=%v, len(sig)=%v", hexutil.Encode(receiptSign), len(receiptSign))
@@ -448,9 +448,9 @@ func verifySigntureForBatch2(tx Transaction, sessionInt *big.Int, vwInt *big.Int
 	return nil
 }
 
-func readScrtForBatch2(sessionID string, sellerAddr string, buyerAddr string, Log ILogger) (Batch2Secret, error) {
+func readScrtForAtomicSwap(sessionID string, sellerAddr string, buyerAddr string, Log ILogger) (AtomicSwapSecret, error) {
 
-	var secret Batch2Secret
+	var secret AtomicSwapSecret
 	for i := 0; i < 20; i++ {
 		Log.Debugf("round %v, read secret from contract. sessionId=%v", i+1, sessionID)
 		sessionInt := new(big.Int)

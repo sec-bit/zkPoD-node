@@ -10,29 +10,29 @@ import (
 
 // BuyerTransaction shows the transaction data for buyer.
 type BuyerTransaction struct {
-	SessionID     string       `json:"sessionId"`
-	Status        string       `json:"status"`
-	SellerIP      string       `json:"sellerIp"`
-	SellerAddr    string       `json:"sellerAddr"`
-	BuyerAddr     string       `json:"buyerAddr"`
-	Mode          string       `json:"mode"`
-	SubMode       string       `json:"sub_mode"`
-	OT            bool         `json:"ot"`
-	Bulletin      Bulletin     `json:"bulletin"`
-	Price         int64        `json:"price" xorm:"INTEGER"`
-	UnitPrice     int64        `json:"unit_price"`
-	ExpireAt      int64        `json:"expireAt" xorm:"INTEGER"`
-	PlainBatch1   PoDBuyerPB1  `json:"plainBatch1"`
-	PlainOTBatch1 PoDBuyerPOB1 `json:"plainOTBatch1"`
-	PlainBatch2   PoDBuyerPB2  `json:"plainBatch2"`
-	TableBatch1   PoDBuyerTB1  `json:"tablebatch1"`
-	TableOTBatch1 PoDBuyerTOB1 `json:"tableOTbatch1"`
-	TableBatch2   PoDBuyerTB2  `json:"tablebatch2"`
-	TableVRF      PoDBuyerTQ   `json:"tablevrf"`
-	TableOTVRF    PoDBuyerTOQ  `json:"tableOTvrf"`
+	SessionID        string      `json:"sessionId"`
+	Status           string      `json:"status"`
+	SellerIP         string      `json:"sellerIp"`
+	SellerAddr       string      `json:"sellerAddr"`
+	BuyerAddr        string      `json:"buyerAddr"`
+	Mode             string      `json:"mode"`
+	SubMode          string      `json:"sub_mode"`
+	OT               bool        `json:"ot"`
+	Bulletin         Bulletin    `json:"bulletin"`
+	Price            int64       `json:"price" xorm:"INTEGER"`
+	UnitPrice        int64       `json:"unit_price"`
+	ExpireAt         int64       `json:"expireAt" xorm:"INTEGER"`
+	PlainComplaint   PoDBuyerPC  `json:"PlainComplaint"`
+	PlainOTComplaint PoDBuyerPOC `json:"PlainOTComplaint"`
+	PlainAtomicSwap  PoDBuyerPAS `json:"PlainAtomicSwap"`
+	TableComplaint   PoDBuyerTC  `json:"TableComplaint"`
+	TableOTComplaint PoDBuyerTOC `json:"TableOTComplaint"`
+	TableAtomicSwap  PoDBuyerTAS `json:"TableAtomicSwap"`
+	TableVRF         PoDBuyerTQ  `json:"tablevrf"`
+	TableOTVRF       PoDBuyerTOQ `json:"tableOTvrf"`
 }
 
-// buyerTxForPB1 executes transaction for buyer while mode is plain_batch1.
+// buyerTxForPC executes transaction for buyer while mode is plain_complaint.
 //
 // step1: prepare session,
 // step2: create transaction request,
@@ -42,7 +42,7 @@ type BuyerTransaction struct {
 // step6: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
+func buyerTxForPC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
 	// bulletinFile := dir + "/bulletin"
@@ -65,7 +65,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for pod's session...", tx.SessionID)
 	var err error
-	tx.PlainBatch1, err = buyerNewSessForPB1(demands, bulletinFile, publicPath, Log)
+	tx.PlainComplaint, err = buyerNewSessForPC(demands, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -73,12 +73,12 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	}
 	defer func() {
-		tx.PlainBatch1.BuyerSession.Free()
+		tx.PlainComplaint.BuyerSession.Free()
 	}()
 	Log.Debugf("[%v]step1: finish preparing for buyer's session...", tx.SessionID)
 
 	Log.Debugf("[%v]step2: start create and send request to seller...", tx.SessionID)
-	err = tx.PlainBatch1.buyerNewReq(requestFile, Log)
+	err = tx.PlainComplaint.buyerNewReq(requestFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		BuyerTxMap[tx.SessionID] = tx
@@ -108,7 +108,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step3: finish receive response from seller...", tx.SessionID)
 
-	rs := tx.PlainBatch1.buyerVerifyResp(responseFile, receiptFile, Log)
+	rs := tx.PlainComplaint.buyerVerifyResp(responseFile, receiptFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -120,18 +120,18 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	Log.Debugf("[%v]step3: finish verify response...", tx.SessionID)
 
 	Log.Debugf("[%v]step4: start read, sign and send receipt to seller...", tx.SessionID)
-	receiptByte, receipt, err := readBatch1Receipt(receiptFile, Log)
+	receiptByte, receipt, err := readReceiptForComplaint(receiptFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
-		Log.Warnf("[%v]step4: failed to read batch1 receipt. err=%v", tx.SessionID, err)
+		Log.Warnf("[%v]step4: failed to read receipt for mode complaint. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
 	}
 	Log.Debugf("[%v]step4: finish read receipt...", tx.SessionID)
 
 	tx.Price = tx.UnitPrice * int64(receipt.C)
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForBatch1(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -152,7 +152,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	Log.Debugf("[%v]step4: finish send recipt to seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step5: start read, save and verify secret from contract...", tx.SessionID)
-	secret, err := readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	secret, err := readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -161,7 +161,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step5: finish read secret from contract...", tx.SessionID)
 
-	err = buyerSaveSecretForBatch1(secret, secretFile, Log)
+	err = buyerSaveSecretForComplaint(secret, secretFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -172,13 +172,13 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	BuyerTxMap[tx.SessionID] = tx
 	Log.Debugf("[%v]step5: finish save secret...", tx.SessionID)
 
-	rs = tx.PlainBatch1.buyerVerifySecret(secretFile, Log)
+	rs = tx.PlainComplaint.buyerVerifySecret(secretFile, Log)
 	Log.Debugf("[%v]step5: finish verify secret.result=%v", tx.SessionID, rs)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
 		BuyerTxMap[tx.SessionID] = tx
 		Log.Warnf("[%v]step6: start claim from contract...", tx.SessionID)
-		rs = tx.PlainBatch1.buyerGeneClaim(claimFile, Log)
+		rs = tx.PlainComplaint.buyerGeneClaim(claimFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -187,7 +187,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		}
 		Log.Debugf("[%v]finish generate claim...", tx.SessionID)
 
-		txid, err := claimToContractForBatch1(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
+		txid, err := claimToContractForComplaint(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
 		if err != nil {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -199,7 +199,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		Log.Debugf("[%v]step6: finish claim to contract...txid=%v", tx.SessionID, txid)
 	} else {
 		Log.Debugf("[%v]step6: start decrypt file...", tx.SessionID)
-		rs = tx.PlainBatch1.buyerDecrypt(outputFile, Log)
+		rs = tx.PlainComplaint.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -214,7 +214,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
 }
 
-// buyerTxForPOB1 executes transaction for buyer while mode is plain_ot_batch1.
+// buyerTxForPOC executes transaction for buyer while mode is plain_ot_complaint.
 //
 // step1: prepare session,
 // step2: exchage keys with seller,
@@ -225,7 +225,7 @@ func buyerTxForPB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step7: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, bulletinFile string, publicPath string, Log ILogger) string {
+func buyerTxForPOC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
 	// bulletinFile := dir + "/bulletin"
@@ -252,7 +252,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.PlainOTBatch1, err = buyerNewSessForPOB1(demands, phantoms, bulletinFile, publicPath, Log)
+	tx.PlainOTComplaint, err = buyerNewSessForPOC(demands, phantoms, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -260,12 +260,12 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	}
 	defer func() {
-		tx.PlainOTBatch1.BuyerSession.Free()
+		tx.PlainOTComplaint.BuyerSession.Free()
 	}()
 	Log.Debugf("[%v]step1: finish prepare for buyer's session...", tx.SessionID)
 
 	Log.Debugf("[%v]step2: start exchage key with seller...", tx.SessionID)
-	rs := tx.PlainOTBatch1.buyerGeneNegoReq(buyerNegoRequestFile, Log)
+	rs := tx.PlainOTComplaint.buyerGeneNegoReq(buyerNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -292,7 +292,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step2: success to receive nego response and request data.", tx.SessionID)
 
-	rs = tx.PlainOTBatch1.buyerDealNegoResp(sellerNegoResponseFile, Log)
+	rs = tx.PlainOTComplaint.buyerDealNegoResp(sellerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -301,7 +301,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step2: success to deal with nego response.", tx.SessionID)
 
-	rs = tx.PlainOTBatch1.buyerGeneNegoResp(sellerNegoRequestFile, buyerNegoResponseFile, Log)
+	rs = tx.PlainOTComplaint.buyerGeneNegoResp(sellerNegoRequestFile, buyerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -324,7 +324,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	Log.Debugf("[%v]step2: finish exchage key with seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step3: start create and send transaction request to seller...", tx.SessionID)
-	err = tx.PlainOTBatch1.buyerNewReq(requestFile, Log)
+	err = tx.PlainOTComplaint.buyerNewReq(requestFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		BuyerTxMap[tx.SessionID] = tx
@@ -354,7 +354,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step4: finish receive transaction response from seller...", tx.SessionID)
 
-	rs = tx.PlainOTBatch1.buyerVerifyResp(responseFile, receiptFile, Log)
+	rs = tx.PlainOTComplaint.buyerVerifyResp(responseFile, receiptFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -366,18 +366,18 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	Log.Debugf("[%v]step4: finish verify transaction response...", tx.SessionID)
 
 	Log.Debugf("[%v]step5: start read, sign and send receipt to seller...", tx.SessionID)
-	receiptByte, receipt, err := readBatch1Receipt(receiptFile, Log)
+	receiptByte, receipt, err := readReceiptForComplaint(receiptFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
-		Log.Warnf("[%v]step5: failed to read batch1 receipt. err=%v", tx.SessionID, err)
+		Log.Warnf("[%v]step5: failed to read receipt. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
 	}
 	Log.Debugf("[%v]step5: finish read receipt...", tx.SessionID)
 
 	tx.Price = tx.UnitPrice * int64(receipt.C)
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForBatch1(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -398,7 +398,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	Log.Debugf("[%v]step5: finish send recipt to seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step6: start read, save and verify secret from contract...", tx.SessionID)
-	secret, err := readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	secret, err := readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -407,7 +407,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step6: finish read secret from contract...", tx.SessionID)
 
-	err = buyerSaveSecretForBatch1(secret, secretFile, Log)
+	err = buyerSaveSecretForComplaint(secret, secretFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -416,7 +416,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step6: finish save secret...", tx.SessionID)
 
-	rs = tx.PlainOTBatch1.buyerVerifySecret(secretFile, Log)
+	rs = tx.PlainOTComplaint.buyerVerifySecret(secretFile, Log)
 	Log.Debugf("[%v]step6: finish verify secret, result=%v", tx.SessionID, rs)
 	tx.Status = TRANSACTION_STATUS_GOT_SECRET
 	BuyerTxMap[tx.SessionID] = tx
@@ -425,7 +425,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
 		BuyerTxMap[tx.SessionID] = tx
 		Log.Warnf("[%v]step7: start claim to contract...", tx.SessionID)
-		rs = tx.PlainOTBatch1.buyerGeneClaim(claimFile, Log)
+		rs = tx.PlainOTComplaint.buyerGeneClaim(claimFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -434,7 +434,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		}
 		Log.Debugf("[%v]step7: finish generate claim...", tx.SessionID)
 
-		txid, err := claimToContractForBatch1(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
+		txid, err := claimToContractForComplaint(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
 		if err != nil {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -446,7 +446,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		Log.Debugf("[%v]step7: finish send claim to contract...txid=%v", tx.SessionID, txid)
 	} else {
 		Log.Debugf("[%v]step7: start decrypt data...", tx.SessionID)
-		rs = tx.PlainOTBatch1.buyerDecrypt(outputFile, Log)
+		rs = tx.PlainOTComplaint.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -461,7 +461,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
 }
 
-// buyerTxForPB2 executes transaction for buyer while mode is plain_batch2.
+// buyerTxForPAS executes transaction for buyer while mode is plain_atomic_swap.
 //
 // step1: prepare session,
 // step2: create transaction request,
@@ -471,7 +471,7 @@ func buyerTxForPOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 // step6: decrypt data.
 //
 // return: response string for api request.
-func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
+func buyerTxForPAS(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
 	// bulletinFile := dir + "/bulletin"
@@ -493,19 +493,19 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.PlainBatch2, err = buyerNewSessForPB2(demands, bulletinFile, publicPath, Log)
+	tx.PlainAtomicSwap, err = buyerNewSessForPAS(demands, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		Log.Warnf("[%v]step1: failed to create session for buyer. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	}
 	defer func() {
-		tx.PlainBatch2.BuyerSession.Free()
+		tx.PlainAtomicSwap.BuyerSession.Free()
 	}()
 	Log.Debugf("[%v]step1: finish preparing for buyer's session...", tx.SessionID)
 
 	Log.Debugf("[%v]step2: start create and send transaction request to seller...", tx.SessionID)
-	err = tx.PlainBatch2.buyerNewReq(requestFile, Log)
+	err = tx.PlainAtomicSwap.buyerNewReq(requestFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		BuyerTxMap[tx.SessionID] = tx
@@ -536,7 +536,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step3: finish receive response from seller...", tx.SessionID)
 
-	rs := tx.PlainBatch2.buyerVerifyResp(responseFile, receiptFile, Log)
+	rs := tx.PlainAtomicSwap.buyerVerifyResp(responseFile, receiptFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -548,18 +548,18 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	Log.Debugf("[%v]step3: finish verify response from seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step4: start read, send and verify receipt to seller...", tx.SessionID)
-	receiptByte, receipt, err := readBatch2Receipt(receiptFile, Log)
+	receiptByte, receipt, err := readReceiptForAtomicSwap(receiptFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
-		Log.Warnf("[%v]step4: failed to read batch2 receipt. err=%v", tx.SessionID, err)
+		Log.Warnf("[%v]step4: failed to read receipt. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
 	}
 	Log.Debugf("[%v]step4: finish read receipt...", tx.SessionID)
 
 	tx.Price = tx.UnitPrice * int64(receipt.C)
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForBatch2(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForAtomicSwap(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -580,7 +580,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	Log.Debugf("[%v]step4: finish send receipt to seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step5: start read, save and verify secret from contract...", tx.SessionID)
-	secret, err := readScrtForBatch2(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	secret, err := readScrtForAtomicSwap(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -589,7 +589,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step5: finish read secret from contract...", tx.SessionID)
 
-	err = buyerSaveSecretForBatch2(secret, secretFile, Log)
+	err = buyerSaveSecretForAtomicSwap(secret, secretFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -598,7 +598,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step5: finish save secret...", tx.SessionID)
 
-	rs = tx.PlainBatch2.buyerVerifySecret(secretFile, Log)
+	rs = tx.PlainAtomicSwap.buyerVerifySecret(secretFile, Log)
 	Log.Debugf("[%v]step5: finish verify secret...result=%v", tx.SessionID, rs)
 	tx.Status = TRANSACTION_STATUS_GOT_SECRET
 	BuyerTxMap[tx.SessionID] = tx
@@ -609,7 +609,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	} else {
 		Log.Debugf("[%v]step6: start decrypt data...", tx.SessionID)
-		rs = tx.PlainBatch2.buyerDecrypt(outputFile, Log)
+		rs = tx.PlainAtomicSwap.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -624,7 +624,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
 }
 
-// buyerTxForTB1 executes transaction for buyer while mode is table_batch1.
+// buyerTxForTC executes transaction for buyer while mode is table_complaint.
 //
 // step1: prepare session,
 // step2: create transaction request,
@@ -634,7 +634,7 @@ func buyerTxForPB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step6: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
+func buyerTxForTC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
 	// bulletinFile := dir + "/bulletin"
@@ -657,7 +657,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableBatch1, err = buyerNewSessForTB1(demands, bulletinFile, publicPath, Log)
+	tx.TableComplaint, err = buyerNewSessForTC(demands, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -665,12 +665,12 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	}
 	defer func() {
-		tx.TableBatch1.BuyerSession.Free()
+		tx.TableComplaint.BuyerSession.Free()
 	}()
 	Log.Debugf("[%v]step1: finish prepare for buyer's session...", tx.SessionID)
 
 	Log.Debugf("[%v]step2: start create and send transaction request to seller...", tx.SessionID)
-	err = tx.TableBatch1.buyerNewReq(requestFile, Log)
+	err = tx.TableComplaint.buyerNewReq(requestFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		BuyerTxMap[tx.SessionID] = tx
@@ -698,7 +698,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step3: finish receive transaction response from seller...", tx.SessionID)
 
-	rs := tx.TableBatch1.buyerVerifyResp(responseFile, receiptFile, Log)
+	rs := tx.TableComplaint.buyerVerifyResp(responseFile, receiptFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -710,7 +710,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	BuyerTxMap[tx.SessionID] = tx
 
 	Log.Debugf("[%v]step4: start read, sign and send receipt to seller...", tx.SessionID)
-	receiptByte, receipt, err := readBatch1Receipt(receiptFile, Log)
+	receiptByte, receipt, err := readReceiptForComplaint(receiptFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -721,7 +721,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	tx.Price = tx.UnitPrice * int64(receipt.C)
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForBatch1(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -742,7 +742,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	BuyerTxMap[tx.SessionID] = tx
 
 	Log.Debugf("[%v]step5: start read save and verify secret from contract...", tx.SessionID)
-	secret, err := readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	secret, err := readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -751,7 +751,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step5: finish read secret from contract...", tx.SessionID)
 
-	err = buyerSaveSecretForBatch1(secret, secretFile, Log)
+	err = buyerSaveSecretForComplaint(secret, secretFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -762,13 +762,13 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	tx.Status = TRANSACTION_STATUS_GOT_SECRET
 	BuyerTxMap[tx.SessionID] = tx
 
-	rs = tx.TableBatch1.buyerVerifySecret(secretFile, Log)
+	rs = tx.TableComplaint.buyerVerifySecret(secretFile, Log)
 	Log.Debugf("[%v]step5: finish verify secret...result=%v", tx.SessionID, rs)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
 		BuyerTxMap[tx.SessionID] = tx
 		Log.Debugf("[%v]step6: start claim to contract...", tx.SessionID)
-		rs = tx.TableBatch1.buyerGeneClaim(claimFile, Log)
+		rs = tx.TableComplaint.buyerGeneClaim(claimFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -777,7 +777,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		}
 		Log.Debugf("[%v]step6: finish generate claim...", tx.SessionID)
 
-		txid, err := claimToContractForBatch1(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
+		txid, err := claimToContractForComplaint(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
 		if err != nil {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -790,7 +790,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		BuyerTxMap[tx.SessionID] = tx
 	} else {
 		Log.Debugf("[%v]step6: start decrypt data...", tx.SessionID)
-		rs = tx.TableBatch1.buyerDecrypt(outputFile, Log)
+		rs = tx.TableComplaint.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -805,7 +805,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
 }
 
-// buyerTxForTOB1 executes transaction  for buyer while mode is table_ot_batch.
+// buyerTxForTOC executes transaction  for buyer while mode is table_ot_complaint.
 //
 // step1: prepare session,
 // step2: exchage keys with seller,
@@ -816,7 +816,7 @@ func buyerTxForTB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 // step7: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, bulletinFile string, publicPath string, Log ILogger) string {
+func buyerTxForTOC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, phantoms []Phantom, bulletinFile string, publicPath string, Log ILogger) string {
 
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
 	// bulletinFile := dir + "/bulletin"
@@ -843,7 +843,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableOTBatch1, err = buyerNewSessForTOB1(demands, phantoms, bulletinFile, publicPath, Log)
+	tx.TableOTComplaint, err = buyerNewSessForTOC(demands, phantoms, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -851,12 +851,12 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	}
 	defer func() {
-		tx.TableOTBatch1.BuyerSession.Free()
+		tx.TableOTComplaint.BuyerSession.Free()
 	}()
 	Log.Debugf("[%v]step1: finish prepare for buyer's session...", tx.SessionID)
 
 	Log.Debugf("[%v]step2: start exchage key with seller...", tx.SessionID)
-	rs := tx.TableOTBatch1.buyerGeneNegoReq(buyerNegoRequestFile, Log)
+	rs := tx.TableOTComplaint.buyerGeneNegoReq(buyerNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -883,7 +883,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step2: success to receive nego response and nego ack request data", tx.SessionID)
 
-	rs = tx.TableOTBatch1.buyerDealNegoResp(sellerNegoResponseFile, Log)
+	rs = tx.TableOTComplaint.buyerDealNegoResp(sellerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -892,7 +892,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step2: success to deal with nego response", tx.SessionID)
 
-	rs = tx.TableOTBatch1.buyerGeneNegoResp(sellerNegoRequestFile, buyerNegoResponseFile, Log)
+	rs = tx.TableOTComplaint.buyerGeneNegoResp(sellerNegoRequestFile, buyerNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -915,7 +915,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	Log.Debugf("[%v]step2: finish exchage key with seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step3: start create and send transaction request to seller...", tx.SessionID)
-	err = tx.TableOTBatch1.buyerNewReq(requestFile, Log)
+	err = tx.TableOTComplaint.buyerNewReq(requestFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		BuyerTxMap[tx.SessionID] = tx
@@ -945,7 +945,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step4: finish receive transaction response from seller...", tx.SessionID)
 
-	rs = tx.TableOTBatch1.buyerVerifyResp(responseFile, receiptFile, Log)
+	rs = tx.TableOTComplaint.buyerVerifyResp(responseFile, receiptFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -957,18 +957,18 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	Log.Debugf("[%v]step4: finish verify transaction response...", tx.SessionID)
 
 	Log.Debugf("[%v]step5: start read, sign and send receipt to seller...", tx.SessionID)
-	receiptByte, receipt, err := readBatch1Receipt(receiptFile, Log)
+	receiptByte, receipt, err := readReceiptForComplaint(receiptFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
-		Log.Warnf("[%v]step5: failed to read batch1 receipt. err=%v", tx.SessionID, err)
+		Log.Warnf("[%v]step5: failed to read receipt. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
 	}
 	Log.Debugf("[%v]step5: finish read receipt...", tx.SessionID)
 
 	tx.Price = tx.UnitPrice * int64(receipt.C)
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForBatch1(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -989,7 +989,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	Log.Debugf("[%v]step5: finish send recipt to seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step6: start read, save and verify secret...", tx.SessionID)
-	secret, err := readScrtForBatch1(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	secret, err := readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -998,7 +998,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	}
 	Log.Debugf("[%v]step6: finish read secret from contract...", tx.SessionID)
 
-	err = buyerSaveSecretForBatch1(secret, secretFile, Log)
+	err = buyerSaveSecretForComplaint(secret, secretFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1009,13 +1009,13 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	BuyerTxMap[tx.SessionID] = tx
 	Log.Debugf("[%v]step6: finish save secret...", tx.SessionID)
 
-	rs = tx.TableOTBatch1.buyerVerifySecret(secretFile, Log)
+	rs = tx.TableOTComplaint.buyerVerifySecret(secretFile, Log)
 	Log.Debugf("[%v]step6: finish verify secret... result=%v", tx.SessionID, rs)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
 		BuyerTxMap[tx.SessionID] = tx
 		Log.Warnf("[%v]step7: start generate and send claim to contract...", tx.SessionID)
-		rs = tx.TableOTBatch1.buyerGeneClaim(claimFile, Log)
+		rs = tx.TableOTComplaint.buyerGeneClaim(claimFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -1024,7 +1024,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		}
 		Log.Debugf("[%v]step7: finish generate claim...", tx.SessionID)
 
-		txid, err := claimToContractForBatch1(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
+		txid, err := claimToContractForComplaint(tx.SessionID, tx.Bulletin, claimFile, tx.SellerAddr, Log)
 		if err != nil {
 			tx.Status = TRANSACTION_STATUS_SEND_CLIAM_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -1037,7 +1037,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 		BuyerTxMap[tx.SessionID] = tx
 	} else {
 		Log.Debugf("[%v]step7: start decrypt data...", tx.SessionID)
-		rs = tx.TableOTBatch1.buyerDecrypt(outputFile, Log)
+		rs = tx.TableOTComplaint.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BuyerTxMap[tx.SessionID] = tx
@@ -1053,7 +1053,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
 }
 
-// buyerTxForTB2 executes transaction for buyer while mode is table_batch2.
+// buyerTxForTAS executes transaction for buyer while mode is table_atomic_swap.
 //
 // step1: prepare session,
 // step2: create transaction request,
@@ -1063,7 +1063,7 @@ func buyerTxForTOB1(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, 
 // step6: claim to contract or decrypt data.
 //
 // return: response string for api request.
-func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
+func buyerTxForTAS(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
 	dir := BConf.BuyerDir + "/transaction/" + tx.SessionID
 	// bulletinFile := dir + "/bulletin"
 	// publicFile := dir + "/public"
@@ -1084,7 +1084,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableBatch2, err = buyerNewSessForTB2(demands, bulletinFile, publicPath, Log)
+	tx.TableAtomicSwap, err = buyerNewSessForTAS(demands, bulletinFile, publicPath, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1092,12 +1092,12 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
 	}
 	defer func() {
-		tx.TableBatch2.BuyerSession.Free()
+		tx.TableAtomicSwap.BuyerSession.Free()
 	}()
 	Log.Debugf("[%v]step1: finish prepare for buyer's session...", tx.SessionID)
 
 	Log.Debugf("[%v]step2: start create and send transaction request to seller...", tx.SessionID)
-	err = tx.TableBatch2.buyerNewReq(requestFile, Log)
+	err = tx.TableAtomicSwap.buyerNewReq(requestFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		BuyerTxMap[tx.SessionID] = tx
@@ -1126,7 +1126,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step3: finish receive response from seller...", tx.SessionID)
 
-	rs := tx.TableBatch2.buyerVerifyResp(responseFile, receiptFile, Log)
+	rs := tx.TableAtomicSwap.buyerVerifyResp(responseFile, receiptFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1138,18 +1138,18 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	Log.Debugf("[%v]step3: finish receive transaction response from seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step4: start read, sign and send receipt to seller...", tx.SessionID)
-	receiptByte, receipt, err := readBatch2Receipt(receiptFile, Log)
+	receiptByte, receipt, err := readReceiptForAtomicSwap(receiptFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
-		Log.Warnf("[%v]step4: failed to read batch2 receipt. err=%v", tx.SessionID, err)
+		Log.Warnf("[%v]step4: failed to read receipt. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
 	}
 	Log.Debugf("[%v]step4: finish read receipt from seller...", tx.SessionID)
 
 	tx.Price = tx.UnitPrice * int64(receipt.C)
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForBatch2(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForAtomicSwap(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1170,7 +1170,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	Log.Debugf("[%v]step4: finish send receipt to seller...", tx.SessionID)
 
 	Log.Debugf("[%v]step5: start read and verify secret from contract...", tx.SessionID)
-	secret, err := readScrtForBatch2(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	secret, err := readScrtForAtomicSwap(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1179,7 +1179,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	}
 	Log.Debugf("[%v]step5: finish read secret from contract...", tx.SessionID)
 
-	err = buyerSaveSecretForBatch2(secret, secretFile, Log)
+	err = buyerSaveSecretForAtomicSwap(secret, secretFile, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1190,7 +1190,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 	BuyerTxMap[tx.SessionID] = tx
 	Log.Debugf("[%v]step5: finish save secret...", tx.SessionID)
 
-	rs = tx.TableBatch2.buyerVerifySecret(secretFile, Log)
+	rs = tx.TableAtomicSwap.buyerVerifySecret(secretFile, Log)
 	Log.Debugf("[%v]step5: finish verify secret...result=%v", tx.SessionID, rs)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
@@ -1199,7 +1199,7 @@ func buyerTxForTB2(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step6: failed to purchase data.")
 	} else {
 		Log.Debugf("[%v]step6: start decrypt file...")
-		rs = tx.TableBatch2.buyerDecrypt(outputFile, Log)
+		rs = tx.TableAtomicSwap.buyerDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BuyerTxMap[tx.SessionID] = tx

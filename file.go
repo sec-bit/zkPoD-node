@@ -18,17 +18,17 @@ import (
 	"github.com/miguelmota/go-solidity-sha3"
 )
 
-//Batch1Secret is the struct of secret for batch1
-type Batch1Secret struct {
+//ComplaintSecret is the struct of secret for compalint mode
+type ComplaintSecret struct {
 	S string `json:"s"`
 }
 
-//Batch2Secret is the struct of secret for batch2
-type Batch2Secret struct {
+//AtomicSwapSecret is the struct of secret for atomic swap mode
+type AtomicSwapSecret struct {
 	S string `json:"s"`
 }
 
-//VRFSecret is the struct of secret for vrf
+//VRFSecret is the struct of secret for vrf mode
 type VRFSecret struct {
 	R string `json:"r"`
 }
@@ -41,21 +41,21 @@ type Claim struct {
 	M []string `json:"m"`
 }
 
-//Batch1Receipt is the struct of receipt for batch1
-type Batch1Receipt struct {
+//ComplaintReceipt is the struct of receipt for compalint mode
+type ComplaintReceipt struct {
 	S string `json:"s"`
 	K string `json:"k"`
 	C uint64 `json:"c"`
 }
 
-//Batch2Receipt is the struct of receipt for batch2
-type Batch2Receipt struct {
+//AtomicSwapReceipt is the struct of receipt for atomic swap mode
+type AtomicSwapReceipt struct {
 	S  string `json:"s"`
 	VW string `json:"vw"`
 	C  uint64 `json:"c"`
 }
 
-//VRFReceipt is the struct of receipt for vrf
+//VRFReceipt is the struct of receipt for vrf mode
 type VRFReceipt struct {
 	G string `json:"g"`
 }
@@ -68,29 +68,6 @@ type Bulletin struct {
 	N            string `json:"n"`
 	SigmaMKLRoot string `json:"sigma_mkl_root"`
 }
-
-// func preBuyerTx(params BuyerConnParam, bulletinPath string, PubPath string, bulletin Bulletin, Log ILogger) (BuyerTransaction, error) {
-// 	var tx BuyerTransaction
-// 	dir := BConf.BuyerDir + "/transaction/" + params.SessionID
-// 	// err := saveBulletinAndPublic(dir, bulletinPath, PubPath, Log)
-// 	// if err != nil {
-// 	// 	Log.Warnf("failed to save bulletin for buyer. err=%v", err)
-// 	// 	return tx, errors.New("failed to save file")
-// 	// }
-// 	// Log.Debugf("[%v]success to save bulletin and public information...", params.SessionID)
-
-// 	tx.SessionID = params.SessionID
-// 	tx.Status = TRANSACTION_STATUS_START
-// 	tx.Bulletin = bulletin
-// 	tx.SellerIP = params.SellerIPAddr
-// 	tx.SellerAddr = params.SellerAddr
-// 	tx.Mode = params.Mode
-// 	tx.SubMode = params.SubMode
-// 	tx.OT = params.OT
-// 	tx.UnitPrice = params.UnitPrice
-// 	tx.BuyerAddr = fmt.Sprintf("%v", ETHKey.Address.Hex())
-// 	return tx, nil
-// }
 
 func pathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
@@ -147,8 +124,8 @@ func readBulletinFile(filePath string, Log ILogger) (Bulletin, error) {
 	return b, nil
 }
 
-func readBatch1Receipt(filePath string, Log ILogger) ([]byte, Batch1Receipt, error) {
-	var r Batch1Receipt
+func readReceiptForComplaint(filePath string, Log ILogger) ([]byte, ComplaintReceipt, error) {
+	var r ComplaintReceipt
 	rf, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		Log.Warnf("failed to read receipt file. err=%v", err)
@@ -165,7 +142,7 @@ func readBatch1Receipt(filePath string, Log ILogger) ([]byte, Batch1Receipt, err
 	return rf, r, nil
 }
 
-func signRecptForBatch1(key *keystore.Key, sessionID string, receipt Batch1Receipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+func signRecptForComplaint(key *keystore.Key, sessionID string, receipt ComplaintReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -202,8 +179,8 @@ func signRecptForBatch1(key *keystore.Key, sessionID string, receipt Batch1Recei
 	return sig, nil
 }
 
-func readBatch2Receipt(filePath string, Log ILogger) ([]byte, Batch2Receipt, error) {
-	var r Batch2Receipt
+func readReceiptForAtomicSwap(filePath string, Log ILogger) ([]byte, AtomicSwapReceipt, error) {
+	var r AtomicSwapReceipt
 	rf, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		Log.Warnf("failed to read receipt file. err=%v", err)
@@ -220,7 +197,7 @@ func readBatch2Receipt(filePath string, Log ILogger) ([]byte, Batch2Receipt, err
 	return rf, r, nil
 }
 
-func signRecptForBatch2(key *keystore.Key, sessionID string, receipt Batch2Receipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+func signRecptForAtomicSwap(key *keystore.Key, sessionID string, receipt AtomicSwapReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -346,7 +323,7 @@ func signRecptForVRFQ(key *keystore.Key, sessionID string, receipt VRFReceipt, p
 	return sig, nil
 }
 
-func readSeed0ForBatch1(filePath string, Log ILogger) (s Batch1Secret, err error) {
+func readSeed0ForComplaint(filePath string, Log ILogger) (s ComplaintSecret, err error) {
 
 	sf, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -363,7 +340,7 @@ func readSeed0ForBatch1(filePath string, Log ILogger) (s Batch1Secret, err error
 	return
 }
 
-func buyerSaveSecretForBatch1(secret Batch1Secret, filePath string, Log ILogger) error {
+func buyerSaveSecretForComplaint(secret ComplaintSecret, filePath string, Log ILogger) error {
 	sByte, err := json.Marshal(&secret)
 	if err != nil {
 		Log.Warnf("Failed to save secret for buyer. err=%v")
@@ -377,7 +354,7 @@ func buyerSaveSecretForBatch1(secret Batch1Secret, filePath string, Log ILogger)
 	return nil
 }
 
-func readSeed0ForBatch2(filePath string, Log ILogger) (s Batch2Secret, err error) {
+func readSeed0ForAtomicSwap(filePath string, Log ILogger) (s AtomicSwapSecret, err error) {
 
 	sf, err := ioutil.ReadFile(filePath)
 	if err != nil {
@@ -394,7 +371,7 @@ func readSeed0ForBatch2(filePath string, Log ILogger) (s Batch2Secret, err error
 	return
 }
 
-func buyerSaveSecretForBatch2(secret Batch2Secret, filePath string, Log ILogger) error {
+func buyerSaveSecretForAtomicSwap(secret AtomicSwapSecret, filePath string, Log ILogger) error {
 	sByte, err := json.Marshal(&secret)
 	if err != nil {
 		Log.Warnf("Failed to save secret for buyer. err=%v")

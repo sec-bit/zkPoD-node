@@ -4,7 +4,7 @@ import (
 	"errors"
 	
 
-	tablevrf "github.com/sec-bit/zkPoD-lib/pod-go/table/vrfq"
+	tablevrf "github.com/sec-bit/zkPoD-lib/pod_go/table/vrfq"
 )
 
 type PoDSellerTQ struct {

@@ -210,7 +210,7 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	if config.Mode == TRANSACTION_MODE_PLAIN_POD {
 		for _, s := range config.SubMode {
-			if s != TRANSACTION_SUB_MODE_BATCH1 && s != TRANSACTION_SUB_MODE_BATCH2 {
+			if s != TRANSACTION_SUB_MODE_COMPLAINT && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP {
 				Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 				fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 				return
@@ -218,7 +218,7 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if config.Mode == TRANSACTION_MODE_TABLE_POD {
 		for _, s := range config.SubMode {
-			if s != TRANSACTION_SUB_MODE_BATCH1 && s != TRANSACTION_SUB_MODE_BATCH2 && s != TRANSACTION_SUB_MODE_VRF {
+			if s != TRANSACTION_SUB_MODE_COMPLAINT && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP && s != TRANSACTION_SUB_MODE_VRF {
 				Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 				fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 				return
@@ -570,14 +570,14 @@ func SellerWithdrawFromTxAPIHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, RESPONSE_NO_NEED_TO_WITHDRAW)
 		return
 	}
-	if tx.SubMode != TRANSACTION_SUB_MODE_BATCH1 {
+	if tx.SubMode != TRANSACTION_SUB_MODE_COMPLAINT {
 		Log.Warnf("the mode does not need withdraw eth.")
 		fmt.Fprintf(w, RESPONSE_NO_NEED_TO_WITHDRAW)
 		return
 	}
 	Log.Debugf("start send transaction to withdraw eth...sessionID=%v", sessionID)
 	t := time.Now()
-	txid, err := settleDealForBatch1(sessionID, tx.SellerAddr, tx.BuyerAddr)
+	txid, err := settleDealForComplaint(sessionID, tx.SellerAddr, tx.BuyerAddr)
 	if err != nil {
 		Log.Warnf("failed to withdraw eth for seller from contract. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_READ_CONTRACT_FAILED)
@@ -681,25 +681,25 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	var response string
 	if tx.Mode == TRANSACTION_MODE_PLAIN_POD {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				response = buyerTxForPOB1(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
+				response = buyerTxForPOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForPB1(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+				response = buyerTxForPC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			response = buyerTxForPB2(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			response = buyerTxForPAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		}
 	} else if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				response = buyerTxForTOB1(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
+				response = buyerTxForTOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForTB1(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+				response = buyerTxForTC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			response = buyerTxForTB2(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			response = buyerTxForTAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		case TRANSACTION_SUB_MODE_VRF:
 			if tx.OT {
 				response = buyerTxForTOQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.PhantomKeyValue, data.BulletinFile, data.PubPath, Log)

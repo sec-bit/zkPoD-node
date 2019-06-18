@@ -1,6 +1,6 @@
 {
     "mode": "plain",
-    "sub_mode": ["batch2", "batch1"],
+    "sub_mode": ["atomic_swap", "complaint"],
     "column": "64",
     "unit_price": 200,
     "description": "ALICE’S ADVENTURES IN WONDERLAND\nLewis Carroll\nTHE MILLENNIUM FULCRUM EDITION 3.0\n",

@@ -25,7 +25,7 @@ func TestTxRequest(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainBatchPoD)
+	mode := uint8(ModePlainComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 	txReq := utils.MakeRandomMsg(32)
 
@@ -81,7 +81,7 @@ func TestTxRequest(t *testing.T) {
 	go startClient(t, &wg, serverAddr, clientKey,
 		func(node *Node, key *ecdsa.PrivateKey) error {
 			if err := node.SendNewSessionRequest(
-				ModePlainBatchPoD, mklroot,
+				ModePlainComplaintPoD, mklroot,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session request: %v",
@@ -95,7 +95,7 @@ func TestTxRequest(t *testing.T) {
 			}
 
 			if err := node.SendSessionAck(
-				sessionID, ModePlainBatchPoD, mklroot, false,
+				sessionID, ModePlainComplaintPoD, mklroot, false,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session ack from client: %v",
@@ -130,7 +130,7 @@ func TestTxResponse(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainBatchPoD)
+	mode := uint8(ModePlainComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 	txReq := utils.MakeRandomMsg(32)
 	txResponse := utils.MakeRandomMsg(128)
@@ -182,7 +182,7 @@ func TestTxResponse(t *testing.T) {
 	go startClient(t, &wg, serverAddr, clientKey,
 		func(node *Node, key *ecdsa.PrivateKey) error {
 			if err := node.SendNewSessionRequest(
-				ModePlainBatchPoD, mklroot,
+				ModePlainComplaintPoD, mklroot,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session request: %v",
@@ -196,7 +196,7 @@ func TestTxResponse(t *testing.T) {
 			}
 
 			if err := node.SendSessionAck(
-				sessionID, ModePlainBatchPoD, mklroot, false,
+				sessionID, ModePlainComplaintPoD, mklroot, false,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session ack from client: %v",
@@ -247,7 +247,7 @@ func TestTxReceipt(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainBatchPoD)
+	mode := uint8(ModePlainComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 	txReq := utils.MakeRandomMsg(32)
 	txResponse := utils.MakeRandomMsg(128)
@@ -327,7 +327,7 @@ func TestTxReceipt(t *testing.T) {
 	go startClient(t, &wg, serverAddr, clientKey,
 		func(node *Node, key *ecdsa.PrivateKey) error {
 			if err := node.SendNewSessionRequest(
-				ModePlainBatchPoD, mklroot,
+				ModePlainComplaintPoD, mklroot,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session request: %v",
@@ -341,7 +341,7 @@ func TestTxReceipt(t *testing.T) {
 			}
 
 			if err := node.SendSessionAck(
-				sessionID, ModePlainBatchPoD, mklroot, false,
+				sessionID, ModePlainComplaintPoD, mklroot, false,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send session ack from client: %v",
@@ -386,7 +386,7 @@ func TestOTNegoRequest(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainOTBatchPoD)
+	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
 	negoReq := utils.MakeRandomMsg(32)
@@ -486,7 +486,7 @@ func TestOTNegoAckReq(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainOTBatchPoD)
+	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
 	buyerNegoReq := utils.MakeRandomMsg(32)
@@ -628,7 +628,7 @@ func TestOTNegoAck(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainOTBatchPoD)
+	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
 	buyerNegoReq := utils.MakeRandomMsg(32)
@@ -771,7 +771,7 @@ func TestOTPod(t *testing.T) {
 	addrChan := make(chan *net.TCPAddr)
 
 	mklroot := utils.MakeRandomMsg(32)
-	mode := uint8(ModePlainOTBatchPoD)
+	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
 	buyerNegoReq := utils.MakeRandomMsg(32)

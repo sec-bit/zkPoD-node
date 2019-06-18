@@ -119,27 +119,27 @@ func insertBuyerTxToDB(transaction BuyerTransaction) error {
 
 	if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				demands, err := json.Marshal(&transaction.PlainOTBatch1.Demands)
+				demands, err := json.Marshal(&transaction.PlainOTComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
-				phantoms, err := json.Marshal(&transaction.PlainOTBatch1.Phantoms)
+				phantoms, err := json.Marshal(&transaction.PlainOTComplaint.Phantoms)
 				if err != nil {
 					return fmt.Errorf("failed to parse phantoms: %v", err)
 				}
 				tx.Phantoms = string(phantoms)
 			} else {
-				demands, err := json.Marshal(&transaction.PlainBatch1.Demands)
+				demands, err := json.Marshal(&transaction.PlainComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			demands, err := json.Marshal(&transaction.PlainBatch2.Demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			demands, err := json.Marshal(&transaction.PlainAtomicSwap.Demands)
 			if err != nil {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -147,27 +147,27 @@ func insertBuyerTxToDB(transaction BuyerTransaction) error {
 		}
 	} else {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				demands, err := json.Marshal(&transaction.TableOTBatch1.Demands)
+				demands, err := json.Marshal(&transaction.TableOTComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
-				phantoms, err := json.Marshal(&transaction.TableOTBatch1.Phantoms)
+				phantoms, err := json.Marshal(&transaction.TableOTComplaint.Phantoms)
 				if err != nil {
 					return fmt.Errorf("failed to parse phantoms: %v", err)
 				}
 				tx.Phantoms = string(phantoms)
 			} else {
-				demands, err := json.Marshal(&transaction.TableBatch1.Demands)
+				demands, err := json.Marshal(&transaction.TableComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			demands, err := json.Marshal(&transaction.TableBatch2.Demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			demands, err := json.Marshal(&transaction.TableAtomicSwap.Demands)
 			if err != nil {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -225,27 +225,27 @@ func updateBuyerTxToDB(transaction BuyerTransaction) error {
 
 	if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				demands, err := json.Marshal(&transaction.PlainOTBatch1.Demands)
+				demands, err := json.Marshal(&transaction.PlainOTComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
-				phantoms, err := json.Marshal(&transaction.PlainOTBatch1.Phantoms)
+				phantoms, err := json.Marshal(&transaction.PlainOTComplaint.Phantoms)
 				if err != nil {
 					return fmt.Errorf("failed to parse phantoms: %v", err)
 				}
 				tx.Phantoms = string(phantoms)
 			} else {
-				demands, err := json.Marshal(&transaction.PlainBatch1.Demands)
+				demands, err := json.Marshal(&transaction.PlainComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			demands, err := json.Marshal(&transaction.PlainBatch2.Demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			demands, err := json.Marshal(&transaction.PlainAtomicSwap.Demands)
 			if err != nil {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -253,27 +253,27 @@ func updateBuyerTxToDB(transaction BuyerTransaction) error {
 		}
 	} else {
 		switch tx.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				demands, err := json.Marshal(&transaction.TableOTBatch1.Demands)
+				demands, err := json.Marshal(&transaction.TableOTComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
-				phantoms, err := json.Marshal(&transaction.TableOTBatch1.Phantoms)
+				phantoms, err := json.Marshal(&transaction.TableOTComplaint.Phantoms)
 				if err != nil {
 					return fmt.Errorf("failed to parse phantoms: %v", err)
 				}
 				tx.Phantoms = string(phantoms)
 			} else {
-				demands, err := json.Marshal(&transaction.TableBatch1.Demands)
+				demands, err := json.Marshal(&transaction.TableComplaint.Demands)
 				if err != nil {
 					return fmt.Errorf("failed to parse demands: %v", err)
 				}
 				tx.Demands = string(demands)
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			demands, err := json.Marshal(&transaction.TableBatch2.Demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			demands, err := json.Marshal(&transaction.TableAtomicSwap.Demands)
 			if err != nil {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -341,48 +341,48 @@ func loadBuyerTxFromDB(sessionID string) (BuyerTransaction, error) {
 
 	if transaction.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch transaction.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if transaction.OT {
-				err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainOTBatch1.Demands)
+				err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainOTComplaint.Demands)
 				if err != nil {
 					return transaction, fmt.Errorf("failed to parse demands: %v", err)
 				}
-				err = json.Unmarshal([]byte(tx.Phantoms), &transaction.PlainOTBatch1.Phantoms)
+				err = json.Unmarshal([]byte(tx.Phantoms), &transaction.PlainOTComplaint.Phantoms)
 				if err != nil {
 					return transaction, fmt.Errorf("failed to parse phantoms: %v", err)
 				}
 			} else {
-				err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainBatch1.Demands)
+				err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainComplaint.Demands)
 				if err != nil {
 					return transaction, fmt.Errorf("failed to parse demands: %v", err)
 				}
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainBatch2.Demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainAtomicSwap.Demands)
 			if err != nil {
 				return transaction, fmt.Errorf("failed to parse demands: %v", err)
 			}
 		}
 	} else {
 		switch transaction.SubMode {
-		case TRANSACTION_SUB_MODE_BATCH1:
+		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if transaction.OT {
-				err := json.Unmarshal([]byte(tx.Demands), &transaction.TableOTBatch1.Demands)
+				err := json.Unmarshal([]byte(tx.Demands), &transaction.TableOTComplaint.Demands)
 				if err != nil {
 					return transaction, fmt.Errorf("failed to parse demands: %v", err)
 				}
-				err = json.Unmarshal([]byte(tx.Phantoms), &transaction.TableOTBatch1.Phantoms)
+				err = json.Unmarshal([]byte(tx.Phantoms), &transaction.TableOTComplaint.Phantoms)
 				if err != nil {
 					return transaction, fmt.Errorf("failed to parse phantoms: %v", err)
 				}
 			} else {
-				err := json.Unmarshal([]byte(tx.Demands), &transaction.TableBatch1.Demands)
+				err := json.Unmarshal([]byte(tx.Demands), &transaction.TableComplaint.Demands)
 				if err != nil {
 					return transaction, fmt.Errorf("failed to parse demands: %v", err)
 				}
 			}
-		case TRANSACTION_SUB_MODE_BATCH2:
-			err := json.Unmarshal([]byte(tx.Demands), &transaction.TableBatch2.Demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			err := json.Unmarshal([]byte(tx.Demands), &transaction.TableAtomicSwap.Demands)
 			if err != nil {
 				return transaction, fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -440,48 +440,48 @@ func loadBuyerTxListFromDB() ([]BuyerTransaction, error) {
 
 		if transactions[i].Mode == TRANSACTION_MODE_TABLE_POD {
 			switch transactions[i].SubMode {
-			case TRANSACTION_SUB_MODE_BATCH1:
+			case TRANSACTION_SUB_MODE_COMPLAINT:
 				if transactions[i].OT {
-					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainOTBatch1.Demands)
+					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainOTComplaint.Demands)
 					if err != nil {
 						return transactions, fmt.Errorf("failed to parse demands: %v", err)
 					}
-					err = json.Unmarshal([]byte(tx.Phantoms), &transactions[i].PlainOTBatch1.Phantoms)
+					err = json.Unmarshal([]byte(tx.Phantoms), &transactions[i].PlainOTComplaint.Phantoms)
 					if err != nil {
 						return transactions, fmt.Errorf("failed to parse phantoms: %v", err)
 					}
 				} else {
-					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainBatch1.Demands)
+					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainComplaint.Demands)
 					if err != nil {
 						return transactions, fmt.Errorf("failed to parse demands: %v", err)
 					}
 				}
-			case TRANSACTION_SUB_MODE_BATCH2:
-				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainBatch2.Demands)
+			case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainAtomicSwap.Demands)
 				if err != nil {
 					return transactions, fmt.Errorf("failed to parse demands: %v", err)
 				}
 			}
 		} else {
 			switch transactions[i].SubMode {
-			case TRANSACTION_SUB_MODE_BATCH1:
+			case TRANSACTION_SUB_MODE_COMPLAINT:
 				if transactions[i].OT {
-					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableOTBatch1.Demands)
+					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableOTComplaint.Demands)
 					if err != nil {
 						return transactions, fmt.Errorf("failed to parse demands: %v", err)
 					}
-					err = json.Unmarshal([]byte(tx.Phantoms), &transactions[i].TableOTBatch1.Phantoms)
+					err = json.Unmarshal([]byte(tx.Phantoms), &transactions[i].TableOTComplaint.Phantoms)
 					if err != nil {
 						return transactions, fmt.Errorf("failed to parse phantoms: %v", err)
 					}
 				} else {
-					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableBatch1.Demands)
+					err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableComplaint.Demands)
 					if err != nil {
 						return transactions, fmt.Errorf("failed to parse demands: %v", err)
 					}
 				}
-			case TRANSACTION_SUB_MODE_BATCH2:
-				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableBatch2.Demands)
+			case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableAtomicSwap.Demands)
 				if err != nil {
 					return transactions, fmt.Errorf("failed to parse demands: %v", err)
 				}

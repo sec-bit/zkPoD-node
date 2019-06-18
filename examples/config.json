@@ -5,7 +5,7 @@
     "pub_path":"./public",
     "bulletin_file":"./bulletin",
     "mode":"plain",
-    "sub_mode":"batch2",
+    "sub_mode":"atomic_swap",
     "ot":false,
     "demands":[
         { "demand_start":0, "demand_count":2},
