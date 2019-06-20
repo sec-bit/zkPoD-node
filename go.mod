@@ -32,4 +32,4 @@ require (
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 )
 
-replace github.com/sec-bit/zkPoD-lib/pod_go v0.0.0 => ../zkPoD-lib/pod-go
+replace github.com/sec-bit/zkPoD-lib/pod_go v0.0.0 => ../zkPoD-lib/pod_go
