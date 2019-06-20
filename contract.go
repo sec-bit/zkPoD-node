@@ -122,7 +122,7 @@ func buyerDeposit(value int64, sellerAddr string) (string, error) {
 		GAdminAuth.Value = big.NewInt(0)
 	}()
 
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.BuyerDeposit(GAdminAuth, common.HexToAddress(sellerAddr))
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.BobDeposit(GAdminAuth, common.HexToAddress(sellerAddr))
 	if err != nil {
 		return "", fmt.Errorf("failed to deposit to %v in contract. err=%v", sellerAddr, err)
 	}
@@ -130,7 +130,7 @@ func buyerDeposit(value int64, sellerAddr string) (string, error) {
 }
 
 func buyerUnDeposit(sellerAddr string) (string, error) {
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.BuyerUnDeposit(GAdminAuth, common.HexToAddress(sellerAddr))
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.BobUnDeposit(GAdminAuth, common.HexToAddress(sellerAddr))
 	if err != nil {
 		return "", fmt.Errorf("failed to undeposit to  %v. err=%v", sellerAddr, err)
 	}
@@ -190,7 +190,7 @@ func submitScrtForComplaint(tx Transaction, receiptSign []byte, Log ILogger) (st
 	}
 
 	t := time.Now()
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofBatch1(GAdminAuth, *byte32(seedByte), sessionInt,
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofComplaint(GAdminAuth, *byte32(seedByte), sessionInt,
 		common.HexToAddress(tx.BuyerAddr), *byte32(seed2Byte), *byte32(mklByte), receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
 		Log.Warnf("failed to submit proof. err=%v", err)
@@ -251,7 +251,7 @@ func readScrtForComplaint(sessionID string, sellerAddr string, buyerAddr string,
 			return secret, errors.New("Failed to convert sessionId")
 		}
 		t := time.Now()
-		records, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.GetRecordBatch1(&bind.CallOpts{}, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
+		records, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.GetRecordComplaint(&bind.CallOpts{}, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
 		if err != nil {
 			Log.Warnf("Failed to read session record: %v", err)
 			return secret, errors.New("Failed to read session record")
@@ -317,7 +317,7 @@ func claimToContractForComplaint(sessionID string, bulletin Bulletin, claimFile 
 		return "", errors.New("failed to convert sCnt")
 	}
 	t := time.Now()
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.ClaimBatch1(GAdminAuth, common.HexToAddress(sellerAddr), sessionInt,
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.ClaimComplaint(GAdminAuth, common.HexToAddress(sellerAddr), sessionInt,
 		claim.I, claim.J, tx, ty, mkls, _sCnt)
 	if err != nil {
 		Log.Warnf("Failed to submit claim. err=%v", err)
@@ -334,7 +334,7 @@ func settleDealForComplaint(sessionID string, sellerAddr string, buyerAddr strin
 	if !rs {
 		return "", errors.New("failed to convert sessionId")
 	}
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SettleBatch1Deal(GAdminAuth, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SettleComplaintDeal(GAdminAuth, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
 	if err != nil {
 		return "", fmt.Errorf("failed to settle deal. sessionID=%v, err=%v", sessionID, err)
 	}
@@ -398,7 +398,7 @@ func submitScrtForAtomicSwap(tx Transaction, receiptSign []byte, Log ILogger) (s
 		*byte32(seedByte), _sCnt, sessionInt, tx.BuyerAddr, *byte32(seed2Byte), vwInt, receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 
 	t := time.Now()
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofBatch2(GAdminAuth, *byte32(seedByte), _sCnt, sessionInt,
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofAtomicSwap(GAdminAuth, *byte32(seedByte), _sCnt, sessionInt,
 		common.HexToAddress(tx.BuyerAddr), *byte32(seed2Byte), vwInt, receipt.C,
 		big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
@@ -460,7 +460,7 @@ func readScrtForAtomicSwap(sessionID string, sellerAddr string, buyerAddr string
 			return secret, errors.New("Failed to convert sessionId")
 		}
 		t := time.Now()
-		records, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.GetRecordBatch2(&bind.CallOpts{}, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
+		records, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.GetRecordAtomicSwap(&bind.CallOpts{}, common.HexToAddress(sellerAddr), common.HexToAddress(buyerAddr), sessionInt)
 		if err != nil {
 			Log.Warnf("Failed to read session record: %v", err)
 			return secret, errors.New("Failed to read session record")
@@ -613,7 +613,7 @@ func readScrtForVRFQ(sessionID string, sellerAddr string, buyerAddr string, Log 
 }
 
 func verifyDeposit(sellerAddr string, buyerAddr string, value int64) (bool, error) {
-	dpst, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.BuyerDeposits(&bind.CallOpts{}, common.HexToAddress(buyerAddr), common.HexToAddress(sellerAddr))
+	dpst, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.BobDeposits(&bind.CallOpts{}, common.HexToAddress(buyerAddr), common.HexToAddress(sellerAddr))
 	if err != nil {
 		return false, fmt.Errorf("failed to read deposit. err=%v", err)
 	}

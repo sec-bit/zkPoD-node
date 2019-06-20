@@ -28,7 +28,7 @@ var (
 )
 
 // ZkPoDExchangeABI is the input ABI used to generate the binding from.
-const ZkPoDExchangeABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"publicVar_\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"buyerDeposits_\",\"outputs\":[{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"pendingCnt\",\"type\":\"uint256\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"s_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint64\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t3\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"bulletins_\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"size\",\"type\":\"uint64\"},{\"name\":\"s\",\"type\":\"uint64\"},{\"name\":\"n\",\"type\":\"uint64\"},{\"name\":\"sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"pledge_value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"blt_type\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t1\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t4\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_publicVar\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_mode\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnBatch1Key\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"OnBatch1Claim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnBatch1Deal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnBatch2Deal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_r\",\"type\":\"uint256\"}],\"name\":\"OnVRFDeal\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"_size\",\"type\":\"uint64\"},{\"name\":\"_s\",\"type\":\"uint64\"},{\"name\":\"_n\",\"type\":\"uint64\"},{\"name\":\"_sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"_vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"_blt_type\",\"type\":\"uint256\"}],\"name\":\"publish\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"unPublish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"buyerDeposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"buyerUnDeposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"withdrawA\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"withdrawB\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofBatch1\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_i\",\"type\":\"uint64\"},{\"name\":\"_j\",\"type\":\"uint64\"},{\"name\":\"_tx\",\"type\":\"uint256\"},{\"name\":\"_ty\",\"type\":\"uint256\"},{\"name\":\"_mkl_path\",\"type\":\"bytes32[]\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"}],\"name\":\"claimBatch1\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"settleBatch1Deal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_sigma_vw\",\"type\":\"uint256\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofBatch2\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_s_r\",\"type\":\"uint256\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_g_exp_r\",\"type\":\"uint256[2]\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofVRF\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"count\",\"type\":\"uint64\"},{\"name\":\"s\",\"type\":\"uint64\"},{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"seed2\",\"type\":\"bytes32\"},{\"name\":\"sigma_vw\",\"type\":\"uint256\"}],\"name\":\"vrfyProofBatch2\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_g_exp_r\",\"type\":\"uint256[2]\"},{\"name\":\"_s_r\",\"type\":\"uint256\"}],\"name\":\"vrfyProofVRF\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_x\",\"type\":\"bytes32\"},{\"name\":\"_y\",\"type\":\"bytes32\"},{\"name\":\"_ij\",\"type\":\"uint64\"},{\"name\":\"_ns\",\"type\":\"uint64\"},{\"name\":\"_root\",\"type\":\"bytes32\"},{\"name\":\"_mkl_path\",\"type\":\"bytes32[]\"}],\"name\":\"vrfyPath\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_x\",\"type\":\"bytes32\"},{\"name\":\"_y\",\"type\":\"bytes32\"}],\"name\":\"hashInSha3\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_x\",\"type\":\"bytes32\"},{\"name\":\"_y\",\"type\":\"uint64\"}],\"name\":\"hashInSha3\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"seed\",\"type\":\"bytes32\"},{\"name\":\"index\",\"type\":\"uint64\"}],\"name\":\"chain\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_n\",\"type\":\"uint256\"}],\"name\":\"log2ub\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getSessionRecord\",\"outputs\":[{\"name\":\"submitAt\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordBatch1\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"seed2\",\"type\":\"bytes32\"},{\"name\":\"k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"count\",\"type\":\"uint64\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"expireAt\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordBatch2\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordVRF\",\"outputs\":[{\"name\":\"r\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ZkPoDExchangeABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"publicVar_\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"bobDeposits_\",\"outputs\":[{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"pendingCnt\",\"type\":\"uint256\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"s_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint64\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t3\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"bulletins_\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"size\",\"type\":\"uint64\"},{\"name\":\"s\",\"type\":\"uint64\"},{\"name\":\"n\",\"type\":\"uint64\"},{\"name\":\"sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"pledge_value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"blt_type\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t1\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t4\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_publicVar\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_mode\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnComplaintKey\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"OnComplaintClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnComplaintDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnAtomicSwapDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_r\",\"type\":\"uint256\"}],\"name\":\"OnVRFDeal\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"_size\",\"type\":\"uint64\"},{\"name\":\"_s\",\"type\":\"uint64\"},{\"name\":\"_n\",\"type\":\"uint64\"},{\"name\":\"_sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"_vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"_blt_type\",\"type\":\"uint256\"}],\"name\":\"publish\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"unPublish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"bobDeposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"bobUnDeposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"withdrawA\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"withdrawB\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofComplaint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_i\",\"type\":\"uint64\"},{\"name\":\"_j\",\"type\":\"uint64\"},{\"name\":\"_tx\",\"type\":\"uint256\"},{\"name\":\"_ty\",\"type\":\"uint256\"},{\"name\":\"_mkl_path\",\"type\":\"bytes32[]\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"}],\"name\":\"claimComplaint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"settleComplaintDeal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_sigma_vw\",\"type\":\"uint256\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofAtomicSwap\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_s_r\",\"type\":\"uint256\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_g_exp_r\",\"type\":\"uint256[2]\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofVRF\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getSessionRecord\",\"outputs\":[{\"name\":\"submitAt\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordComplaint\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"seed2\",\"type\":\"bytes32\"},{\"name\":\"k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"count\",\"type\":\"uint64\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"expireAt\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordAtomicSwap\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordVRF\",\"outputs\":[{\"name\":\"r\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // ZkPoDExchange is an auto generated Go binding around an Ethereum contract.
 type ZkPoDExchange struct {
@@ -172,6 +172,50 @@ func (_ZkPoDExchange *ZkPoDExchangeTransactorRaw) Transact(opts *bind.TransactOp
 	return _ZkPoDExchange.Contract.contract.Transact(opts, method, params...)
 }
 
+// BobDeposits is a free data retrieval call binding the contract method 0x98033565.
+//
+// Solidity: function bobDeposits_(address , address ) constant returns(uint256 value, uint256 unDepositAt, uint256 pendingCnt, uint8 stat)
+func (_ZkPoDExchange *ZkPoDExchangeCaller) BobDeposits(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (struct {
+	Value       *big.Int
+	UnDepositAt *big.Int
+	PendingCnt  *big.Int
+	Stat        uint8
+}, error) {
+	ret := new(struct {
+		Value       *big.Int
+		UnDepositAt *big.Int
+		PendingCnt  *big.Int
+		Stat        uint8
+	})
+	out := ret
+	err := _ZkPoDExchange.contract.Call(opts, out, "bobDeposits_", arg0, arg1)
+	return *ret, err
+}
+
+// BobDeposits is a free data retrieval call binding the contract method 0x98033565.
+//
+// Solidity: function bobDeposits_(address , address ) constant returns(uint256 value, uint256 unDepositAt, uint256 pendingCnt, uint8 stat)
+func (_ZkPoDExchange *ZkPoDExchangeSession) BobDeposits(arg0 common.Address, arg1 common.Address) (struct {
+	Value       *big.Int
+	UnDepositAt *big.Int
+	PendingCnt  *big.Int
+	Stat        uint8
+}, error) {
+	return _ZkPoDExchange.Contract.BobDeposits(&_ZkPoDExchange.CallOpts, arg0, arg1)
+}
+
+// BobDeposits is a free data retrieval call binding the contract method 0x98033565.
+//
+// Solidity: function bobDeposits_(address , address ) constant returns(uint256 value, uint256 unDepositAt, uint256 pendingCnt, uint8 stat)
+func (_ZkPoDExchange *ZkPoDExchangeCallerSession) BobDeposits(arg0 common.Address, arg1 common.Address) (struct {
+	Value       *big.Int
+	UnDepositAt *big.Int
+	PendingCnt  *big.Int
+	Stat        uint8
+}, error) {
+	return _ZkPoDExchange.Contract.BobDeposits(&_ZkPoDExchange.CallOpts, arg0, arg1)
+}
+
 // Bulletins is a free data retrieval call binding the contract method 0xd9417785.
 //
 // Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint8 blt_type, uint8 stat)
@@ -240,80 +284,46 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) Bulletins(arg0 [32]byte) (stru
 	return _ZkPoDExchange.Contract.Bulletins(&_ZkPoDExchange.CallOpts, arg0)
 }
 
-// BuyerDeposits is a free data retrieval call binding the contract method 0x8ca90a25.
+// GetRecordAtomicSwap is a free data retrieval call binding the contract method 0x7c7c75a8.
 //
-// Solidity: function buyerDeposits_(address , address ) constant returns(uint256 value, uint256 unDepositAt, uint256 pendingCnt, uint8 stat)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) BuyerDeposits(opts *bind.CallOpts, arg0 common.Address, arg1 common.Address) (struct {
-	Value       *big.Int
-	UnDepositAt *big.Int
-	PendingCnt  *big.Int
-	Stat        uint8
+// Solidity: function getRecordAtomicSwap(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeCaller) GetRecordAtomicSwap(opts *bind.CallOpts, _a common.Address, _b common.Address, _sid *big.Int) (struct {
+	Seed0    [32]byte
+	SubmitAt *big.Int
 }, error) {
 	ret := new(struct {
-		Value       *big.Int
-		UnDepositAt *big.Int
-		PendingCnt  *big.Int
-		Stat        uint8
+		Seed0    [32]byte
+		SubmitAt *big.Int
 	})
 	out := ret
-	err := _ZkPoDExchange.contract.Call(opts, out, "buyerDeposits_", arg0, arg1)
+	err := _ZkPoDExchange.contract.Call(opts, out, "getRecordAtomicSwap", _a, _b, _sid)
 	return *ret, err
 }
 
-// BuyerDeposits is a free data retrieval call binding the contract method 0x8ca90a25.
+// GetRecordAtomicSwap is a free data retrieval call binding the contract method 0x7c7c75a8.
 //
-// Solidity: function buyerDeposits_(address , address ) constant returns(uint256 value, uint256 unDepositAt, uint256 pendingCnt, uint8 stat)
-func (_ZkPoDExchange *ZkPoDExchangeSession) BuyerDeposits(arg0 common.Address, arg1 common.Address) (struct {
-	Value       *big.Int
-	UnDepositAt *big.Int
-	PendingCnt  *big.Int
-	Stat        uint8
+// Solidity: function getRecordAtomicSwap(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeSession) GetRecordAtomicSwap(_a common.Address, _b common.Address, _sid *big.Int) (struct {
+	Seed0    [32]byte
+	SubmitAt *big.Int
 }, error) {
-	return _ZkPoDExchange.Contract.BuyerDeposits(&_ZkPoDExchange.CallOpts, arg0, arg1)
+	return _ZkPoDExchange.Contract.GetRecordAtomicSwap(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
 }
 
-// BuyerDeposits is a free data retrieval call binding the contract method 0x8ca90a25.
+// GetRecordAtomicSwap is a free data retrieval call binding the contract method 0x7c7c75a8.
 //
-// Solidity: function buyerDeposits_(address , address ) constant returns(uint256 value, uint256 unDepositAt, uint256 pendingCnt, uint8 stat)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) BuyerDeposits(arg0 common.Address, arg1 common.Address) (struct {
-	Value       *big.Int
-	UnDepositAt *big.Int
-	PendingCnt  *big.Int
-	Stat        uint8
+// Solidity: function getRecordAtomicSwap(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordAtomicSwap(_a common.Address, _b common.Address, _sid *big.Int) (struct {
+	Seed0    [32]byte
+	SubmitAt *big.Int
 }, error) {
-	return _ZkPoDExchange.Contract.BuyerDeposits(&_ZkPoDExchange.CallOpts, arg0, arg1)
+	return _ZkPoDExchange.Contract.GetRecordAtomicSwap(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
 }
 
-// Chain is a free data retrieval call binding the contract method 0x749e0178.
+// GetRecordComplaint is a free data retrieval call binding the contract method 0x1f31e95e.
 //
-// Solidity: function chain(bytes32 seed, uint64 index) constant returns(uint256)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) Chain(opts *bind.CallOpts, seed [32]byte, index uint64) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ZkPoDExchange.contract.Call(opts, out, "chain", seed, index)
-	return *ret0, err
-}
-
-// Chain is a free data retrieval call binding the contract method 0x749e0178.
-//
-// Solidity: function chain(bytes32 seed, uint64 index) constant returns(uint256)
-func (_ZkPoDExchange *ZkPoDExchangeSession) Chain(seed [32]byte, index uint64) (*big.Int, error) {
-	return _ZkPoDExchange.Contract.Chain(&_ZkPoDExchange.CallOpts, seed, index)
-}
-
-// Chain is a free data retrieval call binding the contract method 0x749e0178.
-//
-// Solidity: function chain(bytes32 seed, uint64 index) constant returns(uint256)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) Chain(seed [32]byte, index uint64) (*big.Int, error) {
-	return _ZkPoDExchange.Contract.Chain(&_ZkPoDExchange.CallOpts, seed, index)
-}
-
-// GetRecordBatch1 is a free data retrieval call binding the contract method 0x321d0cba.
-//
-// Solidity: function getRecordBatch1(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, bytes32 seed2, bytes32 k_mkl_root, uint64 count, uint256 price, uint256 expireAt, uint256 submitAt)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) GetRecordBatch1(opts *bind.CallOpts, _a common.Address, _b common.Address, _sid *big.Int) (struct {
+// Solidity: function getRecordComplaint(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, bytes32 seed2, bytes32 k_mkl_root, uint64 count, uint256 price, uint256 expireAt, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeCaller) GetRecordComplaint(opts *bind.CallOpts, _a common.Address, _b common.Address, _sid *big.Int) (struct {
 	Seed0    [32]byte
 	Seed2    [32]byte
 	KMklRoot [32]byte
@@ -332,14 +342,14 @@ func (_ZkPoDExchange *ZkPoDExchangeCaller) GetRecordBatch1(opts *bind.CallOpts, 
 		SubmitAt *big.Int
 	})
 	out := ret
-	err := _ZkPoDExchange.contract.Call(opts, out, "getRecordBatch1", _a, _b, _sid)
+	err := _ZkPoDExchange.contract.Call(opts, out, "getRecordComplaint", _a, _b, _sid)
 	return *ret, err
 }
 
-// GetRecordBatch1 is a free data retrieval call binding the contract method 0x321d0cba.
+// GetRecordComplaint is a free data retrieval call binding the contract method 0x1f31e95e.
 //
-// Solidity: function getRecordBatch1(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, bytes32 seed2, bytes32 k_mkl_root, uint64 count, uint256 price, uint256 expireAt, uint256 submitAt)
-func (_ZkPoDExchange *ZkPoDExchangeSession) GetRecordBatch1(_a common.Address, _b common.Address, _sid *big.Int) (struct {
+// Solidity: function getRecordComplaint(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, bytes32 seed2, bytes32 k_mkl_root, uint64 count, uint256 price, uint256 expireAt, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeSession) GetRecordComplaint(_a common.Address, _b common.Address, _sid *big.Int) (struct {
 	Seed0    [32]byte
 	Seed2    [32]byte
 	KMklRoot [32]byte
@@ -348,13 +358,13 @@ func (_ZkPoDExchange *ZkPoDExchangeSession) GetRecordBatch1(_a common.Address, _
 	ExpireAt *big.Int
 	SubmitAt *big.Int
 }, error) {
-	return _ZkPoDExchange.Contract.GetRecordBatch1(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
+	return _ZkPoDExchange.Contract.GetRecordComplaint(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
 }
 
-// GetRecordBatch1 is a free data retrieval call binding the contract method 0x321d0cba.
+// GetRecordComplaint is a free data retrieval call binding the contract method 0x1f31e95e.
 //
-// Solidity: function getRecordBatch1(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, bytes32 seed2, bytes32 k_mkl_root, uint64 count, uint256 price, uint256 expireAt, uint256 submitAt)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordBatch1(_a common.Address, _b common.Address, _sid *big.Int) (struct {
+// Solidity: function getRecordComplaint(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, bytes32 seed2, bytes32 k_mkl_root, uint64 count, uint256 price, uint256 expireAt, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordComplaint(_a common.Address, _b common.Address, _sid *big.Int) (struct {
 	Seed0    [32]byte
 	Seed2    [32]byte
 	KMklRoot [32]byte
@@ -363,43 +373,7 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordBatch1(_a common.Addr
 	ExpireAt *big.Int
 	SubmitAt *big.Int
 }, error) {
-	return _ZkPoDExchange.Contract.GetRecordBatch1(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
-}
-
-// GetRecordBatch2 is a free data retrieval call binding the contract method 0x0ae429ea.
-//
-// Solidity: function getRecordBatch2(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, uint256 submitAt)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) GetRecordBatch2(opts *bind.CallOpts, _a common.Address, _b common.Address, _sid *big.Int) (struct {
-	Seed0    [32]byte
-	SubmitAt *big.Int
-}, error) {
-	ret := new(struct {
-		Seed0    [32]byte
-		SubmitAt *big.Int
-	})
-	out := ret
-	err := _ZkPoDExchange.contract.Call(opts, out, "getRecordBatch2", _a, _b, _sid)
-	return *ret, err
-}
-
-// GetRecordBatch2 is a free data retrieval call binding the contract method 0x0ae429ea.
-//
-// Solidity: function getRecordBatch2(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, uint256 submitAt)
-func (_ZkPoDExchange *ZkPoDExchangeSession) GetRecordBatch2(_a common.Address, _b common.Address, _sid *big.Int) (struct {
-	Seed0    [32]byte
-	SubmitAt *big.Int
-}, error) {
-	return _ZkPoDExchange.Contract.GetRecordBatch2(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
-}
-
-// GetRecordBatch2 is a free data retrieval call binding the contract method 0x0ae429ea.
-//
-// Solidity: function getRecordBatch2(address _a, address _b, uint256 _sid) constant returns(bytes32 seed0, uint256 submitAt)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordBatch2(_a common.Address, _b common.Address, _sid *big.Int) (struct {
-	Seed0    [32]byte
-	SubmitAt *big.Int
-}, error) {
-	return _ZkPoDExchange.Contract.GetRecordBatch2(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
+	return _ZkPoDExchange.Contract.GetRecordComplaint(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
 }
 
 // GetRecordVRF is a free data retrieval call binding the contract method 0xb79881e1.
@@ -476,58 +450,6 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetSessionRecord(_a common.Add
 	Stat     uint8
 }, error) {
 	return _ZkPoDExchange.Contract.GetSessionRecord(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
-}
-
-// HashInSha3 is a free data retrieval call binding the contract method 0x1013f453.
-//
-// Solidity: function hashInSha3(bytes32 _x, uint64 _y) constant returns(bytes32)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) HashInSha3(opts *bind.CallOpts, _x [32]byte, _y uint64) ([32]byte, error) {
-	var (
-		ret0 = new([32]byte)
-	)
-	out := ret0
-	err := _ZkPoDExchange.contract.Call(opts, out, "hashInSha3", _x, _y)
-	return *ret0, err
-}
-
-// HashInSha3 is a free data retrieval call binding the contract method 0x1013f453.
-//
-// Solidity: function hashInSha3(bytes32 _x, uint64 _y) constant returns(bytes32)
-func (_ZkPoDExchange *ZkPoDExchangeSession) HashInSha3(_x [32]byte, _y uint64) ([32]byte, error) {
-	return _ZkPoDExchange.Contract.HashInSha3(&_ZkPoDExchange.CallOpts, _x, _y)
-}
-
-// HashInSha3 is a free data retrieval call binding the contract method 0x1013f453.
-//
-// Solidity: function hashInSha3(bytes32 _x, uint64 _y) constant returns(bytes32)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) HashInSha3(_x [32]byte, _y uint64) ([32]byte, error) {
-	return _ZkPoDExchange.Contract.HashInSha3(&_ZkPoDExchange.CallOpts, _x, _y)
-}
-
-// Log2ub is a free data retrieval call binding the contract method 0x426423c9.
-//
-// Solidity: function log2ub(uint256 _n) constant returns(uint256)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) Log2ub(opts *bind.CallOpts, _n *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ZkPoDExchange.contract.Call(opts, out, "log2ub", _n)
-	return *ret0, err
-}
-
-// Log2ub is a free data retrieval call binding the contract method 0x426423c9.
-//
-// Solidity: function log2ub(uint256 _n) constant returns(uint256)
-func (_ZkPoDExchange *ZkPoDExchangeSession) Log2ub(_n *big.Int) (*big.Int, error) {
-	return _ZkPoDExchange.Contract.Log2ub(&_ZkPoDExchange.CallOpts, _n)
-}
-
-// Log2ub is a free data retrieval call binding the contract method 0x426423c9.
-//
-// Solidity: function log2ub(uint256 _n) constant returns(uint256)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) Log2ub(_n *big.Int) (*big.Int, error) {
-	return _ZkPoDExchange.Contract.Log2ub(&_ZkPoDExchange.CallOpts, _n)
 }
 
 // PublicVar is a free data retrieval call binding the contract method 0x0a6c93e0.
@@ -660,145 +582,67 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) T4() (*big.Int, error) {
 	return _ZkPoDExchange.Contract.T4(&_ZkPoDExchange.CallOpts)
 }
 
-// VrfyPath is a free data retrieval call binding the contract method 0xd54ee12d.
+// BobDeposit is a paid mutator transaction binding the contract method 0x6bc76fdb.
 //
-// Solidity: function vrfyPath(bytes32 _x, bytes32 _y, uint64 _ij, uint64 _ns, bytes32 _root, bytes32[] _mkl_path) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) VrfyPath(opts *bind.CallOpts, _x [32]byte, _y [32]byte, _ij uint64, _ns uint64, _root [32]byte, _mkl_path [][32]byte) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _ZkPoDExchange.contract.Call(opts, out, "vrfyPath", _x, _y, _ij, _ns, _root, _mkl_path)
-	return *ret0, err
+// Solidity: function bobDeposit(address _to) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) BobDeposit(opts *bind.TransactOpts, _to common.Address) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "bobDeposit", _to)
 }
 
-// VrfyPath is a free data retrieval call binding the contract method 0xd54ee12d.
+// BobDeposit is a paid mutator transaction binding the contract method 0x6bc76fdb.
 //
-// Solidity: function vrfyPath(bytes32 _x, bytes32 _y, uint64 _ij, uint64 _ns, bytes32 _root, bytes32[] _mkl_path) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeSession) VrfyPath(_x [32]byte, _y [32]byte, _ij uint64, _ns uint64, _root [32]byte, _mkl_path [][32]byte) (bool, error) {
-	return _ZkPoDExchange.Contract.VrfyPath(&_ZkPoDExchange.CallOpts, _x, _y, _ij, _ns, _root, _mkl_path)
+// Solidity: function bobDeposit(address _to) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) BobDeposit(_to common.Address) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.BobDeposit(&_ZkPoDExchange.TransactOpts, _to)
 }
 
-// VrfyPath is a free data retrieval call binding the contract method 0xd54ee12d.
+// BobDeposit is a paid mutator transaction binding the contract method 0x6bc76fdb.
 //
-// Solidity: function vrfyPath(bytes32 _x, bytes32 _y, uint64 _ij, uint64 _ns, bytes32 _root, bytes32[] _mkl_path) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) VrfyPath(_x [32]byte, _y [32]byte, _ij uint64, _ns uint64, _root [32]byte, _mkl_path [][32]byte) (bool, error) {
-	return _ZkPoDExchange.Contract.VrfyPath(&_ZkPoDExchange.CallOpts, _x, _y, _ij, _ns, _root, _mkl_path)
+// Solidity: function bobDeposit(address _to) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) BobDeposit(_to common.Address) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.BobDeposit(&_ZkPoDExchange.TransactOpts, _to)
 }
 
-// VrfyProofBatch2 is a free data retrieval call binding the contract method 0x16ddfc3c.
+// BobUnDeposit is a paid mutator transaction binding the contract method 0x30a84ef3.
 //
-// Solidity: function vrfyProofBatch2(uint64 count, uint64 s, bytes32 seed0, bytes32 seed2, uint256 sigma_vw) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) VrfyProofBatch2(opts *bind.CallOpts, count uint64, s uint64, seed0 [32]byte, seed2 [32]byte, sigma_vw *big.Int) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _ZkPoDExchange.contract.Call(opts, out, "vrfyProofBatch2", count, s, seed0, seed2, sigma_vw)
-	return *ret0, err
+// Solidity: function bobUnDeposit(address _to) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) BobUnDeposit(opts *bind.TransactOpts, _to common.Address) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "bobUnDeposit", _to)
 }
 
-// VrfyProofBatch2 is a free data retrieval call binding the contract method 0x16ddfc3c.
+// BobUnDeposit is a paid mutator transaction binding the contract method 0x30a84ef3.
 //
-// Solidity: function vrfyProofBatch2(uint64 count, uint64 s, bytes32 seed0, bytes32 seed2, uint256 sigma_vw) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeSession) VrfyProofBatch2(count uint64, s uint64, seed0 [32]byte, seed2 [32]byte, sigma_vw *big.Int) (bool, error) {
-	return _ZkPoDExchange.Contract.VrfyProofBatch2(&_ZkPoDExchange.CallOpts, count, s, seed0, seed2, sigma_vw)
+// Solidity: function bobUnDeposit(address _to) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) BobUnDeposit(_to common.Address) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.BobUnDeposit(&_ZkPoDExchange.TransactOpts, _to)
 }
 
-// VrfyProofBatch2 is a free data retrieval call binding the contract method 0x16ddfc3c.
+// BobUnDeposit is a paid mutator transaction binding the contract method 0x30a84ef3.
 //
-// Solidity: function vrfyProofBatch2(uint64 count, uint64 s, bytes32 seed0, bytes32 seed2, uint256 sigma_vw) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) VrfyProofBatch2(count uint64, s uint64, seed0 [32]byte, seed2 [32]byte, sigma_vw *big.Int) (bool, error) {
-	return _ZkPoDExchange.Contract.VrfyProofBatch2(&_ZkPoDExchange.CallOpts, count, s, seed0, seed2, sigma_vw)
+// Solidity: function bobUnDeposit(address _to) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) BobUnDeposit(_to common.Address) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.BobUnDeposit(&_ZkPoDExchange.TransactOpts, _to)
 }
 
-// VrfyProofVRF is a free data retrieval call binding the contract method 0xaeb8f1fa.
+// ClaimComplaint is a paid mutator transaction binding the contract method 0xf0e2e4e6.
 //
-// Solidity: function vrfyProofVRF(uint256[2] _g_exp_r, uint256 _s_r) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeCaller) VrfyProofVRF(opts *bind.CallOpts, _g_exp_r [2]*big.Int, _s_r *big.Int) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _ZkPoDExchange.contract.Call(opts, out, "vrfyProofVRF", _g_exp_r, _s_r)
-	return *ret0, err
+// Solidity: function claimComplaint(address _a, uint256 _sid, uint64 _i, uint64 _j, uint256 _tx, uint256 _ty, bytes32[] _mkl_path, uint64 _sCnt) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) ClaimComplaint(opts *bind.TransactOpts, _a common.Address, _sid *big.Int, _i uint64, _j uint64, _tx *big.Int, _ty *big.Int, _mkl_path [][32]byte, _sCnt uint64) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "claimComplaint", _a, _sid, _i, _j, _tx, _ty, _mkl_path, _sCnt)
 }
 
-// VrfyProofVRF is a free data retrieval call binding the contract method 0xaeb8f1fa.
+// ClaimComplaint is a paid mutator transaction binding the contract method 0xf0e2e4e6.
 //
-// Solidity: function vrfyProofVRF(uint256[2] _g_exp_r, uint256 _s_r) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeSession) VrfyProofVRF(_g_exp_r [2]*big.Int, _s_r *big.Int) (bool, error) {
-	return _ZkPoDExchange.Contract.VrfyProofVRF(&_ZkPoDExchange.CallOpts, _g_exp_r, _s_r)
+// Solidity: function claimComplaint(address _a, uint256 _sid, uint64 _i, uint64 _j, uint256 _tx, uint256 _ty, bytes32[] _mkl_path, uint64 _sCnt) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) ClaimComplaint(_a common.Address, _sid *big.Int, _i uint64, _j uint64, _tx *big.Int, _ty *big.Int, _mkl_path [][32]byte, _sCnt uint64) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.ClaimComplaint(&_ZkPoDExchange.TransactOpts, _a, _sid, _i, _j, _tx, _ty, _mkl_path, _sCnt)
 }
 
-// VrfyProofVRF is a free data retrieval call binding the contract method 0xaeb8f1fa.
+// ClaimComplaint is a paid mutator transaction binding the contract method 0xf0e2e4e6.
 //
-// Solidity: function vrfyProofVRF(uint256[2] _g_exp_r, uint256 _s_r) constant returns(bool)
-func (_ZkPoDExchange *ZkPoDExchangeCallerSession) VrfyProofVRF(_g_exp_r [2]*big.Int, _s_r *big.Int) (bool, error) {
-	return _ZkPoDExchange.Contract.VrfyProofVRF(&_ZkPoDExchange.CallOpts, _g_exp_r, _s_r)
-}
-
-// BuyerDeposit is a paid mutator transaction binding the contract method 0x7ffdf46b.
-//
-// Solidity: function buyerDeposit(address _to) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) BuyerDeposit(opts *bind.TransactOpts, _to common.Address) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "buyerDeposit", _to)
-}
-
-// BuyerDeposit is a paid mutator transaction binding the contract method 0x7ffdf46b.
-//
-// Solidity: function buyerDeposit(address _to) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) BuyerDeposit(_to common.Address) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.BuyerDeposit(&_ZkPoDExchange.TransactOpts, _to)
-}
-
-// BuyerDeposit is a paid mutator transaction binding the contract method 0x7ffdf46b.
-//
-// Solidity: function buyerDeposit(address _to) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) BuyerDeposit(_to common.Address) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.BuyerDeposit(&_ZkPoDExchange.TransactOpts, _to)
-}
-
-// BuyerUnDeposit is a paid mutator transaction binding the contract method 0x87faeac1.
-//
-// Solidity: function buyerUnDeposit(address _to) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) BuyerUnDeposit(opts *bind.TransactOpts, _to common.Address) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "buyerUnDeposit", _to)
-}
-
-// BuyerUnDeposit is a paid mutator transaction binding the contract method 0x87faeac1.
-//
-// Solidity: function buyerUnDeposit(address _to) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) BuyerUnDeposit(_to common.Address) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.BuyerUnDeposit(&_ZkPoDExchange.TransactOpts, _to)
-}
-
-// BuyerUnDeposit is a paid mutator transaction binding the contract method 0x87faeac1.
-//
-// Solidity: function buyerUnDeposit(address _to) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) BuyerUnDeposit(_to common.Address) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.BuyerUnDeposit(&_ZkPoDExchange.TransactOpts, _to)
-}
-
-// ClaimBatch1 is a paid mutator transaction binding the contract method 0x0846fa02.
-//
-// Solidity: function claimBatch1(address _a, uint256 _sid, uint64 _i, uint64 _j, uint256 _tx, uint256 _ty, bytes32[] _mkl_path, uint64 _sCnt) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) ClaimBatch1(opts *bind.TransactOpts, _a common.Address, _sid *big.Int, _i uint64, _j uint64, _tx *big.Int, _ty *big.Int, _mkl_path [][32]byte, _sCnt uint64) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "claimBatch1", _a, _sid, _i, _j, _tx, _ty, _mkl_path, _sCnt)
-}
-
-// ClaimBatch1 is a paid mutator transaction binding the contract method 0x0846fa02.
-//
-// Solidity: function claimBatch1(address _a, uint256 _sid, uint64 _i, uint64 _j, uint256 _tx, uint256 _ty, bytes32[] _mkl_path, uint64 _sCnt) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) ClaimBatch1(_a common.Address, _sid *big.Int, _i uint64, _j uint64, _tx *big.Int, _ty *big.Int, _mkl_path [][32]byte, _sCnt uint64) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.ClaimBatch1(&_ZkPoDExchange.TransactOpts, _a, _sid, _i, _j, _tx, _ty, _mkl_path, _sCnt)
-}
-
-// ClaimBatch1 is a paid mutator transaction binding the contract method 0x0846fa02.
-//
-// Solidity: function claimBatch1(address _a, uint256 _sid, uint64 _i, uint64 _j, uint256 _tx, uint256 _ty, bytes32[] _mkl_path, uint64 _sCnt) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) ClaimBatch1(_a common.Address, _sid *big.Int, _i uint64, _j uint64, _tx *big.Int, _ty *big.Int, _mkl_path [][32]byte, _sCnt uint64) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.ClaimBatch1(&_ZkPoDExchange.TransactOpts, _a, _sid, _i, _j, _tx, _ty, _mkl_path, _sCnt)
+// Solidity: function claimComplaint(address _a, uint256 _sid, uint64 _i, uint64 _j, uint256 _tx, uint256 _ty, bytes32[] _mkl_path, uint64 _sCnt) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) ClaimComplaint(_a common.Address, _sid *big.Int, _i uint64, _j uint64, _tx *big.Int, _ty *big.Int, _mkl_path [][32]byte, _sCnt uint64) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.ClaimComplaint(&_ZkPoDExchange.TransactOpts, _a, _sid, _i, _j, _tx, _ty, _mkl_path, _sCnt)
 }
 
 // Publish is a paid mutator transaction binding the contract method 0x56e25912.
@@ -822,67 +666,67 @@ func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) Publish(_size uint64, _s u
 	return _ZkPoDExchange.Contract.Publish(&_ZkPoDExchange.TransactOpts, _size, _s, _n, _sigma_mkl_root, _vrf_meta_digest, _blt_type)
 }
 
-// SettleBatch1Deal is a paid mutator transaction binding the contract method 0xdf480a3e.
+// SettleComplaintDeal is a paid mutator transaction binding the contract method 0x629eee0a.
 //
-// Solidity: function settleBatch1Deal(address _a, address _b, uint256 _sid) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) SettleBatch1Deal(opts *bind.TransactOpts, _a common.Address, _b common.Address, _sid *big.Int) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "settleBatch1Deal", _a, _b, _sid)
+// Solidity: function settleComplaintDeal(address _a, address _b, uint256 _sid) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) SettleComplaintDeal(opts *bind.TransactOpts, _a common.Address, _b common.Address, _sid *big.Int) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "settleComplaintDeal", _a, _b, _sid)
 }
 
-// SettleBatch1Deal is a paid mutator transaction binding the contract method 0xdf480a3e.
+// SettleComplaintDeal is a paid mutator transaction binding the contract method 0x629eee0a.
 //
-// Solidity: function settleBatch1Deal(address _a, address _b, uint256 _sid) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) SettleBatch1Deal(_a common.Address, _b common.Address, _sid *big.Int) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SettleBatch1Deal(&_ZkPoDExchange.TransactOpts, _a, _b, _sid)
+// Solidity: function settleComplaintDeal(address _a, address _b, uint256 _sid) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) SettleComplaintDeal(_a common.Address, _b common.Address, _sid *big.Int) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SettleComplaintDeal(&_ZkPoDExchange.TransactOpts, _a, _b, _sid)
 }
 
-// SettleBatch1Deal is a paid mutator transaction binding the contract method 0xdf480a3e.
+// SettleComplaintDeal is a paid mutator transaction binding the contract method 0x629eee0a.
 //
-// Solidity: function settleBatch1Deal(address _a, address _b, uint256 _sid) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SettleBatch1Deal(_a common.Address, _b common.Address, _sid *big.Int) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SettleBatch1Deal(&_ZkPoDExchange.TransactOpts, _a, _b, _sid)
+// Solidity: function settleComplaintDeal(address _a, address _b, uint256 _sid) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SettleComplaintDeal(_a common.Address, _b common.Address, _sid *big.Int) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SettleComplaintDeal(&_ZkPoDExchange.TransactOpts, _a, _b, _sid)
 }
 
-// SubmitProofBatch1 is a paid mutator transaction binding the contract method 0xbd3aa96d.
+// SubmitProofAtomicSwap is a paid mutator transaction binding the contract method 0x71c9f5dc.
 //
-// Solidity: function submitProofBatch1(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofBatch1(opts *bind.TransactOpts, _seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "submitProofBatch1", _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofAtomicSwap(bytes32 _seed0, uint64 _sCnt, uint256 _sid, address _b, bytes32 _seed2, uint256 _sigma_vw, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofAtomicSwap(opts *bind.TransactOpts, _seed0 [32]byte, _sCnt uint64, _sid *big.Int, _b common.Address, _seed2 [32]byte, _sigma_vw *big.Int, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "submitProofAtomicSwap", _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
 }
 
-// SubmitProofBatch1 is a paid mutator transaction binding the contract method 0xbd3aa96d.
+// SubmitProofAtomicSwap is a paid mutator transaction binding the contract method 0x71c9f5dc.
 //
-// Solidity: function submitProofBatch1(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofBatch1(_seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SubmitProofBatch1(&_ZkPoDExchange.TransactOpts, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofAtomicSwap(bytes32 _seed0, uint64 _sCnt, uint256 _sid, address _b, bytes32 _seed2, uint256 _sigma_vw, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofAtomicSwap(_seed0 [32]byte, _sCnt uint64, _sid *big.Int, _b common.Address, _seed2 [32]byte, _sigma_vw *big.Int, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofAtomicSwap(&_ZkPoDExchange.TransactOpts, _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
 }
 
-// SubmitProofBatch1 is a paid mutator transaction binding the contract method 0xbd3aa96d.
+// SubmitProofAtomicSwap is a paid mutator transaction binding the contract method 0x71c9f5dc.
 //
-// Solidity: function submitProofBatch1(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofBatch1(_seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SubmitProofBatch1(&_ZkPoDExchange.TransactOpts, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofAtomicSwap(bytes32 _seed0, uint64 _sCnt, uint256 _sid, address _b, bytes32 _seed2, uint256 _sigma_vw, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofAtomicSwap(_seed0 [32]byte, _sCnt uint64, _sid *big.Int, _b common.Address, _seed2 [32]byte, _sigma_vw *big.Int, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofAtomicSwap(&_ZkPoDExchange.TransactOpts, _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
 }
 
-// SubmitProofBatch2 is a paid mutator transaction binding the contract method 0x0bddf632.
+// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x13efc6f8.
 //
-// Solidity: function submitProofBatch2(bytes32 _seed0, uint64 _sCnt, uint256 _sid, address _b, bytes32 _seed2, uint256 _sigma_vw, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofBatch2(opts *bind.TransactOpts, _seed0 [32]byte, _sCnt uint64, _sid *big.Int, _b common.Address, _seed2 [32]byte, _sigma_vw *big.Int, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "submitProofBatch2", _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofComplaint(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofComplaint(opts *bind.TransactOpts, _seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "submitProofComplaint", _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
 }
 
-// SubmitProofBatch2 is a paid mutator transaction binding the contract method 0x0bddf632.
+// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x13efc6f8.
 //
-// Solidity: function submitProofBatch2(bytes32 _seed0, uint64 _sCnt, uint256 _sid, address _b, bytes32 _seed2, uint256 _sigma_vw, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofBatch2(_seed0 [32]byte, _sCnt uint64, _sid *big.Int, _b common.Address, _seed2 [32]byte, _sigma_vw *big.Int, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SubmitProofBatch2(&_ZkPoDExchange.TransactOpts, _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofComplaint(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofComplaint(_seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofComplaint(&_ZkPoDExchange.TransactOpts, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
 }
 
-// SubmitProofBatch2 is a paid mutator transaction binding the contract method 0x0bddf632.
+// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x13efc6f8.
 //
-// Solidity: function submitProofBatch2(bytes32 _seed0, uint64 _sCnt, uint256 _sid, address _b, bytes32 _seed2, uint256 _sigma_vw, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofBatch2(_seed0 [32]byte, _sCnt uint64, _sid *big.Int, _b common.Address, _seed2 [32]byte, _sigma_vw *big.Int, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SubmitProofBatch2(&_ZkPoDExchange.TransactOpts, _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofComplaint(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofComplaint(_seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofComplaint(&_ZkPoDExchange.TransactOpts, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
 }
 
 // SubmitProofVRF is a paid mutator transaction binding the contract method 0x50f9b445.
@@ -969,9 +813,9 @@ func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) WithdrawB(_to common.Addre
 	return _ZkPoDExchange.Contract.WithdrawB(&_ZkPoDExchange.TransactOpts, _to)
 }
 
-// ZkPoDExchangeOnBatch1ClaimIterator is returned from FilterOnBatch1Claim and is used to iterate over the raw logs and unpacked data for OnBatch1Claim events raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch1ClaimIterator struct {
-	Event *ZkPoDExchangeOnBatch1Claim // Event containing the contract specifics and raw log
+// ZkPoDExchangeOnAtomicSwapDealIterator is returned from FilterOnAtomicSwapDeal and is used to iterate over the raw logs and unpacked data for OnAtomicSwapDeal events raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnAtomicSwapDealIterator struct {
+	Event *ZkPoDExchangeOnAtomicSwapDeal // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -985,7 +829,7 @@ type ZkPoDExchangeOnBatch1ClaimIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *ZkPoDExchangeOnBatch1ClaimIterator) Next() bool {
+func (it *ZkPoDExchangeOnAtomicSwapDealIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -994,7 +838,7 @@ func (it *ZkPoDExchangeOnBatch1ClaimIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(ZkPoDExchangeOnBatch1Claim)
+			it.Event = new(ZkPoDExchangeOnAtomicSwapDeal)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1009,7 +853,7 @@ func (it *ZkPoDExchangeOnBatch1ClaimIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(ZkPoDExchangeOnBatch1Claim)
+		it.Event = new(ZkPoDExchangeOnAtomicSwapDeal)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1025,29 +869,30 @@ func (it *ZkPoDExchangeOnBatch1ClaimIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *ZkPoDExchangeOnBatch1ClaimIterator) Error() error {
+func (it *ZkPoDExchangeOnAtomicSwapDealIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *ZkPoDExchangeOnBatch1ClaimIterator) Close() error {
+func (it *ZkPoDExchangeOnAtomicSwapDealIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// ZkPoDExchangeOnBatch1Claim represents a OnBatch1Claim event raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch1Claim struct {
-	A   common.Address
-	B   common.Address
-	Sid *big.Int
-	Raw types.Log // Blockchain specific contextual infos
+// ZkPoDExchangeOnAtomicSwapDeal represents a OnAtomicSwapDeal event raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnAtomicSwapDeal struct {
+	A     common.Address
+	B     common.Address
+	Sid   *big.Int
+	Seed0 [32]byte
+	Raw   types.Log // Blockchain specific contextual infos
 }
 
-// FilterOnBatch1Claim is a free log retrieval operation binding the contract event 0x2502be5e06bef8815dce6e5cd8a4716834c23245c72cfeba602441f05744e6f4.
+// FilterOnAtomicSwapDeal is a free log retrieval operation binding the contract event 0xff2c2f55ea8e89ebf103b88cb5f7806ec36789e2e8ffb192727fa47ccfec5d63.
 //
-// Solidity: event OnBatch1Claim(address indexed _a, address indexed _b, uint256 indexed _sid)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch1Claim(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnBatch1ClaimIterator, error) {
+// Solidity: event OnAtomicSwapDeal(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnAtomicSwapDeal(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnAtomicSwapDealIterator, error) {
 
 	var _aRule []interface{}
 	for _, _aItem := range _a {
@@ -1062,17 +907,17 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch1Claim(opts *bind.Filt
 		_sidRule = append(_sidRule, _sidItem)
 	}
 
-	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnBatch1Claim", _aRule, _bRule, _sidRule)
+	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnAtomicSwapDeal", _aRule, _bRule, _sidRule)
 	if err != nil {
 		return nil, err
 	}
-	return &ZkPoDExchangeOnBatch1ClaimIterator{contract: _ZkPoDExchange.contract, event: "OnBatch1Claim", logs: logs, sub: sub}, nil
+	return &ZkPoDExchangeOnAtomicSwapDealIterator{contract: _ZkPoDExchange.contract, event: "OnAtomicSwapDeal", logs: logs, sub: sub}, nil
 }
 
-// WatchOnBatch1Claim is a free log subscription operation binding the contract event 0x2502be5e06bef8815dce6e5cd8a4716834c23245c72cfeba602441f05744e6f4.
+// WatchOnAtomicSwapDeal is a free log subscription operation binding the contract event 0xff2c2f55ea8e89ebf103b88cb5f7806ec36789e2e8ffb192727fa47ccfec5d63.
 //
-// Solidity: event OnBatch1Claim(address indexed _a, address indexed _b, uint256 indexed _sid)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Claim(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnBatch1Claim, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
+// Solidity: event OnAtomicSwapDeal(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnAtomicSwapDeal(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnAtomicSwapDeal, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
 
 	var _aRule []interface{}
 	for _, _aItem := range _a {
@@ -1087,7 +932,7 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Claim(opts *bind.Watch
 		_sidRule = append(_sidRule, _sidItem)
 	}
 
-	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnBatch1Claim", _aRule, _bRule, _sidRule)
+	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnAtomicSwapDeal", _aRule, _bRule, _sidRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1097,8 +942,8 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Claim(opts *bind.Watch
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(ZkPoDExchangeOnBatch1Claim)
-				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnBatch1Claim", log); err != nil {
+				event := new(ZkPoDExchangeOnAtomicSwapDeal)
+				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnAtomicSwapDeal", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1119,9 +964,9 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Claim(opts *bind.Watch
 	}), nil
 }
 
-// ZkPoDExchangeOnBatch1DealIterator is returned from FilterOnBatch1Deal and is used to iterate over the raw logs and unpacked data for OnBatch1Deal events raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch1DealIterator struct {
-	Event *ZkPoDExchangeOnBatch1Deal // Event containing the contract specifics and raw log
+// ZkPoDExchangeOnComplaintClaimIterator is returned from FilterOnComplaintClaim and is used to iterate over the raw logs and unpacked data for OnComplaintClaim events raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnComplaintClaimIterator struct {
+	Event *ZkPoDExchangeOnComplaintClaim // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1135,7 +980,7 @@ type ZkPoDExchangeOnBatch1DealIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *ZkPoDExchangeOnBatch1DealIterator) Next() bool {
+func (it *ZkPoDExchangeOnComplaintClaimIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1144,7 +989,7 @@ func (it *ZkPoDExchangeOnBatch1DealIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(ZkPoDExchangeOnBatch1Deal)
+			it.Event = new(ZkPoDExchangeOnComplaintClaim)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1159,7 +1004,7 @@ func (it *ZkPoDExchangeOnBatch1DealIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(ZkPoDExchangeOnBatch1Deal)
+		it.Event = new(ZkPoDExchangeOnComplaintClaim)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1175,19 +1020,169 @@ func (it *ZkPoDExchangeOnBatch1DealIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *ZkPoDExchangeOnBatch1DealIterator) Error() error {
+func (it *ZkPoDExchangeOnComplaintClaimIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *ZkPoDExchangeOnBatch1DealIterator) Close() error {
+func (it *ZkPoDExchangeOnComplaintClaimIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// ZkPoDExchangeOnBatch1Deal represents a OnBatch1Deal event raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch1Deal struct {
+// ZkPoDExchangeOnComplaintClaim represents a OnComplaintClaim event raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnComplaintClaim struct {
+	A   common.Address
+	B   common.Address
+	Sid *big.Int
+	Raw types.Log // Blockchain specific contextual infos
+}
+
+// FilterOnComplaintClaim is a free log retrieval operation binding the contract event 0xacba611c3ca0197a61bfbe86ec078a16c436808bdda2c1c248c534a595b1ad90.
+//
+// Solidity: event OnComplaintClaim(address indexed _a, address indexed _b, uint256 indexed _sid)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnComplaintClaim(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnComplaintClaimIterator, error) {
+
+	var _aRule []interface{}
+	for _, _aItem := range _a {
+		_aRule = append(_aRule, _aItem)
+	}
+	var _bRule []interface{}
+	for _, _bItem := range _b {
+		_bRule = append(_bRule, _bItem)
+	}
+	var _sidRule []interface{}
+	for _, _sidItem := range _sid {
+		_sidRule = append(_sidRule, _sidItem)
+	}
+
+	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnComplaintClaim", _aRule, _bRule, _sidRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ZkPoDExchangeOnComplaintClaimIterator{contract: _ZkPoDExchange.contract, event: "OnComplaintClaim", logs: logs, sub: sub}, nil
+}
+
+// WatchOnComplaintClaim is a free log subscription operation binding the contract event 0xacba611c3ca0197a61bfbe86ec078a16c436808bdda2c1c248c534a595b1ad90.
+//
+// Solidity: event OnComplaintClaim(address indexed _a, address indexed _b, uint256 indexed _sid)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnComplaintClaim(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnComplaintClaim, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
+
+	var _aRule []interface{}
+	for _, _aItem := range _a {
+		_aRule = append(_aRule, _aItem)
+	}
+	var _bRule []interface{}
+	for _, _bItem := range _b {
+		_bRule = append(_bRule, _bItem)
+	}
+	var _sidRule []interface{}
+	for _, _sidItem := range _sid {
+		_sidRule = append(_sidRule, _sidItem)
+	}
+
+	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnComplaintClaim", _aRule, _bRule, _sidRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ZkPoDExchangeOnComplaintClaim)
+				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnComplaintClaim", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ZkPoDExchangeOnComplaintDealIterator is returned from FilterOnComplaintDeal and is used to iterate over the raw logs and unpacked data for OnComplaintDeal events raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnComplaintDealIterator struct {
+	Event *ZkPoDExchangeOnComplaintDeal // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ZkPoDExchangeOnComplaintDealIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ZkPoDExchangeOnComplaintDeal)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ZkPoDExchangeOnComplaintDeal)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ZkPoDExchangeOnComplaintDealIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ZkPoDExchangeOnComplaintDealIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ZkPoDExchangeOnComplaintDeal represents a OnComplaintDeal event raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnComplaintDeal struct {
 	A     common.Address
 	B     common.Address
 	Sid   *big.Int
@@ -1195,10 +1190,10 @@ type ZkPoDExchangeOnBatch1Deal struct {
 	Raw   types.Log // Blockchain specific contextual infos
 }
 
-// FilterOnBatch1Deal is a free log retrieval operation binding the contract event 0x97ba31aaf3572239af72fddb099e107414e93b2801a058b873dfc7ecaa777a47.
+// FilterOnComplaintDeal is a free log retrieval operation binding the contract event 0xbb7539d148611cf3f9068b9e92a49185664f507b60523ae71e03216bcfc7e505.
 //
-// Solidity: event OnBatch1Deal(address indexed _a, address indexed _b, uint256 indexed _sid, uint256 _price)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch1Deal(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnBatch1DealIterator, error) {
+// Solidity: event OnComplaintDeal(address indexed _a, address indexed _b, uint256 indexed _sid, uint256 _price)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnComplaintDeal(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnComplaintDealIterator, error) {
 
 	var _aRule []interface{}
 	for _, _aItem := range _a {
@@ -1213,17 +1208,17 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch1Deal(opts *bind.Filte
 		_sidRule = append(_sidRule, _sidItem)
 	}
 
-	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnBatch1Deal", _aRule, _bRule, _sidRule)
+	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnComplaintDeal", _aRule, _bRule, _sidRule)
 	if err != nil {
 		return nil, err
 	}
-	return &ZkPoDExchangeOnBatch1DealIterator{contract: _ZkPoDExchange.contract, event: "OnBatch1Deal", logs: logs, sub: sub}, nil
+	return &ZkPoDExchangeOnComplaintDealIterator{contract: _ZkPoDExchange.contract, event: "OnComplaintDeal", logs: logs, sub: sub}, nil
 }
 
-// WatchOnBatch1Deal is a free log subscription operation binding the contract event 0x97ba31aaf3572239af72fddb099e107414e93b2801a058b873dfc7ecaa777a47.
+// WatchOnComplaintDeal is a free log subscription operation binding the contract event 0xbb7539d148611cf3f9068b9e92a49185664f507b60523ae71e03216bcfc7e505.
 //
-// Solidity: event OnBatch1Deal(address indexed _a, address indexed _b, uint256 indexed _sid, uint256 _price)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Deal(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnBatch1Deal, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
+// Solidity: event OnComplaintDeal(address indexed _a, address indexed _b, uint256 indexed _sid, uint256 _price)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnComplaintDeal(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnComplaintDeal, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
 
 	var _aRule []interface{}
 	for _, _aItem := range _a {
@@ -1238,7 +1233,7 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Deal(opts *bind.WatchO
 		_sidRule = append(_sidRule, _sidItem)
 	}
 
-	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnBatch1Deal", _aRule, _bRule, _sidRule)
+	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnComplaintDeal", _aRule, _bRule, _sidRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1248,8 +1243,8 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Deal(opts *bind.WatchO
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(ZkPoDExchangeOnBatch1Deal)
-				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnBatch1Deal", log); err != nil {
+				event := new(ZkPoDExchangeOnComplaintDeal)
+				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnComplaintDeal", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -1270,9 +1265,9 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Deal(opts *bind.WatchO
 	}), nil
 }
 
-// ZkPoDExchangeOnBatch1KeyIterator is returned from FilterOnBatch1Key and is used to iterate over the raw logs and unpacked data for OnBatch1Key events raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch1KeyIterator struct {
-	Event *ZkPoDExchangeOnBatch1Key // Event containing the contract specifics and raw log
+// ZkPoDExchangeOnComplaintKeyIterator is returned from FilterOnComplaintKey and is used to iterate over the raw logs and unpacked data for OnComplaintKey events raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnComplaintKeyIterator struct {
+	Event *ZkPoDExchangeOnComplaintKey // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -1286,7 +1281,7 @@ type ZkPoDExchangeOnBatch1KeyIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *ZkPoDExchangeOnBatch1KeyIterator) Next() bool {
+func (it *ZkPoDExchangeOnComplaintKeyIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -1295,7 +1290,7 @@ func (it *ZkPoDExchangeOnBatch1KeyIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(ZkPoDExchangeOnBatch1Key)
+			it.Event = new(ZkPoDExchangeOnComplaintKey)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -1310,7 +1305,7 @@ func (it *ZkPoDExchangeOnBatch1KeyIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(ZkPoDExchangeOnBatch1Key)
+		it.Event = new(ZkPoDExchangeOnComplaintKey)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -1326,19 +1321,19 @@ func (it *ZkPoDExchangeOnBatch1KeyIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *ZkPoDExchangeOnBatch1KeyIterator) Error() error {
+func (it *ZkPoDExchangeOnComplaintKeyIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *ZkPoDExchangeOnBatch1KeyIterator) Close() error {
+func (it *ZkPoDExchangeOnComplaintKeyIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// ZkPoDExchangeOnBatch1Key represents a OnBatch1Key event raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch1Key struct {
+// ZkPoDExchangeOnComplaintKey represents a OnComplaintKey event raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnComplaintKey struct {
 	A     common.Address
 	B     common.Address
 	Sid   *big.Int
@@ -1346,10 +1341,10 @@ type ZkPoDExchangeOnBatch1Key struct {
 	Raw   types.Log // Blockchain specific contextual infos
 }
 
-// FilterOnBatch1Key is a free log retrieval operation binding the contract event 0x08068d0fcd10dfa2c800de1d7ec458dcaab4a39626af415baf1d694f6a404484.
+// FilterOnComplaintKey is a free log retrieval operation binding the contract event 0x85218455b9d63667af97af61458f54558d6907d3e0b0eb772f6d4736b0c3eb52.
 //
-// Solidity: event OnBatch1Key(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch1Key(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnBatch1KeyIterator, error) {
+// Solidity: event OnComplaintKey(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnComplaintKey(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnComplaintKeyIterator, error) {
 
 	var _aRule []interface{}
 	for _, _aItem := range _a {
@@ -1364,17 +1359,17 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch1Key(opts *bind.Filter
 		_sidRule = append(_sidRule, _sidItem)
 	}
 
-	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnBatch1Key", _aRule, _bRule, _sidRule)
+	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnComplaintKey", _aRule, _bRule, _sidRule)
 	if err != nil {
 		return nil, err
 	}
-	return &ZkPoDExchangeOnBatch1KeyIterator{contract: _ZkPoDExchange.contract, event: "OnBatch1Key", logs: logs, sub: sub}, nil
+	return &ZkPoDExchangeOnComplaintKeyIterator{contract: _ZkPoDExchange.contract, event: "OnComplaintKey", logs: logs, sub: sub}, nil
 }
 
-// WatchOnBatch1Key is a free log subscription operation binding the contract event 0x08068d0fcd10dfa2c800de1d7ec458dcaab4a39626af415baf1d694f6a404484.
+// WatchOnComplaintKey is a free log subscription operation binding the contract event 0x85218455b9d63667af97af61458f54558d6907d3e0b0eb772f6d4736b0c3eb52.
 //
-// Solidity: event OnBatch1Key(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Key(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnBatch1Key, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
+// Solidity: event OnComplaintKey(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnComplaintKey(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnComplaintKey, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
 
 	var _aRule []interface{}
 	for _, _aItem := range _a {
@@ -1389,7 +1384,7 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Key(opts *bind.WatchOp
 		_sidRule = append(_sidRule, _sidItem)
 	}
 
-	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnBatch1Key", _aRule, _bRule, _sidRule)
+	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnComplaintKey", _aRule, _bRule, _sidRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1399,159 +1394,8 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch1Key(opts *bind.WatchOp
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(ZkPoDExchangeOnBatch1Key)
-				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnBatch1Key", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ZkPoDExchangeOnBatch2DealIterator is returned from FilterOnBatch2Deal and is used to iterate over the raw logs and unpacked data for OnBatch2Deal events raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch2DealIterator struct {
-	Event *ZkPoDExchangeOnBatch2Deal // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *ZkPoDExchangeOnBatch2DealIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(ZkPoDExchangeOnBatch2Deal)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(ZkPoDExchangeOnBatch2Deal)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *ZkPoDExchangeOnBatch2DealIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *ZkPoDExchangeOnBatch2DealIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// ZkPoDExchangeOnBatch2Deal represents a OnBatch2Deal event raised by the ZkPoDExchange contract.
-type ZkPoDExchangeOnBatch2Deal struct {
-	A     common.Address
-	B     common.Address
-	Sid   *big.Int
-	Seed0 [32]byte
-	Raw   types.Log // Blockchain specific contextual infos
-}
-
-// FilterOnBatch2Deal is a free log retrieval operation binding the contract event 0xc8dff79bd96b1390c89f4aa1d31095efeafc211fb5bb0bf27d1b557abcab4920.
-//
-// Solidity: event OnBatch2Deal(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnBatch2Deal(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnBatch2DealIterator, error) {
-
-	var _aRule []interface{}
-	for _, _aItem := range _a {
-		_aRule = append(_aRule, _aItem)
-	}
-	var _bRule []interface{}
-	for _, _bItem := range _b {
-		_bRule = append(_bRule, _bItem)
-	}
-	var _sidRule []interface{}
-	for _, _sidItem := range _sid {
-		_sidRule = append(_sidRule, _sidItem)
-	}
-
-	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnBatch2Deal", _aRule, _bRule, _sidRule)
-	if err != nil {
-		return nil, err
-	}
-	return &ZkPoDExchangeOnBatch2DealIterator{contract: _ZkPoDExchange.contract, event: "OnBatch2Deal", logs: logs, sub: sub}, nil
-}
-
-// WatchOnBatch2Deal is a free log subscription operation binding the contract event 0xc8dff79bd96b1390c89f4aa1d31095efeafc211fb5bb0bf27d1b557abcab4920.
-//
-// Solidity: event OnBatch2Deal(address indexed _a, address indexed _b, uint256 indexed _sid, bytes32 _seed0)
-func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnBatch2Deal(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnBatch2Deal, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
-
-	var _aRule []interface{}
-	for _, _aItem := range _a {
-		_aRule = append(_aRule, _aItem)
-	}
-	var _bRule []interface{}
-	for _, _bItem := range _b {
-		_bRule = append(_bRule, _bItem)
-	}
-	var _sidRule []interface{}
-	for _, _sidItem := range _sid {
-		_sidRule = append(_sidRule, _sidItem)
-	}
-
-	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnBatch2Deal", _aRule, _bRule, _sidRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(ZkPoDExchangeOnBatch2Deal)
-				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnBatch2Deal", log); err != nil {
+				event := new(ZkPoDExchangeOnComplaintKey)
+				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnComplaintKey", log); err != nil {
 					return err
 				}
 				event.Raw = log
