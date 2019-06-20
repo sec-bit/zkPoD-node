@@ -32,19 +32,19 @@ func connectSQLite(dbpath string) (*xorm.Engine, error) {
 	db.ShowSQL(false)
 	db.Logger().SetLevel(core.LOG_DEBUG)
 
-	err = db.CreateTables(&BuyerTx{})
+	err = db.CreateTables(&BobTx{})
 	if err != nil {
-		Log.Errorf("failed to create table buyer_tx, err=%v", err)
-		return db, errors.New("failed to create table buyer_tx")
+		Log.Errorf("failed to create table Bob_tx, err=%v", err)
+		return db, errors.New("failed to create table Bob_tx")
 	}
-	Log.Debugf("initialize table buyer_tx success")
+	Log.Debugf("initialize table Bob_tx success")
 
-	err = db.CreateTables(&SellerTx{})
+	err = db.CreateTables(&AliceTx{})
 	if err != nil {
-		Log.Errorf("failed to create table seller_tx, err=%v", err)
-		return db, errors.New("failed to create table seller_tx")
+		Log.Errorf("failed to create table Alice_tx, err=%v", err)
+		return db, errors.New("failed to create table Alice_tx")
 	}
-	Log.Debugf("initialize table seller_tx success")
+	Log.Debugf("initialize table Alice_tx success")
 
 	err = db.CreateTables(&PodLog{})
 	if err != nil {
@@ -53,14 +53,14 @@ func connectSQLite(dbpath string) (*xorm.Engine, error) {
 	}
 	Log.Debugf("initialize table pod_log success")
 
-	err = db.Sync2(new(BuyerTx))
+	err = db.Sync2(new(BobTx))
 	if err != nil {
-		Log.Warnf("table buyer_tx sync error, err=%v", err)
+		Log.Warnf("table Bob_tx sync error, err=%v", err)
 		return nil, err
 	}
-	err = db.Sync2(new(SellerTx))
+	err = db.Sync2(new(AliceTx))
 	if err != nil {
-		Log.Warnf("table seller_tx sync error, err=%v", err)
+		Log.Warnf("table Alice_tx sync error, err=%v", err)
 		return nil, err
 	}
 	err = db.Sync2(new(PodLog))
@@ -73,13 +73,13 @@ func connectSQLite(dbpath string) (*xorm.Engine, error) {
 	return db, err
 }
 
-type BuyerTx struct {
+type BobTx struct {
 	SessionId         string    `json:"sessionId" xorm:"text pk not null"`
 	Status            string    `json:"status" xorm:"text not null"`
-	SellerIP          string    `json:"sellerIP" xorm:"text not null"`
-	SellerAddr        string    `json:"sellerAddr" xorm:"text not null"`
-	SellerSyncthingId string    `json:"sellerSyncthingId" xorm:"text"`
-	BuyerAddr         string    `json:"buyerAddr" xorm:"text not null"`
+	AliceIP          string    `json:"AliceIP" xorm:"text not null"`
+	AliceAddr        string    `json:"AliceAddr" xorm:"text not null"`
+	AliceSyncthingId string    `json:"AliceSyncthingId" xorm:"text"`
+	BobAddr         string    `json:"BobAddr" xorm:"text not null"`
 	Mode              string    `json:"mode" xorm:"text not null"`
 	SubMode           string    `json:"subMode" xorm:"text not null"`
 	OT                bool      `json:"ot" xorm:"bool"`
@@ -99,14 +99,14 @@ type BuyerTx struct {
 	UpdateDate        time.Time `json:"updateDate" xorm:"updated"`
 }
 
-func insertBuyerTxToDB(transaction BuyerTransaction) error {
+func insertBobTxToDB(transaction BobTransaction) error {
 
-	var tx BuyerTx
+	var tx BobTx
 	tx.SessionId = transaction.SessionID
 	tx.Status = transaction.Status
-	tx.SellerIP = transaction.SellerIP
-	tx.SellerAddr = transaction.SellerAddr
-	tx.BuyerAddr = transaction.BuyerAddr
+	tx.AliceIP = transaction.AliceIP
+	tx.AliceAddr = transaction.AliceAddr
+	tx.BobAddr = transaction.BobAddr
 	tx.Mode = transaction.Mode
 	tx.SubMode = transaction.SubMode
 	tx.OT = transaction.OT
@@ -199,19 +199,19 @@ func insertBuyerTxToDB(transaction BuyerTransaction) error {
 
 	_, err := DBConn.Insert(&tx)
 	if err != nil {
-		return fmt.Errorf("failed to insert transaction to buyer_tx. err=%v", err)
+		return fmt.Errorf("failed to insert transaction to Bob_tx. err=%v", err)
 	}
 	return nil
 }
 
-func updateBuyerTxToDB(transaction BuyerTransaction) error {
+func updateBobTxToDB(transaction BobTransaction) error {
 
-	var tx BuyerTx
+	var tx BobTx
 	tx.SessionId = transaction.SessionID
 	tx.Status = transaction.Status
-	tx.SellerIP = transaction.SellerIP
-	tx.SellerAddr = transaction.SellerAddr
-	tx.BuyerAddr = transaction.BuyerAddr
+	tx.AliceIP = transaction.AliceIP
+	tx.AliceAddr = transaction.AliceAddr
+	tx.BobAddr = transaction.BobAddr
 	tx.Mode = transaction.Mode
 	tx.SubMode = transaction.SubMode
 	tx.OT = transaction.OT
@@ -304,18 +304,18 @@ func updateBuyerTxToDB(transaction BuyerTransaction) error {
 
 	_, err := DBConn.Where("session_id = ?", tx.SessionId).Update(&tx)
 	if err != nil {
-		return fmt.Errorf("failed to insert transaction to buyer_tx. err=%v", err)
+		return fmt.Errorf("failed to insert transaction to Bob_tx. err=%v", err)
 	}
 	return nil
 }
 
-func loadBuyerTxFromDB(sessionID string) (BuyerTransaction, error) {
-	var tx BuyerTx
-	var transaction BuyerTransaction
+func loadBobTxFromDB(sessionID string) (BobTransaction, error) {
+	var tx BobTx
+	var transaction BobTransaction
 
 	rs, err := DBConn.Where("session_id = ?", sessionID).Get(&tx)
 	if err != nil {
-		return transaction, fmt.Errorf("failed to read transaction for buyer. sessionID=%v, err=%v", sessionID, err)
+		return transaction, fmt.Errorf("failed to read transaction for Bob. sessionID=%v, err=%v", sessionID, err)
 	}
 
 	if !rs {
@@ -324,9 +324,9 @@ func loadBuyerTxFromDB(sessionID string) (BuyerTransaction, error) {
 
 	transaction.SessionID = tx.SessionId
 	transaction.Status = tx.Status
-	transaction.SellerIP = tx.SellerIP
-	transaction.SellerAddr = tx.SellerAddr
-	transaction.BuyerAddr = tx.BuyerAddr
+	transaction.AliceIP = tx.AliceIP
+	transaction.AliceAddr = tx.AliceAddr
+	transaction.BobAddr = tx.BobAddr
 	transaction.Mode = tx.Mode
 	transaction.SubMode = tx.SubMode
 	transaction.OT = tx.OT
@@ -410,22 +410,22 @@ func loadBuyerTxFromDB(sessionID string) (BuyerTransaction, error) {
 	return transaction, nil
 }
 
-func loadBuyerTxListFromDB() ([]BuyerTransaction, error) {
+func loadBobTxListFromDB() ([]BobTransaction, error) {
 
-	var txs []BuyerTx
+	var txs []BobTx
 
 	err := DBConn.Find(&txs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read transaction for buyer. err=%v", err)
+		return nil, fmt.Errorf("failed to read transaction for Bob. err=%v", err)
 	}
 
-	var transactions = make([]BuyerTransaction, len(txs))
+	var transactions = make([]BobTransaction, len(txs))
 	for i, tx := range txs {
 		transactions[i].SessionID = tx.SessionId
 		transactions[i].Status = tx.Status
-		transactions[i].SellerIP = tx.SellerIP
-		transactions[i].SellerAddr = tx.SellerAddr
-		transactions[i].BuyerAddr = tx.BuyerAddr
+		transactions[i].AliceIP = tx.AliceIP
+		transactions[i].AliceAddr = tx.AliceAddr
+		transactions[i].BobAddr = tx.BobAddr
 		transactions[i].Mode = tx.Mode
 		transactions[i].SubMode = tx.SubMode
 		transactions[i].OT = tx.OT
@@ -510,12 +510,12 @@ func loadBuyerTxListFromDB() ([]BuyerTransaction, error) {
 	return transactions, nil
 }
 
-type SellerTx struct {
+type AliceTx struct {
 	SessionId    string `json:"sessionId" xorm:"text pk not null"`
 	Status       string `json:"status" xorm:"text not null"`
-	SellerAddr   string `json:"sellerAddr" xorm:"text not null"`
-	BuyerPubKey  string `json:"buyerPubkey" xorm:"text not null"`
-	BuyerAddr    string `json:"buyerAddr" xorm:"text not null"`
+	AliceAddr   string `json:"AliceAddr" xorm:"text not null"`
+	BobPubKey  string `json:"BobPubkey" xorm:"text not null"`
+	BobAddr    string `json:"BobAddr" xorm:"text not null"`
 	Mode         string `json:"mode" xorm:"text not null"`
 	SubMode      string `json:"subMode" xorm:"text not null"`
 	OT           bool   `json:"ot" xorm:"bool"`
@@ -535,14 +535,14 @@ type SellerTx struct {
 	UpdateDate time.Time `json:"updateDate" xorm:"updated"`
 }
 
-func insertSellerTxToDB(transaction Transaction) error {
+func insertAliceTxToDB(transaction Transaction) error {
 
-	var tx SellerTx
+	var tx AliceTx
 	tx.SessionId = transaction.SessionID
 	tx.Status = transaction.Status //StatusAtoi(transaction.Status)
-	tx.SellerAddr = transaction.SellerAddr
-	// tx.BuyerPubKey = fmt.Sprintf("0x%x", crypto.FromECDSAPub(transaction.BuyerPubKey)[1:])
-	tx.BuyerAddr = transaction.BuyerAddr
+	tx.AliceAddr = transaction.AliceAddr
+	// tx.BobPubKey = fmt.Sprintf("0x%x", crypto.FromECDSAPub(transaction.BobPubKey)[1:])
+	tx.BobAddr = transaction.BobAddr
 	tx.Mode = transaction.Mode
 	tx.SubMode = transaction.SubMode
 	tx.OT = transaction.OT
@@ -556,20 +556,20 @@ func insertSellerTxToDB(transaction Transaction) error {
 
 	_, err := DBConn.Insert(&tx)
 	if err != nil {
-		return fmt.Errorf("failed to insert transaction to seller_tx. err=%v", err)
+		return fmt.Errorf("failed to insert transaction to Alice_tx. err=%v", err)
 	}
 	return nil
 }
 
-func updateSellerTxToDB(transaction Transaction) error {
+func updateAliceTxToDB(transaction Transaction) error {
 
-	var tx SellerTx
+	var tx AliceTx
 	tx.SessionId = transaction.SessionID
 	tx.Status = transaction.Status //StatusAtoi(transaction.Status)
-	// tx.SellerIP = transaction.SellerIP
-	tx.SellerAddr = transaction.SellerAddr
-	// tx.BuyerPubKey = transaction.BuyerPubKey
-	tx.BuyerAddr = transaction.BuyerAddr
+	// tx.AliceIP = transaction.AliceIP
+	tx.AliceAddr = transaction.AliceAddr
+	// tx.BobPubKey = transaction.BobPubKey
+	tx.BobAddr = transaction.BobAddr
 	tx.Mode = transaction.Mode
 	tx.SubMode = transaction.SubMode
 	tx.OT = transaction.OT
@@ -583,19 +583,19 @@ func updateSellerTxToDB(transaction Transaction) error {
 
 	_, err := DBConn.Where("session_id = ?", tx.SessionId).Update(&tx)
 	if err != nil {
-		return fmt.Errorf("failed to insert transaction to seller_tx. err=%v", err)
+		return fmt.Errorf("failed to insert transaction to Alice_tx. err=%v", err)
 	}
 	return nil
 }
 
-func loadSellerFromDB(sessionID string) (Transaction, bool, error) {
+func loadAliceFromDB(sessionID string) (Transaction, bool, error) {
 
-	var tx SellerTx
+	var tx AliceTx
 	var transaction Transaction
 
 	rs, err := DBConn.Where("session_id = ?", sessionID).Get(&tx)
 	if err != nil {
-		return transaction, false, fmt.Errorf("failed to read transaction for buyer. sessionID=%v, err=%v", sessionID, err)
+		return transaction, false, fmt.Errorf("failed to read transaction for Bob. sessionID=%v, err=%v", sessionID, err)
 	}
 	if !rs {
 		return transaction, false, nil
@@ -603,9 +603,9 @@ func loadSellerFromDB(sessionID string) (Transaction, bool, error) {
 
 	transaction.SessionID = tx.SessionId
 	transaction.Status = tx.Status
-	transaction.SellerAddr = tx.SellerAddr
-	transaction.BuyerAddr = tx.BuyerAddr
-	// transaction.BuyerPubKey = tx.BuyerPubKey
+	transaction.AliceAddr = tx.AliceAddr
+	transaction.BobAddr = tx.BobAddr
+	// transaction.BobPubKey = tx.BobPubKey
 	transaction.Mode = tx.Mode
 	transaction.SubMode = tx.SubMode
 	transaction.OT = tx.OT
@@ -621,22 +621,22 @@ func loadSellerFromDB(sessionID string) (Transaction, bool, error) {
 	return transaction, true, nil
 }
 
-func loadSellerTxListToDB() ([]Transaction, error) {
+func loadAliceTxListToDB() ([]Transaction, error) {
 
-	var txs []BuyerTx
+	var txs []BobTx
 
 	err := DBConn.Find(&txs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read transaction for buyer. err=%v", err)
+		return nil, fmt.Errorf("failed to read transaction for Bob. err=%v", err)
 	}
 
 	var transactions = make([]Transaction, len(txs))
 	for i, tx := range txs {
 		transactions[i].SessionID = tx.SessionId
 		transactions[i].Status = tx.Status
-		// transactions[i].SellerIP = tx.SellerIP
-		transactions[i].SellerAddr = tx.SellerAddr
-		transactions[i].BuyerAddr = tx.BuyerAddr
+		// transactions[i].AliceIP = tx.AliceIP
+		transactions[i].AliceAddr = tx.AliceAddr
+		transactions[i].BobAddr = tx.BobAddr
 		transactions[i].Mode = tx.Mode
 		transactions[i].SubMode = tx.SubMode
 		transactions[i].OT = tx.OT

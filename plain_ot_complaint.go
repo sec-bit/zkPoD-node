@@ -7,19 +7,19 @@ import (
 	"github.com/sec-bit/zkPoD-lib/pod_go/types"
 )
 
-type PoDSellerPOC struct {
-	SellerSession *plain_ot_complaint.SellerSession `json:"sellerSession"`
+type PoDAlicePOC struct {
+	AliceSession *plain_ot_complaint.AliceSession `json:"AliceSession"`
 }
 
-// sellerNewSessForPOC prepares seller's session while mode is plain_ot_complaint.
+// AliceNewSessForPOC prepares Alice's session while mode is plain_ot_complaint.
 //
-// It is provides an interface for NewSellerSession.
+// It is provides an interface for NewAliceSession.
 //
 // Return:
-//  If no error occurs, return a PoDSellerPOC struct and a nil error.
+//  If no error occurs, return a PoDAlicePOC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForPOC(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerPOC, error) {
-	var poc PoDSellerPOC
+func AliceNewSessForPOC(publishPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDAlicePOC, error) {
+	var poc PoDAlicePOC
 	rs, err := pathExists(publishPath)
 	if err != nil {
 		Log.Warnf("Failed to check. err=%v", err)
@@ -31,41 +31,41 @@ func sellerNewSessForPOC(publishPath string, sellerID [40]uint8, buyerID [40]uin
 	}
 	Log.Debugf("publishPath=%v", publishPath)
 
-	poc.SellerSession, err = plain_ot_complaint.NewSellerSession(publishPath, sellerID, buyerID)
+	poc.AliceSession, err = plain_ot_complaint.NewAliceSession(publishPath, AliceID, BobID)
 	if err != nil {
-		Log.Warnf("failed to create session for seller. err=%v", err)
-		return poc, errors.New("failed to create session for seller")
+		Log.Warnf("failed to create session for Alice. err=%v", err)
+		return poc, errors.New("failed to create session for Alice")
 	}
 	return poc, nil
 }
 
-// sellerGeneNegoReq generates nego request file for seller while mode is plain_ot_complaint.
+// AliceGeneNegoReq generates nego request file for Alice while mode is plain_ot_complaint.
 //
 // It is provides an interface for GetNegoRequest.
 //
 // Return:
 //  If generate nego request successfully, return true.
 //  Otherwise, return false.
-func (poc PoDSellerPOC) sellerGeneNegoReq(requestFile string, Log ILogger) bool {
+func (poc PoDAlicePOC) AliceGeneNegoReq(requestFile string, Log ILogger) bool {
 
-	err := poc.SellerSession.GetNegoRequest(requestFile)
+	err := poc.AliceSession.GetNegoRequest(requestFile)
 	if err != nil {
-		Log.Warnf("failed to generate nego request for seller. err=%v", err)
+		Log.Warnf("failed to generate nego request for Alice. err=%v", err)
 		return false
 	}
-	Log.Debugf("success to generate nego request for seller. requestFile=%v", requestFile)
+	Log.Debugf("success to generate nego request for Alice. requestFile=%v", requestFile)
 	return true
 }
 
-// sellerGeneNegoResp generates nego response file for seller while mode is plain_ot_complaint.
+// AliceGeneNegoResp generates nego response file for Alice while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnNegoRequest.
 //
 // Return:
 //  If verify nego request and generate nego response successfully, return true.
 //  Otherwise, return false.
-func (poc PoDSellerPOC) sellerGeneNegoResp(requestFile string, responseFile string, Log ILogger) bool {
-	err := poc.SellerSession.OnNegoRequest(requestFile, responseFile)
+func (poc PoDAlicePOC) AliceGeneNegoResp(requestFile string, responseFile string, Log ILogger) bool {
+	err := poc.AliceSession.OnNegoRequest(requestFile, responseFile)
 	if err != nil {
 		Log.Warnf("failed to verify nego request and generate nego response. err=%v", err)
 		return false
@@ -74,33 +74,33 @@ func (poc PoDSellerPOC) sellerGeneNegoResp(requestFile string, responseFile stri
 	return true
 }
 
-// sellerDealNegoResp deals with buyer's nego response for seller while mode is plain_ot_complaint.
+// AliceDealNegoResp deals with Bob's nego response for Alice while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnNegoResponse.
 //
 // Return:
-//  If deal with buyer's nego response successfully, return true.
+//  If deal with Bob's nego response successfully, return true.
 //  Otherwise, return false.
-func (poc PoDSellerPOC) sellerDealNegoResp(responseFile string, Log ILogger) bool {
-	err := poc.SellerSession.OnNegoResponse(responseFile)
+func (poc PoDAlicePOC) AliceDealNegoResp(responseFile string, Log ILogger) bool {
+	err := poc.AliceSession.OnNegoResponse(responseFile)
 	if err != nil {
-		Log.Warnf("failed to deal with buyer's nego response. err=%v", err)
+		Log.Warnf("failed to deal with Bob's nego response. err=%v", err)
 		return false
 	}
-	Log.Debugf("success to deal with buyer's nego response. responseFile=%v", responseFile)
+	Log.Debugf("success to deal with Bob's nego response. responseFile=%v", responseFile)
 	return true
 }
 
-// sellerVerifyReq verifies request file and generates response file for seller while mode is plain_ot_complaint.
+// AliceVerifyReq verifies request file and generates response file for Alice while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnRequest.
 //
 // Return:
 //  If verify transaction requset and generate transaction response successfully, return true.
 //  Otherwise, return false.
-func (poc PoDSellerPOC) sellerVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
+func (poc PoDAlicePOC) AliceVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
 
-	err := poc.SellerSession.OnRequest(requestFile, responseFile)
+	err := poc.AliceSession.OnRequest(requestFile, responseFile)
 	if err != nil {
 		Log.Warnf("verify request and generate response....Failed. err=%v", err)
 		return false
@@ -109,16 +109,16 @@ func (poc PoDSellerPOC) sellerVerifyReq(requestFile string, responseFile string,
 	return true
 }
 
-// sellerVerifyReceipt verifies receipt file and generate secret file for seller while mode is plain_ot_complaint.
+// AliceVerifyReceipt verifies receipt file and generate secret file for Alice while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnReceipt.
 //
 // Return:
 //  If verify receipt file and generate secret file successfully, return true.
 //  Otherwise, return false.
-func (poc PoDSellerPOC) sellerVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
+func (poc PoDAlicePOC) AliceVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
 
-	err := poc.SellerSession.OnReceipt(receiptFile, secretFile)
+	err := poc.AliceSession.OnReceipt(receiptFile, secretFile)
 	if err != nil {
 		Log.Warnf("verify receipt file and generate secret file.....Failed. err=%v", err)
 		return false
@@ -127,22 +127,22 @@ func (poc PoDSellerPOC) sellerVerifyReceipt(receiptFile string, secretFile strin
 	return true
 }
 
-type PoDBuyerPOC struct {
-	BuyerSession *plain_ot_complaint.BuyerSession `json:"buyerSession"`
+type PoDBobPOC struct {
+	BobSession *plain_ot_complaint.BobSession `json:"BobSession"`
 	Demands      []Demand                         `json:"demands"`
 	Phantoms     []Phantom                        `json:"phantoms"`
 }
 
-// buyerNewSessForPOC prepares buyer's session while mode is plain_ot_complaint.
+// BobNewSessForPOC prepares Bob's session while mode is plain_ot_complaint.
 //
-// It is provides an interface for NewBuyerSession.
+// It is provides an interface for NewBobSession.
 //
 // Return:
-//  If no error occurs, return a PoDBuyerPOC struct and a nil error.
+//  If no error occurs, return a PoDBobPOC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForPOC(demandArr []Demand, phantomArr []Phantom, plainBulletin string, plainPublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerPOC, error) {
+func BobNewSessForPOC(demandArr []Demand, phantomArr []Phantom, plainBulletin string, plainPublicPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDBobPOC, error) {
 
-	var poc PoDBuyerPOC
+	var poc PoDBobPOC
 	demands := make([]types.Range, 0)
 	for _, d := range demandArr {
 		demands = append(demands, types.Range{d.DemandStart, d.DemandCount})
@@ -155,43 +155,43 @@ func buyerNewSessForPOC(demandArr []Demand, phantomArr []Phantom, plainBulletin 
 	}
 	poc.Phantoms = phantomArr
 
-	session, err := plain_ot_complaint.NewBuyerSession(plainBulletin, plainPublicPath, sellerID, buyerID, demands, phantoms)
+	session, err := plain_ot_complaint.NewBobSession(plainBulletin, plainPublicPath, AliceID, BobID, demands, phantoms)
 	if err != nil {
-		Log.Warnf("Failed to create session for buyer. err=%v", err)
-		return poc, errors.New("Failed to create session for buyer")
+		Log.Warnf("Failed to create session for Bob. err=%v", err)
+		return poc, errors.New("Failed to create session for Bob")
 	}
-	poc.BuyerSession = session
-	Log.Debugf("success to create session for seller.")
+	poc.BobSession = session
+	Log.Debugf("success to create session for Alice.")
 	return poc, nil
 }
 
-// buyerGeneNegoReq generates nego request file for buyer while mode is plain_ot_complaint.
+// BobGeneNegoReq generates nego request file for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for GetNegoRequest.
 //
 // Return:
-//  If generates nego request for buyer successfully, return true.
+//  If generates nego request for Bob successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerGeneNegoReq(requestFile string, Log ILogger) bool {
+func (poc PoDBobPOC) BobGeneNegoReq(requestFile string, Log ILogger) bool {
 
-	err := poc.BuyerSession.GetNegoRequest(requestFile)
+	err := poc.BobSession.GetNegoRequest(requestFile)
 	if err != nil {
-		Log.Warnf("Failed to generates nego request for buyer. err=%v", err)
+		Log.Warnf("Failed to generates nego request for Bob. err=%v", err)
 		return false
 	}
-	Log.Debugf("success to generates nego request for buyer. requestFile=%v", requestFile)
+	Log.Debugf("success to generates nego request for Bob. requestFile=%v", requestFile)
 	return true
 }
 
-// buyerGeneNegoResp verifies nego request and generates nego response for buyer while mode is plain_ot_complaint.
+// BobGeneNegoResp verifies nego request and generates nego response for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnNegoRequest.
 //
 // Return:
-//  If generates nego response for buyer successfully, return true.
+//  If generates nego response for Bob successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerGeneNegoResp(requestFile string, responseFile string, Log ILogger) bool {
-	err := poc.BuyerSession.OnNegoRequest(requestFile, responseFile)
+func (poc PoDBobPOC) BobGeneNegoResp(requestFile string, responseFile string, Log ILogger) bool {
+	err := poc.BobSession.OnNegoRequest(requestFile, responseFile)
 	if err != nil {
 		Log.Warnf("Failed to verify nego request and generate nego response. err=%v", err)
 		return false
@@ -200,32 +200,32 @@ func (poc PoDBuyerPOC) buyerGeneNegoResp(requestFile string, responseFile string
 	return true
 }
 
-// buyerDealNegoResp deals with seller's nego response for buyer while mode is plain_ot_complaint.
+// BobDealNegoResp deals with Alice's nego response for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnNegoResponse.
 //
 // Return:
-//  If deals with seller's nego response successfully, return true.
+//  If deals with Alice's nego response successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerDealNegoResp(responseFile string, Log ILogger) bool {
-	err := poc.BuyerSession.OnNegoResponse(responseFile)
+func (poc PoDBobPOC) BobDealNegoResp(responseFile string, Log ILogger) bool {
+	err := poc.BobSession.OnNegoResponse(responseFile)
 	if err != nil {
-		Log.Warnf("Failed to deals with seller's nego response. err=%v", err)
+		Log.Warnf("Failed to deals with Alice's nego response. err=%v", err)
 		return false
 	}
-	Log.Debugf("success to deal with seller's nego response. responseFile=%v", responseFile)
+	Log.Debugf("success to deal with Alice's nego response. responseFile=%v", responseFile)
 	return true
 }
 
-// buyerNewReq creates request file for buyer while mode is plain_ot_complaint.
+// BobNewReq creates request file for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for GetRequest.
 //
 // Return:
 //  If no error occurs, generate a request file and return a nil error.
 //  Otherwise, return the non-nil error.
-func (poc PoDBuyerPOC) buyerNewReq(requestFile string, Log ILogger) error {
-	err := poc.BuyerSession.GetRequest(requestFile)
+func (poc PoDBobPOC) BobNewReq(requestFile string, Log ILogger) error {
+	err := poc.BobSession.GetRequest(requestFile)
 	if err != nil {
 		Log.Warnf("Failed to create request file. err=%v", err)
 		return errors.New("Failed to create request file")
@@ -234,15 +234,15 @@ func (poc PoDBuyerPOC) buyerNewReq(requestFile string, Log ILogger) error {
 	return nil
 }
 
-// buyerVerifyResp verifies response data for buyer while mode is plain_ot_complaint.
+// BobVerifyResp verifies response data for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnResponse.
 //
 // Return:
 //  If verify response and generate receipt successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
-	err := poc.BuyerSession.OnResponse(responseFile, receiptFile)
+func (poc PoDBobPOC) BobVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
+	err := poc.BobSession.OnResponse(responseFile, receiptFile)
 	if err != nil {
 		Log.Warnf("failed to verify response and generate receipt. err=%v", err)
 		return false
@@ -251,15 +251,15 @@ func (poc PoDBuyerPOC) buyerVerifyResp(responseFile string, receiptFile string, 
 	return true
 }
 
-// buyerVerifySecret verifies secret for buyer while mode is plain_ot_complaint.
+// BobVerifySecret verifies secret for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for OnSecret.
 //
 // Return:
 //  If verify secret successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerVerifySecret(secretFile string, Log ILogger) bool {
-	err := poc.BuyerSession.OnSecret(secretFile)
+func (poc PoDBobPOC) BobVerifySecret(secretFile string, Log ILogger) bool {
+	err := poc.BobSession.OnSecret(secretFile)
 	if err != nil {
 		Log.Warnf("failed to verify secret. err=%v", err)
 		return false
@@ -268,15 +268,15 @@ func (poc PoDBuyerPOC) buyerVerifySecret(secretFile string, Log ILogger) bool {
 	return true
 }
 
-// buyerGeneClaim generates claim with incorrect secret for buyer while mode is plain_ot_complaint.
+// BobGeneClaim generates claim with incorrect secret for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for GenerateClaim.
 //
 // Return:
 //  If generate claim successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerGeneClaim(claimFile string, Log ILogger) bool {
-	err := poc.BuyerSession.GenerateClaim(claimFile)
+func (poc PoDBobPOC) BobGeneClaim(claimFile string, Log ILogger) bool {
+	err := poc.BobSession.GenerateClaim(claimFile)
 	if err != nil {
 		Log.Warnf("failed to generate claim. err=%v", err)
 		return false
@@ -285,15 +285,15 @@ func (poc PoDBuyerPOC) buyerGeneClaim(claimFile string, Log ILogger) bool {
 	return true
 }
 
-//buyerDecrypt decrypts file for buyer while mode is plain_ot_complaint.
+//BobDecrypt decrypts file for Bob while mode is plain_ot_complaint.
 //
 // It is provides an interface for GenerateClaim.
 //
 // Return:
 //  If decrypt file successfully, return true.
 //  Otherwise, return false.
-func (poc PoDBuyerPOC) buyerDecrypt(outFile string, Log ILogger) bool {
-	err := poc.BuyerSession.Decrypt(outFile)
+func (poc PoDBobPOC) BobDecrypt(outFile string, Log ILogger) bool {
+	err := poc.BobSession.Decrypt(outFile)
 	if err != nil {
 		Log.Warnf("Failed to decrypt file. err=%v", err)
 		return false

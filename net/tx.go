@@ -15,7 +15,7 @@ import (
 //
 // 1. Non-OT mode
 //
-//  Seller (A)                                           Buyer (B)
+//  Alice (A)                                           Bob (B)
 //  ==========                                           =========
 //
 //  SessionEstablished           request                 SessionEstablished
@@ -31,7 +31,7 @@ import (
 //
 // 2. OT mode
 //
-//  Seller (A)                                             Buyer (B)
+//  Alice (A)                                             Bob (B)
 //  ==========                                             =========
 //
 //  SessionEstablished          nego req                   SessionEstablished

@@ -7,19 +7,19 @@ import (
 	"github.com/sec-bit/zkPoD-lib/pod_go/types"
 )
 
-type PoDSellerPAS struct {
-	SellerSession *plain_atomic_swap.SellerSession `json:"sellerSession"`
+type PoDAlicePAS struct {
+	AliceSession *plain_atomic_swap.AliceSession `json:"AliceSession"`
 }
 
-// sellerNewSessForPAS prepares seller's session while mode is plain_atomic_swap.
+// AliceNewSessForPAS prepares Alice's session while mode is plain_atomic_swap.
 //
-// It is provides an interface for NewSellerSession.
+// It is provides an interface for NewAliceSession.
 //
 // Return:
-//  If no error occurs, return a PoDSellerPAS struct and a nil error.
+//  If no error occurs, return a PoDAlicePAS struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForPAS(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerPAS, error) {
-	var pas PoDSellerPAS
+func AliceNewSessForPAS(publishPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDAlicePAS, error) {
+	var pas PoDAlicePAS
 	rs, err := pathExists(publishPath)
 	if err != nil {
 		Log.Warnf("Failed to check. err=%v", err)
@@ -31,25 +31,25 @@ func sellerNewSessForPAS(publishPath string, sellerID [40]uint8, buyerID [40]uin
 	}
 	Log.Debugf("publishPath=%v", publishPath)
 
-	pas.SellerSession, err = plain_atomic_swap.NewSellerSession(publishPath, sellerID, buyerID)
+	pas.AliceSession, err = plain_atomic_swap.NewAliceSession(publishPath, AliceID, BobID)
 	if err != nil {
-		Log.Warnf("failed to create session for seller. err=%v", err)
-		return pas, errors.New("failed to create session for seller")
+		Log.Warnf("failed to create session for Alice. err=%v", err)
+		return pas, errors.New("failed to create session for Alice")
 	}
-	Log.Debugf("success to create session for seller")
+	Log.Debugf("success to create session for Alice")
 	return pas, nil
 }
 
-// sellerVerifyReq verifies request file and generates response file for seller while mode is plain_atomic_swap.
+// AliceVerifyReq verifies request file and generates response file for Alice while mode is plain_atomic_swap.
 //
 // It is provides an interface for OnRequest.
 //
 // Return:
 //  If verify transaction requset and generate transaction response successfully, return true.
 //  Otherwise, return false.
-func (pas PoDSellerPAS) sellerVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
+func (pas PoDAlicePAS) AliceVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
 
-	err := pas.SellerSession.OnRequest(requestFile, responseFile)
+	err := pas.AliceSession.OnRequest(requestFile, responseFile)
 	if err != nil {
 		Log.Warnf("Verify request and generate response....Failed. err=%v", err)
 		return false
@@ -58,16 +58,16 @@ func (pas PoDSellerPAS) sellerVerifyReq(requestFile string, responseFile string,
 	return true
 }
 
-// sellerVerifyReceipt verifies receipt file and generate secret file for seller while mode is plain_atomic_swap.
+// AliceVerifyReceipt verifies receipt file and generate secret file for Alice while mode is plain_atomic_swap.
 //
 // It is provides an interface for OnReceipt.
 //
 // Return:
 //  If verify receipt file and generate secret file successfully, return true.
 //  Otherwise, return false.
-func (pas PoDSellerPAS) sellerVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
+func (pas PoDAlicePAS) AliceVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
 
-	err := pas.SellerSession.OnReceipt(receiptFile, secretFile)
+	err := pas.AliceSession.OnReceipt(receiptFile, secretFile)
 	if err != nil {
 		Log.Warnf("Verify receipt file and generate secret file.....Failed. err=%v", err)
 		return false
@@ -76,46 +76,46 @@ func (pas PoDSellerPAS) sellerVerifyReceipt(receiptFile string, secretFile strin
 	return true
 }
 
-type PoDBuyerPAS struct {
-	BuyerSession *plain_atomic_swap.BuyerSession `json:"buyerSession"`
+type PoDBobPAS struct {
+	BobSession *plain_atomic_swap.BobSession `json:"BobSession"`
 	Demands      []Demand                        `json:"demands"`
 }
 
-// buyerNewSessForPAS prepares buyer's session while mode is plain_atomic_swap.
+// BobNewSessForPAS prepares Bob's session while mode is plain_atomic_swap.
 //
-// It is provides an interface for NewBuyerSession.
+// It is provides an interface for NewBobSession.
 //
 // Return:
-//  If no error occurs, return a buyer's session and a nil error.
+//  If no error occurs, return a Bob's session and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForPAS(demandArr []Demand, plainBulletin string, plainPublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerPAS, error) {
+func BobNewSessForPAS(demandArr []Demand, plainBulletin string, plainPublicPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDBobPAS, error) {
 
-	var pas PoDBuyerPAS
+	var pas PoDBobPAS
 	demands := make([]types.Range, 0)
 	for _, d := range demandArr {
 		demands = append(demands, types.Range{d.DemandStart, d.DemandCount})
 	}
 	pas.Demands = demandArr
 
-	session, err := plain_atomic_swap.NewBuyerSession(plainBulletin, plainPublicPath, sellerID, buyerID, demands)
+	session, err := plain_atomic_swap.NewBobSession(plainBulletin, plainPublicPath, AliceID, BobID, demands)
 	if err != nil {
-		Log.Warnf("Failed to create session for buyer. err=%v", err)
-		return pas, errors.New("Failed to create session for buyer")
+		Log.Warnf("Failed to create session for Bob. err=%v", err)
+		return pas, errors.New("Failed to create session for Bob")
 	}
-	pas.BuyerSession = session
-	Log.Debugf("success to create session for buyer")
+	pas.BobSession = session
+	Log.Debugf("success to create session for Bob")
 	return pas, nil
 }
 
-// buyerNewReq creates request file for buyer while mode is plain_atomic_swap.
+// BobNewReq creates request file for Bob while mode is plain_atomic_swap.
 //
 // It is provides an interface for GetRequest.
 //
 // Return:
 //  If no error occurs, generate a request file and return a nil error.
 //  Otherwise, return the non-nil error.
-func (pas PoDBuyerPAS) buyerNewReq(requestFile string, Log ILogger) error {
-	err := pas.BuyerSession.GetRequest(requestFile)
+func (pas PoDBobPAS) BobNewReq(requestFile string, Log ILogger) error {
+	err := pas.BobSession.GetRequest(requestFile)
 	if err != nil {
 		Log.Warnf("Failed to create request file. err=%v", err)
 		return errors.New("Failed to create request file")
@@ -124,15 +124,15 @@ func (pas PoDBuyerPAS) buyerNewReq(requestFile string, Log ILogger) error {
 	return nil
 }
 
-// buyerVerifyResp verifies response data for buyer while mode is plain_atomic_swap.
+// BobVerifyResp verifies response data for Bob while mode is plain_atomic_swap.
 //
 // It is provides an interface for OnResponse.
 //
 // Return:
 //  If verify response and generate receipt successfully, return true.
 //  Otherwise, return false.
-func (pas PoDBuyerPAS) buyerVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
-	err := pas.BuyerSession.OnResponse(responseFile, receiptFile)
+func (pas PoDBobPAS) BobVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
+	err := pas.BobSession.OnResponse(responseFile, receiptFile)
 	if err != nil {
 		Log.Warnf("failed to verify response and generate receipt. err=%v", err)
 		return false
@@ -141,15 +141,15 @@ func (pas PoDBuyerPAS) buyerVerifyResp(responseFile string, receiptFile string, 
 	return true
 }
 
-// buyerVerifySecret verifies secret for buyer while mode is plain_atomic_swap.
+// BobVerifySecret verifies secret for Bob while mode is plain_atomic_swap.
 //
 // It is provides an interface for OnSecret.
 //
 // Return:
 //  If verify secret successfully, return true.
 //  Otherwise, return false.
-func (pas PoDBuyerPAS) buyerVerifySecret(secretFile string, Log ILogger) bool {
-	err := pas.BuyerSession.OnSecret(secretFile)
+func (pas PoDBobPAS) BobVerifySecret(secretFile string, Log ILogger) bool {
+	err := pas.BobSession.OnSecret(secretFile)
 	if err != nil {
 		Log.Warnf("failed to verify secret. err=%v", err)
 		return false
@@ -158,15 +158,15 @@ func (pas PoDBuyerPAS) buyerVerifySecret(secretFile string, Log ILogger) bool {
 	return true
 }
 
-// buyerDecrypt decrypts file for buyer while mode is plain_atomic_swap.
+// BobDecrypt decrypts file for Bob while mode is plain_atomic_swap.
 //
 // It is provides an interface for GenerateClaim.
 //
 // Return:
 //  If decrypt file successfully, return true.
 //  Otherwise, return false.
-func (pas PoDBuyerPAS) buyerDecrypt(outFile string, Log ILogger) bool {
-	err := pas.BuyerSession.Decrypt(outFile)
+func (pas PoDBobPAS) BobDecrypt(outFile string, Log ILogger) bool {
+	err := pas.BobSession.Decrypt(outFile)
 	if err != nil {
 		Log.Warnf("Failed to decrypt file. err=%v", err)
 		return false

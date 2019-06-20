@@ -76,7 +76,7 @@ const (
 //  Otherwise, return a nil node and the non-nil error.
 //
 // Examples:
-// 1. Create a communication node for seller.
+// 1. Create a communication node for Alice.
 //    ```
 //    import (
 //        "crypto/ecdsa"
@@ -84,8 +84,8 @@ const (
 //        "github.com/sec-bit/zkPoD-node/net/rlpx"
 //    )
 //
-//    func Seller(sellerTCPAddr string, sellerEthPrivkey *ecdsa.PrivateKey) error {
-//        addr, err := rlpx.NewAddr(sellerTCOAddr, sellerEthPrivkey.PublicKey)
+//    func Alice(AliceTCPAddr string, AliceEthPrivkey *ecdsa.PrivateKey) error {
+//        addr, err := rlpx.NewAddr(AliceTCOAddr, AliceEthPrivkey.PublicKey)
 //        if err != nil {
 //            return err
 //        }
@@ -103,12 +103,12 @@ const (
 //        // Note: conn should be alive until the node is closed.
 //        defer conn.Close()
 //
-//        buyerEthPubkey, err := conn.Handshake(sellerEthPrivkey, false)
+//        BobEthPubkey, err := conn.Handshake(AliceEthPrivkey, false)
 //        if err != nil {
 //            return err
 //        }
 //
-//        node, err := pod_net.NewNode(conn, sellerEthPrivkey, buyerEthPubkey)
+//        node, err := pod_net.NewNode(conn, AliceEthPrivkey, BobEthPubkey)
 //        if err != nil {
 //            return err
 //        }
@@ -121,7 +121,7 @@ const (
 //    }
 //    ```
 //
-// 2. Create a communication node for buyer.
+// 2. Create a communication node for Bob.
 //    ```
 //    import (
 //        "crypto/ecdsa"
@@ -131,12 +131,12 @@ const (
 //        "github.com/sec-bit/zkPoD-node/net/rlpx"
 //    )
 //
-//    func Buyer(sellerTCPAddr, sellerEthAddr string, buyerEthPrivkey *ecdsa.PrivateKey) error {
-//        tcpAddr, err := net.ResolveTCPAddr("tcp", sellerTCPAddr)
+//    func Bob(AliceTCPAddr, AliceEthAddr string, BobEthPrivkey *ecdsa.PrivateKey) error {
+//        tcpAddr, err := net.ResolveTCPAddr("tcp", AliceTCPAddr)
 //        if err != nil {
 //            return err
 //        }
-//        ethAddr := common.HexToAddress(sellerEthAddr)
+//        ethAddr := common.HexToAddress(AliceEthAddr)
 //        addr := rlpx.Addr{TCPAddr: tcpAddr, EthAddr: ethAddr}
 //
 //        conn, err := rlpx.Dial(addr)
@@ -145,12 +145,12 @@ const (
 //        }
 //        defer conn.Close()
 //
-//        sellerEthPubkey, err := conn.Handshake(buyerEthPrivkey, true)
+//        AliceEthPubkey, err := conn.Handshake(BobEthPrivkey, true)
 //        if err != nil {
 //            return err
 //        }
 //
-//        node, err := pod_net.NewNode(conn, buyerEthPrivkey, sellerEthPubkey)
+//        node, err := pod_net.NewNode(conn, BobEthPrivkey, AliceEthPubkey)
 //        if err != nil {
 //            return nil
 //        }

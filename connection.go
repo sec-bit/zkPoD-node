@@ -21,23 +21,23 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-// SellerStartNode starts p2p node for seller node,
-// listen to request from buyer
-func SellerStartNode(sellerIPAddr string, key *keystore.Key, Log ILogger) error {
+// AliceStartNode starts p2p node for Alice node,
+// listen to request from Bob
+func AliceStartNode(AliceIPAddr string, key *keystore.Key, Log ILogger) error {
 
 	var wg sync.WaitGroup
 
-	serveAddr, err := rlpx.NewAddr(sellerIPAddr, key.PrivateKey.PublicKey)
+	serveAddr, err := rlpx.NewAddr(AliceIPAddr, key.PrivateKey.PublicKey)
 	if err != nil {
-		Log.Errorf("failed to initialize seller's server address. err=%v", err)
-		return fmt.Errorf("failed to start seller's node")
+		Log.Errorf("failed to initialize Alice's server address. err=%v", err)
+		return fmt.Errorf("failed to start Alice's node")
 	}
-	// Log.Debugf("Initialize seller's server address finish.")
+	// Log.Debugf("Initialize Alice's server address finish.")
 
 	l, err := rlpx.Listen(serveAddr)
 	if err != nil {
 		Log.Errorf("failed to listen on %s: %v", serveAddr, err)
-		return fmt.Errorf("failed to start seller's node")
+		return fmt.Errorf("failed to start Alice's node")
 	}
 	defer func() {
 		if err := l.Close(); err != nil {
@@ -49,7 +49,7 @@ func SellerStartNode(sellerIPAddr string, key *keystore.Key, Log ILogger) error 
 			return
 		}
 	}()
-	SellerNodeStart = true
+	AliceNodeStart = true
 	fmt.Printf("===>>>Listen to %v\n\n", serveAddr)
 
 	for {
@@ -61,7 +61,7 @@ func SellerStartNode(sellerIPAddr string, key *keystore.Key, Log ILogger) error 
 		}
 		wg.Add(1)
 		go func() {
-			sellerAcceptTx(&wg, conn, key, Log)
+			AliceAcceptTx(&wg, conn, key, Log)
 			if err := conn.Close(); err != nil {
 				Log.Errorf("failed to close connection on server side: %v",
 					err)
@@ -73,9 +73,9 @@ func SellerStartNode(sellerIPAddr string, key *keystore.Key, Log ILogger) error 
 	return nil
 }
 
-//sellerAcceptTx connects with buyer and handle transaction for seller.
-func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key, Log ILogger) {
-	Log.Debugf("start connect with buyer node....")
+//AliceAcceptTx connects with Bob and handle transaction for Alice.
+func AliceAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key, Log ILogger) {
+	Log.Debugf("start connect with Bob node....")
 	defer func() {
 		wg.Done()
 		if err := recover(); err != nil {
@@ -84,7 +84,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 		}
 	}()
 
-	node, rkey, params, err := preSellerTxAndConn(conn, key, Log)
+	node, rkey, params, err := preAliceTxAndConn(conn, key, Log)
 	if err != nil {
 		Log.Warnf("failed to prepare for transaction connection. err=%v", err)
 		return
@@ -100,59 +100,59 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 	var tx Transaction
 	tx.SessionID = params.SessionID
 	tx.Status = TRANSACTION_STATUS_START
-	tx.BuyerPubKey = rkey
-	tx.BuyerAddr = crypto.PubkeyToAddress(*rkey).Hex()
+	tx.BobPubKey = rkey
+	tx.BobAddr = crypto.PubkeyToAddress(*rkey).Hex()
 	tx.Bulletin = params.Bulletin
 	tx.Mode = params.Mode
 	tx.SubMode = params.SubMode
 	tx.OT = params.OT
 	tx.UnitPrice = params.UnitPrice
-	tx.SellerAddr = key.Address.Hex()
+	tx.AliceAddr = key.Address.Hex()
 
-	text := []uint8(tx.BuyerAddr)
+	text := []uint8(tx.BobAddr)
 	Log.Debugf("text:%v", text)
 
-	SellerTxMap[tx.SessionID] = tx
-	err = insertSellerTxToDB(tx)
+	AliceTxMap[tx.SessionID] = tx
+	err = insertAliceTxToDB(tx)
 	if err != nil {
-		Log.Warnf("[%v]failed to save transaction to db for seller. err=%v", params.SessionID, err)
+		Log.Warnf("[%v]failed to save transaction to db for Alice. err=%v", params.SessionID, err)
 		return
 	}
 
-	publishPath := BConf.SellerDir + "/publish/" + tx.Bulletin.SigmaMKLRoot
+	publishPath := BConf.AliceDir + "/publish/" + tx.Bulletin.SigmaMKLRoot
 
 	if tx.Mode == TRANSACTION_MODE_PLAIN_POD {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				tx.PlainOTComplaint, err = sellerNewSessForPOC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+				tx.PlainOTComplaint, err = AliceNewSessForPOC(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 				if err != nil {
-					Log.Warnf("failed to prepare for seller's session. err=%v", err)
+					Log.Warnf("failed to prepare for Alice's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.PlainOTComplaint.SellerSession.Free()
+					tx.PlainOTComplaint.AliceSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for plain_ot_complaint")
+				Log.Debugf("success to prepare Alice session for plain_ot_complaint")
 
-				err = sellerTxForPOC(node, key, tx, Log)
+				err = AliceTxForPOC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.PlainComplaint, err = sellerNewSessForPC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+				tx.PlainComplaint, err = AliceNewSessForPC(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 				if err != nil {
-					Log.Warnf("failed to prepare for seller's session. err=%v", err)
+					Log.Warnf("failed to prepare for Alice's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.PlainComplaint.SellerSession.Free()
+					tx.PlainComplaint.AliceSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for plain_complaint")
+				Log.Debugf("success to prepare Alice session for plain_complaint")
 
-				err = sellerTxForPC(node, key, tx, Log)
+				err = AliceTxForPC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
@@ -160,17 +160,17 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				Log.Debugf("transaction finish...")
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
-			tx.PlainAtomicSwap, err = sellerNewSessForPAS(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+			tx.PlainAtomicSwap, err = AliceNewSessForPAS(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 			if err != nil {
-				Log.Warnf("Failed to prepare for seller's session. err=%v", err)
+				Log.Warnf("Failed to prepare for Alice's session. err=%v", err)
 				return
 			}
 			defer func() {
-				tx.PlainAtomicSwap.SellerSession.Free()
+				tx.PlainAtomicSwap.AliceSession.Free()
 			}()
-			Log.Debugf("success to prepare seller session for plain_atomic_swap")
+			Log.Debugf("success to prepare Alice session for plain_atomic_swap")
 
-			err = sellerTxForPAS(node, key, tx, Log)
+			err = AliceTxForPAS(node, key, tx, Log)
 			if err != nil {
 				Log.Warnf("transaction error. err=%v", err)
 				return
@@ -181,34 +181,34 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				tx.TableOTComplaint, err = sellerNewSessForTOC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+				tx.TableOTComplaint, err = AliceNewSessForTOC(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 				if err != nil {
-					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
+					Log.Warnf("Failed to prepare for Alice's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.TableOTComplaint.SellerSession.Free()
+					tx.TableOTComplaint.AliceSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for table_ot_complaint1")
+				Log.Debugf("success to prepare Alice session for table_ot_complaint1")
 
-				err = sellerTxForTOC(node, key, tx, Log)
+				err = AliceTxForTOC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.TableComplaint, err = sellerNewSessForTC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+				tx.TableComplaint, err = AliceNewSessForTC(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 				if err != nil {
-					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
+					Log.Warnf("Failed to prepare for Alice's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.TableComplaint.SellerSession.Free()
+					tx.TableComplaint.AliceSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for table_complaint")
+				Log.Debugf("success to prepare Alice session for table_complaint")
 
-				err = sellerTxForTC(node, key, tx, Log)
+				err = AliceTxForTC(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
@@ -216,17 +216,17 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				Log.Debugf("transaction finish...")
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
-			tx.TableAtomicSwap, err = sellerNewSessForTAS(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+			tx.TableAtomicSwap, err = AliceNewSessForTAS(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 			if err != nil {
-				Log.Warnf("Failed to prepare for seller's session. err=%v", err)
+				Log.Warnf("Failed to prepare for Alice's session. err=%v", err)
 				return
 			}
 			defer func() {
-				tx.TableAtomicSwap.SellerSession.Free()
+				tx.TableAtomicSwap.AliceSession.Free()
 			}()
-			Log.Debugf("success to prepare seller session for table_atomic_swap")
+			Log.Debugf("success to prepare Alice session for table_atomic_swap")
 
-			err = sellerTxForTAS(node, key, tx, Log)
+			err = AliceTxForTAS(node, key, tx, Log)
 			if err != nil {
 				Log.Warnf("transaction error. err=%v", err)
 				return
@@ -234,34 +234,34 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 			Log.Debugf("transaction finish...")
 		case TRANSACTION_SUB_MODE_VRF:
 			if tx.OT {
-				tx.TableOTVRF, err = sellerNewSessForTOQ(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+				tx.TableOTVRF, err = AliceNewSessForTOQ(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 				if err != nil {
-					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
+					Log.Warnf("Failed to prepare for Alice's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.TableOTVRF.SellerSession.Free()
+					tx.TableOTVRF.AliceSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for table_ot_vrf")
+				Log.Debugf("success to prepare Alice session for table_ot_vrf")
 
-				err = sellerTxForTOQ(node, key, tx, Log)
+				err = AliceTxForTOQ(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.TableVRF, err = sellerNewSessForTQ(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
+				tx.TableVRF, err = AliceNewSessForTQ(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
 				if err != nil {
-					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
+					Log.Warnf("Failed to prepare for Alice's session. err=%v", err)
 					return
 				}
 				defer func() {
-					tx.TableVRF.SellerSession.Free()
+					tx.TableVRF.AliceSession.Free()
 				}()
-				Log.Debugf("success to prepare seller session for table_vrf")
+				Log.Debugf("success to prepare Alice session for table_vrf")
 
-				err = sellerTxForTQ(node, key, tx, Log)
+				err = AliceTxForTQ(node, key, tx, Log)
 				if err != nil {
 					Log.Warnf("transaction error. err=%v", err)
 					return
@@ -272,7 +272,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 	}
 }
 
-type SellerConnParam struct {
+type AliceConnParam struct {
 	Mode      string
 	SubMode   string
 	OT        bool
@@ -281,16 +281,16 @@ type SellerConnParam struct {
 	Bulletin  Bulletin
 }
 
-func preSellerTxAndConn(conn *rlpx.Connection, key *keystore.Key, Log ILogger) (node *pod_net.Node, rkey *ecdsa.PublicKey, params SellerConnParam, err error) {
+func preAliceTxAndConn(conn *rlpx.Connection, key *keystore.Key, Log ILogger) (node *pod_net.Node, rkey *ecdsa.PublicKey, params AliceConnParam, err error) {
 
-	node, rkey, err = sellerNewConn(conn, key, Log)
+	node, rkey, err = AliceNewConn(conn, key, Log)
 	if err != nil {
 		Log.Warnf("%v", err)
 		return
 	}
 	Log.Debugf("success to new connection...")
 
-	req, re, err := sellerRcvSessReq(node, Log)
+	req, re, err := AliceRcvSessReq(node, Log)
 	if err != nil {
 		node.Close()
 		Log.Warnf("failed to receive session request. err=%v", err)
@@ -298,7 +298,7 @@ func preSellerTxAndConn(conn *rlpx.Connection, key *keystore.Key, Log ILogger) (
 	}
 
 	mklroot := hex.EncodeToString(req.SigmaMklRoot)
-	params, re, err = preSellerTx(mklroot, re, Log)
+	params, re, err = preAliceTx(mklroot, re, Log)
 	if err != nil {
 		node.Close()
 		Log.Warnf("failed to prepare for transaction. err=%v", err)
@@ -315,17 +315,17 @@ func preSellerTxAndConn(conn *rlpx.Connection, key *keystore.Key, Log ILogger) (
 		return
 	}
 
-	err = preSellerConn(node, key, params, req, Log)
+	err = preAliceConn(node, key, params, req, Log)
 	if err != nil {
 		node.Close()
-		Log.Errorf("failed to establish session with buyer. err=%v", err)
+		Log.Errorf("failed to establish session with Bob. err=%v", err)
 		return
 	}
 	Log.Debugf("[%v]established connection session successfully....", params.SessionID)
 	return
 }
 
-func sellerNewConn(conn *rlpx.Connection, key *keystore.Key, Log ILogger) (*pod_net.Node, *ecdsa.PublicKey, error) {
+func AliceNewConn(conn *rlpx.Connection, key *keystore.Key, Log ILogger) (*pod_net.Node, *ecdsa.PublicKey, error) {
 
 	rkey, err := conn.Handshake(key.PrivateKey, false)
 	if err != nil {
@@ -350,7 +350,7 @@ type requestExtra struct {
 	Ot      bool   `json:"ot"`
 }
 
-func sellerRcvSessReq(node *pod_net.Node, Log ILogger) (req *pod_net.SessionRequest, re requestExtra, err error) {
+func AliceRcvSessReq(node *pod_net.Node, Log ILogger) (req *pod_net.SessionRequest, re requestExtra, err error) {
 	req, err = node.RecvSessionRequest()
 	if err != nil {
 		Log.Warnf("failed to receive session request. err=%v", err)
@@ -372,7 +372,7 @@ func sellerRcvSessReq(node *pod_net.Node, Log ILogger) (req *pod_net.SessionRequ
 	return
 }
 
-func preSellerConn(node *pod_net.Node, key *keystore.Key, params SellerConnParam, req *pod_net.SessionRequest, Log ILogger) (err error) {
+func preAliceConn(node *pod_net.Node, key *keystore.Key, params AliceConnParam, req *pod_net.SessionRequest, Log ILogger) (err error) {
 
 	/////////////////////////RecvSessionRequest/////////////////////////
 	sessionIDInt, err := strconv.ParseUint(params.SessionID, 16, 64)
@@ -498,7 +498,7 @@ func modeFromInt(netMode uint8) (mode string, subMode string, ot bool, err error
 	return
 }
 
-func sellerRcvPODReq(node *pod_net.Node, requestFile string) error {
+func AliceRcvPODReq(node *pod_net.Node, requestFile string) error {
 	reqBuf := new(bytes.Buffer)
 	if _, err := node.RecvTxRequest(reqBuf); err != nil {
 		return err
@@ -517,7 +517,7 @@ func sellerRcvPODReq(node *pod_net.Node, requestFile string) error {
 	return nil
 }
 
-func sellerSendPODResp(node *pod_net.Node, responseFile string) error {
+func AliceSendPODResp(node *pod_net.Node, responseFile string) error {
 	txResponse, err := ioutil.ReadFile(responseFile)
 	if err != nil {
 		return fmt.Errorf("failed to read response file: %v", err)
@@ -530,7 +530,7 @@ func sellerSendPODResp(node *pod_net.Node, responseFile string) error {
 	return nil
 }
 
-func sellerRcvPODRecpt(node *pod_net.Node, receiptFile string) (receiptSign []byte, price int64, expireAt int64, err error) {
+func AliceRcvPODRecpt(node *pod_net.Node, receiptFile string) (receiptSign []byte, price int64, expireAt int64, err error) {
 	receipt, _, err := node.RecvTxReceipt()
 	if err != nil {
 		return
@@ -560,14 +560,14 @@ func sellerRcvPODRecpt(node *pod_net.Node, receiptFile string) (receiptSign []by
 	return
 }
 
-func sellerReceiveNegoReq(node *pod_net.Node, buyerNegoRequestFile string) error {
+func AliceReceiveNegoReq(node *pod_net.Node, BobNegoRequestFile string) error {
 	reqBuf := new(bytes.Buffer)
 	if _, err := node.RecvNegoRequest(reqBuf); err != nil {
 		return fmt.Errorf(
 			"failed to receive negotiation request: %v",
 			err)
 	}
-	reqf, err := os.OpenFile(buyerNegoRequestFile, os.O_WRONLY|os.O_CREATE, 0666)
+	reqf, err := os.OpenFile(BobNegoRequestFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to save file: %v", err)
 	}
@@ -580,7 +580,7 @@ func sellerReceiveNegoReq(node *pod_net.Node, buyerNegoRequestFile string) error
 	return nil
 }
 
-func sellerSendNegoResp(node *pod_net.Node, negoResponseFile string, negoRequestFile string) error {
+func AliceSendNegoResp(node *pod_net.Node, negoResponseFile string, negoRequestFile string) error {
 	txResponse, err := ioutil.ReadFile(negoResponseFile)
 	if err != nil {
 		return fmt.Errorf("failed to read response file: %v", err)
@@ -602,7 +602,7 @@ func sellerSendNegoResp(node *pod_net.Node, negoResponseFile string, negoRequest
 	return nil
 }
 
-func sellerRcvNegoResp(node *pod_net.Node, buyerNegoResponseFile string) error {
+func AliceRcvNegoResp(node *pod_net.Node, BobNegoResponseFile string) error {
 
 	negoRespBuf := new(bytes.Buffer)
 	if _, err := node.RecvNegoAck(negoRespBuf); err != nil {
@@ -610,7 +610,7 @@ func sellerRcvNegoResp(node *pod_net.Node, buyerNegoResponseFile string) error {
 			"failed to receive nego ack: %v", err)
 	}
 
-	reqf, err := os.OpenFile(buyerNegoResponseFile, os.O_WRONLY|os.O_CREATE, 0666)
+	reqf, err := os.OpenFile(BobNegoResponseFile, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to save file: %v", err)
 	}
@@ -623,10 +623,10 @@ func sellerRcvNegoResp(node *pod_net.Node, buyerNegoResponseFile string) error {
 	return nil
 }
 
-/////////////////////////////////Buyer////////////////////////////////////////
-type BuyerConnParam struct {
-	SellerIPAddr string
-	SellerAddr   string
+/////////////////////////////////Bob////////////////////////////////////////
+type BobConnParam struct {
+	AliceIPAddr string
+	AliceAddr   string
 	Mode         string
 	SubMode      string
 	OT           bool
@@ -635,18 +635,18 @@ type BuyerConnParam struct {
 	MerkleRoot   string
 }
 
-func preBuyerConn(params BuyerConnParam, key *keystore.Key, Log ILogger) (*pod_net.Node, *rlpx.Connection, BuyerConnParam, error) {
-	node, conn, err := buyNewConn(params.SellerIPAddr, params.SellerAddr, key, Log)
+func preBobConn(params BobConnParam, key *keystore.Key, Log ILogger) (*pod_net.Node, *rlpx.Connection, BobConnParam, error) {
+	node, conn, err := buyNewConn(params.AliceIPAddr, params.AliceAddr, key, Log)
 	if err != nil {
 		Log.Warnf("failed to new connection. err=%v", err)
 		return node, conn, params, errors.New("failed to new connection")
 	}
-	params.SessionID, params.Mode, params.SubMode, params.OT, err = buyerCreateSess(node, params.MerkleRoot, params.Mode, params.SubMode, params.OT, params.UnitPrice, Log)
+	params.SessionID, params.Mode, params.SubMode, params.OT, err = BobCreateSess(node, params.MerkleRoot, params.Mode, params.SubMode, params.OT, params.UnitPrice, Log)
 	if err != nil {
 		Log.Warnf("failed to create net session. err=%v", err)
 		return node, conn, params, errors.New("failed to create net session")
 	}
-	dir := BConf.BuyerDir + "/transaction/" + params.SessionID
+	dir := BConf.BobDir + "/transaction/" + params.SessionID
 	err = os.Mkdir(dir, os.ModePerm)
 	if err != nil {
 		Log.Errorf("create folder %v error. err=%v", dir, err)
@@ -656,12 +656,12 @@ func preBuyerConn(params BuyerConnParam, key *keystore.Key, Log ILogger) (*pod_n
 	return node, conn, params, nil
 }
 
-func buyNewConn(sellerIPAddr string, sellerAddr string, key *keystore.Key, Log ILogger) (*pod_net.Node, *rlpx.Connection, error) {
+func buyNewConn(AliceIPAddr string, AliceAddr string, key *keystore.Key, Log ILogger) (*pod_net.Node, *rlpx.Connection, error) {
 
-	Log.Debugf("sellerIPAddr=%v", sellerIPAddr)
+	Log.Debugf("AliceIPAddr=%v", AliceIPAddr)
 	Log.Debugf("PublicKey=%v", key.PrivateKey.PublicKey)
-	commonAddr := common.HexToAddress(sellerAddr)
-	tcpAddr, err := net.ResolveTCPAddr("tcp", sellerIPAddr)
+	commonAddr := common.HexToAddress(AliceAddr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", AliceIPAddr)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -674,9 +674,9 @@ func buyNewConn(sellerIPAddr string, sellerAddr string, key *keystore.Key, Log I
 	conn, err := rlpx.Dial(serveAddr)
 	if err != nil {
 		return nil, nil, fmt.Errorf(
-			"failed to dial %s: %v", sellerIPAddr, err)
+			"failed to dial %s: %v", AliceIPAddr, err)
 	}
-	Log.Debugf("create dial with seller successfully. sellerAddr=%v, sellerIP=%v. ", serveAddr, sellerIPAddr)
+	Log.Debugf("create dial with Alice successfully. AliceAddr=%v, AliceIP=%v. ", serveAddr, AliceIPAddr)
 
 	rkey, err := conn.Handshake(key.PrivateKey, true)
 	if err != nil {
@@ -688,11 +688,11 @@ func buyNewConn(sellerIPAddr string, sellerAddr string, key *keystore.Key, Log I
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create client node: %v", err)
 	}
-	Log.Debugf("connect to seller...")
+	Log.Debugf("connect to Alice...")
 	return node, conn, nil
 }
 
-func buyerCreateSess(node *pod_net.Node, mklroot string, mode string, subMode string, ot bool, unitPrice int64, Log ILogger) (string, string, string, bool, error) {
+func BobCreateSess(node *pod_net.Node, mklroot string, mode string, subMode string, ot bool, unitPrice int64, Log ILogger) (string, string, string, bool, error) {
 	mklrootByte, err := hex.DecodeString(mklroot)
 	if err != nil {
 		return "", mode, subMode, ot, fmt.Errorf(
@@ -753,7 +753,7 @@ func buyerCreateSess(node *pod_net.Node, mklroot string, mode string, subMode st
 	return sessionID, mode, subMode, ot, nil
 }
 
-func buyerSendPODReq(node *pod_net.Node, requestFile string) error {
+func BobSendPODReq(node *pod_net.Node, requestFile string) error {
 	txReq, err := ioutil.ReadFile(requestFile)
 	if err != nil {
 		return fmt.Errorf("failed to read transaction request file: %v", err)
@@ -765,7 +765,7 @@ func buyerSendPODReq(node *pod_net.Node, requestFile string) error {
 	return nil
 }
 
-func buyerRcvPODResp(node *pod_net.Node, responseFile string) error {
+func BobRcvPODResp(node *pod_net.Node, responseFile string) error {
 
 	RespBuf := new(bytes.Buffer)
 	_, err := node.RecvTxResponse(RespBuf)
@@ -792,7 +792,7 @@ type ReceiptForConnection struct {
 	ExpireAt    int64  `json:"expireAt"`
 }
 
-func buyerSendPODRecpt(node *pod_net.Node, price int64, expireAt int64, receiptByte []byte, sign []byte) error {
+func BobSendPODRecpt(node *pod_net.Node, price int64, expireAt int64, receiptByte []byte, sign []byte) error {
 
 	var receipt ReceiptForConnection
 	receipt.ReceiptByte = receiptByte
@@ -810,16 +810,16 @@ func buyerSendPODRecpt(node *pod_net.Node, price int64, expireAt int64, receiptB
 	return nil
 }
 
-func buyerSendNegoReq(node *pod_net.Node, negoRequestFile string) error {
+func BobSendNegoReq(node *pod_net.Node, negoRequestFile string) error {
 
-	buyerNegoReq, err := ioutil.ReadFile(negoRequestFile)
+	BobNegoReq, err := ioutil.ReadFile(negoRequestFile)
 	if err != nil {
 		return fmt.Errorf("failed to read transaction receipt file: %v", err)
 	}
 
 	if err := node.SendNegoRequest(
-		bytes.NewReader(buyerNegoReq),
-		uint64(len(buyerNegoReq)),
+		bytes.NewReader(BobNegoReq),
+		uint64(len(BobNegoReq)),
 	); err != nil {
 		return fmt.Errorf(
 			"failed to send negotiation request: %v",
@@ -829,7 +829,7 @@ func buyerSendNegoReq(node *pod_net.Node, negoRequestFile string) error {
 	return nil
 }
 
-func buyerRcvNegoResp(node *pod_net.Node, negoResponseFile string, negoAckFile string) error {
+func BobRcvNegoResp(node *pod_net.Node, negoResponseFile string, negoAckFile string) error {
 	respBuf := new(bytes.Buffer)
 	ackBuf := new(bytes.Buffer)
 	if _, _, err := node.RecvNegoAckReq(
@@ -864,16 +864,16 @@ func buyerRcvNegoResp(node *pod_net.Node, negoResponseFile string, negoAckFile s
 	return nil
 }
 
-func buyerSendNegoResp(node *pod_net.Node, negoResponseFile string) error {
+func BobSendNegoResp(node *pod_net.Node, negoResponseFile string) error {
 
-	buyerNegoResp, err := ioutil.ReadFile(negoResponseFile)
+	BobNegoResp, err := ioutil.ReadFile(negoResponseFile)
 	if err != nil {
 		return fmt.Errorf("failed to read transaction receipt file: %v", err)
 	}
 
 	if err := node.SendNegoAck(
-		bytes.NewReader(buyerNegoResp),
-		uint64(len(buyerNegoResp)),
+		bytes.NewReader(BobNegoResp),
+		uint64(len(BobNegoResp)),
 	); err != nil {
 		return fmt.Errorf(
 			"failed to send nego ack: %v", err)

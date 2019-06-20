@@ -57,7 +57,7 @@ func ReadCfgAPIHandler(w http.ResponseWriter, r *http.Request) {
 func ReLoadConfigAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
-	if SellerNodeStart && BuyerNodeStart {
+	if AliceNodeStart && BobNodeStart {
 		//TODO: be capable to modify
 		Log.Warnf("the node has started and can not modify config.")
 		fmt.Fprintf(w, RESPONSE_HAS_STARTED)
@@ -76,7 +76,7 @@ func ReLoadConfigAPIHandler(w http.ResponseWriter, r *http.Request) {
 		nodeRecovery(w, Log)
 	}()
 
-	if !SellerNodeStart {
+	if !AliceNodeStart {
 		ip := r.FormValue("ip")
 		if ip != "" {
 			Log.Debugf("ip=%v", ip)
@@ -85,7 +85,7 @@ func ReLoadConfigAPIHandler(w http.ResponseWriter, r *http.Request) {
 		plog.Detail = "modify ip =" + ip + ";"
 	}
 
-	if !SellerNodeStart && !BuyerNodeStart {
+	if !AliceNodeStart && !BobNodeStart {
 		password := r.FormValue("password")
 		keystoreFile := r.FormValue("keystore")
 		privkey := r.FormValue("privkey")
@@ -174,13 +174,13 @@ type InitPublishConfig struct {
 	FilePath    string   `json:"file_path"`
 }
 
-//InitPublishDataAPIHandler is a api handler for seller to initializing data for publishing.
+//InitPublishDataAPIHandler is a api handler for Alice to initializing data for publishing.
 func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_SELLER_PUBLISH_INIT
+	plog.Operation = LOG_OPERATION_TYPE_ALICE_PUBLISH_INIT
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -228,7 +228,7 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log.Debugf("parameter verified. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 	plog.Detail = fmt.Sprintf("mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 
-	var dir string = BConf.SellerDir + "/publish"
+	var dir string = BConf.AliceDir + "/publish"
 	var fileBytes []byte
 	var fileName string
 	if config.FilePath != "" {
@@ -314,13 +314,13 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//PublishDataAPIHandler is the api handler for seller to publish data to contract.
+//PublishDataAPIHandler is the api handler for Alice to publish data to contract.
 func PublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_SELLER_PUBLISH
+	plog.Operation = LOG_OPERATION_TYPE_ALICE_PUBLISH
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -336,7 +336,7 @@ func PublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	plog.Detail = fmt.Sprintf("merkleRoot=%v, deposit value=%v", merkleRoot, value)
 
 	Log.Infof("start publish data to contract...merkleRoot=%v, value=%v", merkleRoot, value)
-	dataFile := BConf.SellerDir + "/publish/" + merkleRoot
+	dataFile := BConf.AliceDir + "/publish/" + merkleRoot
 
 	valueInt, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
@@ -357,7 +357,7 @@ func PublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !rs {
-		Log.Warnf("the data does not exist.")
+		Log.Warnf("the data does not exist. filepath=%v", dataFile)
 		fmt.Fprintf(w, RESPONSE_DATA_NOT_EXIST)
 		return
 	}
@@ -399,13 +399,13 @@ func PublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//CloseDataAPIHandler is the api handler for seller to close a published data in contract.
+//CloseDataAPIHandler is the api handler for Alice to close a published data in contract.
 func CloseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_SELLER_CLOSE
+	plog.Operation = LOG_OPERATION_TYPE_ALICE_CLOSE
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -425,7 +425,7 @@ func CloseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bulletinFile := BConf.SellerDir + "/publish/" + merkleRoot + "/bulletin"
+	bulletinFile := BConf.AliceDir + "/publish/" + merkleRoot + "/bulletin"
 
 	b, err := readBulletinFile(bulletinFile, Log)
 	if err != nil {
@@ -476,13 +476,13 @@ func CloseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//SellerWithdrawFromDataAPIHandler is the api handler for seller to withdraw ETH from closed data.
-func SellerWithdrawFromDataAPIHandler(w http.ResponseWriter, r *http.Request) {
+//AliceWithdrawFromDataAPIHandler is the api handler for Alice to withdraw ETH from closed data.
+func AliceWithdrawFromDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_SELLER_CLOSE
+	plog.Operation = LOG_OPERATION_TYPE_ALICE_CLOSE
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -502,7 +502,7 @@ func SellerWithdrawFromDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	plog.Detail = fmt.Sprintf("merkleRoot=%v", merkleRoot)
 
-	bulletinFile := BConf.SellerDir + "/publish/" + merkleRoot + "/bulletin"
+	bulletinFile := BConf.AliceDir + "/publish/" + merkleRoot + "/bulletin"
 	b, err := readBulletinFile(bulletinFile, Log)
 	if err != nil {
 		Log.Warnf("failed to read bulletin file. err=%v", err)
@@ -522,7 +522,7 @@ func SellerWithdrawFromDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	t := time.Now()
 	txid, err := withdrawAETHFromContract(bltByte, Log)
 	if err != nil {
-		Log.Warnf("failed to withdraw ETH for seller from contract. err=%v", err)
+		Log.Warnf("failed to withdraw ETH for Alice from contract. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_READ_CONTRACT_FAILED)
 		return
 	}
@@ -533,13 +533,13 @@ func SellerWithdrawFromDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//SellerWithdrawFromTxAPIHandler is the api handler for seller to withdraw ETH from transacion.
-func SellerWithdrawFromTxAPIHandler(w http.ResponseWriter, r *http.Request) {
+//AliceWithdrawFromTxAPIHandler is the api handler for Alice to withdraw ETH from transacion.
+func AliceWithdrawFromTxAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_SELLER_WITHDRAW_FROM_TX
+	plog.Operation = LOG_OPERATION_TYPE_ALICE_WITHDRAW_FROM_TX
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -559,7 +559,7 @@ func SellerWithdrawFromTxAPIHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 		return
 	}
-	tx, rs, err := loadSellerFromDB(sessionID)
+	tx, rs, err := loadAliceFromDB(sessionID)
 	if err != nil {
 		Log.Warnf("failed to load transaction info from db. sessionID=%v, err=%v", sessionID, err)
 		fmt.Fprintf(w, RESPONSE_READ_DATABASE_FAILED)
@@ -577,9 +577,9 @@ func SellerWithdrawFromTxAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	Log.Debugf("start send transaction to withdraw eth...sessionID=%v", sessionID)
 	t := time.Now()
-	txid, err := settleDealForComplaint(sessionID, tx.SellerAddr, tx.BuyerAddr)
+	txid, err := settleDealForComplaint(sessionID, tx.AliceAddr, tx.BobAddr)
 	if err != nil {
-		Log.Warnf("failed to withdraw eth for seller from contract. err=%v", err)
+		Log.Warnf("failed to withdraw eth for Alice from contract. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_READ_CONTRACT_FAILED)
 		return
 	}
@@ -590,14 +590,14 @@ func SellerWithdrawFromTxAPIHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//BuyerPurchaseDataAPIHandler provides api for purchasing data for buyer.
-func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
+//BobPurchaseDataAPIHandler provides api for purchasing data for Bob.
+func BobPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	Log.Infof("start purchase data...")
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_BUYER_TX
+	plog.Operation = LOG_OPERATION_TYPE_BOB_TX
 	defer func() {
 		err := insertLogToDB(plog)
 		if err != nil {
@@ -617,17 +617,17 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	Log.Debugf("success to parse request data. data=%v", requestData)
 
-	if data.MerkleRoot == "" || data.SellerIP == "" || data.SellerAddr == "" || data.BulletinFile == "" || data.PubPath == "" {
-		Log.Warnf("invalid parameter. merkleRoot=%v, sellerIP=%v, sellerAddr=%v, bulletinFile=%v, PubPath=%v",
-			data.MerkleRoot, data.SellerIP, data.SellerAddr, data.BulletinFile, data.PubPath)
+	if data.MerkleRoot == "" || data.AliceIP == "" || data.AliceAddr == "" || data.BulletinFile == "" || data.PubPath == "" {
+		Log.Warnf("invalid parameter. merkleRoot=%v, AliceIP=%v, AliceAddr=%v, bulletinFile=%v, PubPath=%v",
+			data.MerkleRoot, data.AliceIP, data.AliceAddr, data.BulletinFile, data.PubPath)
 		fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 		return
 	}
-	Log.Debugf("read parameters. merkleRoot=%v, sellerIP=%v, sellerAddr=%v, bulletinFile=%v, PubPath=%v",
-		data.MerkleRoot, data.SellerIP, data.SellerAddr, data.BulletinFile, data.PubPath)
+	Log.Debugf("read parameters. merkleRoot=%v, AliceIP=%v, AliceAddr=%v, bulletinFile=%v, PubPath=%v",
+		data.MerkleRoot, data.AliceIP, data.AliceAddr, data.BulletinFile, data.PubPath)
 
-	plog.Detail = fmt.Sprintf("merkleRoot=%v, sellerIP=%v, sellerAddr=%v, bulletinFile=%v, PubPath=%v",
-		data.MerkleRoot, data.SellerIP, data.SellerAddr, data.BulletinFile, data.PubPath)
+	plog.Detail = fmt.Sprintf("merkleRoot=%v, AliceIP=%v, AliceAddr=%v, bulletinFile=%v, PubPath=%v",
+		data.MerkleRoot, data.AliceIP, data.AliceAddr, data.BulletinFile, data.PubPath)
 
 	bulletin, err := readBulletinFile(data.BulletinFile, Log)
 	if err != nil {
@@ -638,8 +638,8 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	plog.Detail = fmt.Sprintf("%v, merkle root=%v,", plog.Detail, bulletin.SigmaMKLRoot)
 
 	Log.Debugf("step0: prepare for transaction...")
-	var params = BuyerConnParam{data.SellerIP, data.SellerAddr, bulletin.Mode, data.SubMode, data.OT, data.UnitPrice, "", bulletin.SigmaMKLRoot}
-	node, conn, params, err := preBuyerConn(params, ETHKey, Log)
+	var params = BobConnParam{data.AliceIP, data.AliceAddr, bulletin.Mode, data.SubMode, data.OT, data.UnitPrice, "", bulletin.SigmaMKLRoot}
+	node, conn, params, err := preBobConn(params, ETHKey, Log)
 	if err != nil {
 		Log.Warnf("failed to prepare net for transaction. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_PURCHASE_FAILED)
@@ -653,28 +653,28 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 			Log.Errorf("failed to close connection on client side: %v", err)
 		}
 	}()
-	Log.Debugf("[%v]step0: success to establish connecting session with seller. seller IP=%v, seller address=%v", params.SessionID, params.SellerIPAddr, params.SellerAddr)
+	Log.Debugf("[%v]step0: success to establish connecting session with Alice. Alice IP=%v, Alice address=%v", params.SessionID, params.AliceIPAddr, params.AliceAddr)
 	plog.Detail = fmt.Sprintf("%v, sessionID=%v,", plog.Detail, params.SessionID)
 	plog.SessionId = params.SessionID
 
-	var tx BuyerTransaction
+	var tx BobTransaction
 	tx.SessionID = params.SessionID
 	tx.Status = TRANSACTION_STATUS_START
 	tx.Bulletin = bulletin
-	tx.SellerIP = params.SellerIPAddr
-	tx.SellerAddr = params.SellerAddr
+	tx.AliceIP = params.AliceIPAddr
+	tx.AliceAddr = params.AliceAddr
 	tx.Mode = params.Mode
 	tx.SubMode = params.SubMode
 	tx.OT = params.OT
 	tx.UnitPrice = params.UnitPrice
-	tx.BuyerAddr = fmt.Sprintf("%v", ETHKey.Address.Hex())
+	tx.BobAddr = fmt.Sprintf("%v", ETHKey.Address.Hex())
 
 	Log.Debugf("[%v]step0: success to prepare for transaction...", params.SessionID)
 	tx.Status = TRANSACTION_STATUS_START
-	err = insertBuyerTxToDB(tx)
+	err = insertBobTxToDB(tx)
 	if err != nil {
-		Log.Warnf("failed to save transaction  to db for buyer. err=%v", err)
-		fmt.Fprintf(w, fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "failed to save transaction to db for buyer."))
+		Log.Warnf("failed to save transaction  to db for Bob. err=%v", err)
+		fmt.Fprintf(w, fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "failed to save transaction to db for Bob."))
 		return
 	}
 
@@ -683,28 +683,28 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				response = buyerTxForPOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
+				response = BobTxForPOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForPC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+				response = BobTxForPC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
-			response = buyerTxForPAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+			response = BobTxForPAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		}
 	} else if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				response = buyerTxForTOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
+				response = BobTxForTOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForTC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+				response = BobTxForTC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
-			response = buyerTxForTAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+			response = BobTxForTAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		case TRANSACTION_SUB_MODE_VRF:
 			if tx.OT {
-				response = buyerTxForTOQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.PhantomKeyValue, data.BulletinFile, data.PubPath, Log)
+				response = BobTxForTOQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.PhantomKeyValue, data.BulletinFile, data.PubPath, Log)
 			} else {
-				response = buyerTxForTQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.BulletinFile, data.PubPath, Log)
+				response = BobTxForTQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.BulletinFile, data.PubPath, Log)
 			}
 		}
 	}
@@ -723,13 +723,13 @@ func BuyerPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//BuyerDepositETHAPIHandler provides api for depositing eth for buyer from contract.
-func BuyerDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
+//BobDepositETHAPIHandler provides api for depositing eth for Bob from contract.
+func BobDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_BUYER_DEPOSIT
+	plog.Operation = LOG_OPERATION_TYPE_BOB_DEPOSIT
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -741,9 +741,9 @@ func BuyerDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	value := r.FormValue("value")
-	sellerAddr := r.FormValue("address")
-	Log.Infof("start deposit eth to seller. value=%v, seller address=%v", value, sellerAddr)
-	plog.Detail = fmt.Sprintf("undeposit value=%v, seller address=%v", value, sellerAddr)
+	AliceAddr := r.FormValue("address")
+	Log.Infof("start deposit eth to Alice. value=%v, Alice address=%v", value, AliceAddr)
+	plog.Detail = fmt.Sprintf("undeposit value=%v, Alice address=%v", value, AliceAddr)
 
 	valueInt, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
@@ -752,22 +752,22 @@ func BuyerDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if sellerAddr == "" {
-		Log.Warnf("incomplete parameter. seller address=%v", sellerAddr)
+	if AliceAddr == "" {
+		Log.Warnf("incomplete parameter. Alice address=%v", AliceAddr)
 		fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 		return
 	}
-	Log.Debugf("read parameters. value=%v, seller address=%v", value, sellerAddr)
+	Log.Debugf("read parameters. value=%v, Alice address=%v", value, AliceAddr)
 
-	Log.Debugf("start send transaction to deposit eth to seller in contract...value=%v, seller address=%v", value, sellerAddr)
+	Log.Debugf("start send transaction to deposit eth to Alice in contract...value=%v, Alice address=%v", value, AliceAddr)
 	t := time.Now()
-	txid, err := buyerDeposit(valueInt, sellerAddr)
+	txid, err := BobDeposit(valueInt, AliceAddr)
 	if err != nil {
 		Log.Warnf("failed to deposit eth to contract. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_DEPOSIT_CONTRACT_FAILED)
 		return
 	}
-	Log.Infof("success to send transaction to deposit eth...txid=%v, value=%v, seller address=%v, time cost=%v", txid, value, sellerAddr, time.Since(t))
+	Log.Infof("success to send transaction to deposit eth...txid=%v, value=%v, Alice address=%v, time cost=%v", txid, value, AliceAddr, time.Since(t))
 
 	plog.Result = LOG_RESULT_SUCCESS
 	fmt.Fprintf(w, fmt.Sprintf(RESPONSE_SUCCESS, "depositing eth to contract..."))
@@ -775,13 +775,13 @@ func BuyerDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//BuyerUnDepositETHAPIHandler provides api for undepositing eth for buyer from contract.
-func BuyerUnDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
+//BobUnDepositETHAPIHandler provides api for undepositing eth for Bob from contract.
+func BobUnDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_BUYER_UNDEPOSIT
+	plog.Operation = LOG_OPERATION_TYPE_BOB_UNDEPOSIT
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -792,38 +792,38 @@ func BuyerUnDepositETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 		nodeRecovery(w, Log)
 	}()
 
-	sellerAddr := r.FormValue("address")
-	Log.Infof("start undeposit eth from seller in contract. seller address=%v", sellerAddr)
+	AliceAddr := r.FormValue("address")
+	Log.Infof("start undeposit eth from Alice in contract. Alice address=%v", AliceAddr)
 
-	if sellerAddr == "" {
-		Log.Warnf("incomplete parameter. seller address=%v", sellerAddr)
+	if AliceAddr == "" {
+		Log.Warnf("incomplete parameter. Alice address=%v", AliceAddr)
 		fmt.Fprintf(w, RESPONSE_UNDEPOSIT_CONTRACT_FAILED)
 		return
 	}
-	plog.Detail = fmt.Sprintf("seller address=%v", sellerAddr)
+	plog.Detail = fmt.Sprintf("Alice address=%v", AliceAddr)
 
-	Log.Debugf("start send transaction to undeposit eth to seller in contract...seller address=%v", sellerAddr)
+	Log.Debugf("start send transaction to undeposit eth to Alice in contract...Alice address=%v", AliceAddr)
 	t := time.Now()
-	txid, err := buyerUnDeposit(sellerAddr)
+	txid, err := BobUnDeposit(AliceAddr)
 	if err != nil {
 		Log.Warnf("failed to undeposit eth to contract. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_UNDEPOSIT_CONTRACT_FAILED)
 		return
 	}
-	Log.Infof("success to send transaction to undeposit eth...txid=%v, seller address=%v, time cost=%v", txid, sellerAddr, time.Since(t))
+	Log.Infof("success to send transaction to undeposit eth...txid=%v, Alice address=%v, time cost=%v", txid, AliceAddr, time.Since(t))
 
 	plog.Result = LOG_RESULT_SUCCESS
 	fmt.Fprintf(w, fmt.Sprintf(RESPONSE_SUCCESS, "undepositing eth from contract..."))
 	return
 }
 
-// BuyerWithdrawETHAPIHandler provides api for withdrawing ETH for buyer from contract.
-func BuyerWithdrawETHAPIHandler(w http.ResponseWriter, r *http.Request) {
+// BobWithdrawETHAPIHandler provides api for withdrawing ETH for Bob from contract.
+func BobWithdrawETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 	Log := Logger.NewSessionLogger()
 
 	var plog PodLog
 	plog.Result = LOG_RESULT_FAILED
-	plog.Operation = LOG_OPERATION_TYPE_BUYER_WITHDRAW
+	plog.Operation = LOG_OPERATION_TYPE_BOB_WITHDRAW
 
 	defer func() {
 		err := insertLogToDB(plog)
@@ -834,18 +834,18 @@ func BuyerWithdrawETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 		nodeRecovery(w, Log)
 	}()
 
-	sellerAddr := r.FormValue("address")
-	Log.Infof("start withdraw eth from contract. seller address=%v", sellerAddr)
-	if sellerAddr == "" {
-		Log.Warnf("incomplete parameter. seller address=%v", sellerAddr)
+	AliceAddr := r.FormValue("address")
+	Log.Infof("start withdraw eth from contract. Alice address=%v", AliceAddr)
+	if AliceAddr == "" {
+		Log.Warnf("incomplete parameter. Alice address=%v", AliceAddr)
 		fmt.Fprintf(w, RESPONSE_WITHDRAW_CONTRACT_FAILED)
 		return
 	}
-	plog.Detail = fmt.Sprintf("seller address=%v", sellerAddr)
+	plog.Detail = fmt.Sprintf("Alice address=%v", AliceAddr)
 
-	Log.Debugf("start send transaction to withdraw eth from contract...seller address=%v", sellerAddr)
+	Log.Debugf("start send transaction to withdraw eth from contract...Alice address=%v", AliceAddr)
 	t := time.Now()
-	txid, rs, err := buyerWithdrawETHFromContract(sellerAddr)
+	txid, rs, err := BobWithdrawETHFromContract(AliceAddr)
 	if err != nil {
 		Log.Warnf("failed to deposit ETH to contract. err=%v", err)
 		fmt.Fprintf(w, RESPONSE_WITHDRAW_CONTRACT_FAILED)
@@ -856,7 +856,7 @@ func BuyerWithdrawETHAPIHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, RESPONSE_WITHDRAW_CONTRACT_FAILED)
 		return
 	}
-	Log.Infof("success to send transaction to withdraw eth...txid=%v, seller address=%v, time cost=%v", txid, sellerAddr, time.Since(t))
+	Log.Infof("success to send transaction to withdraw eth...txid=%v, Alice address=%v, time cost=%v", txid, AliceAddr, time.Since(t))
 
 	plog.Result = LOG_RESULT_SUCCESS
 	fmt.Fprintf(w, fmt.Sprintf(RESPONSE_SUCCESS, "withdrawing eth from contract..."))

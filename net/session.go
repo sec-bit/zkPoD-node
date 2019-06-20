@@ -9,7 +9,7 @@ import (
 
 // Session State Transitions:
 //
-//  Seller (A)                                                Buyer (B)
+//  Alice (A)                                                Bob (B)
 //  ==========                                                =========
 //
 //  Connected                       req                       Connected
@@ -211,7 +211,7 @@ func (node *Node) SendSessionAck(
 	id uint64, mode uint8, mklroot []byte, extra []byte, needFurtherAck bool,
 ) error {
 	if needFurtherAck && node.state != stateSessionReqRecvd {
-		// server/seller side
+		// server/Alice side
 		return invalidStateError(node, stateSessionReqRecvd)
 	} else if !needFurtherAck && node.state != stateSessionAckRecvd {
 		return invalidStateError(node, stateSessionAckRecvd)

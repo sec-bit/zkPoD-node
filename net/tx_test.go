@@ -489,9 +489,9 @@ func TestOTNegoAckReq(t *testing.T) {
 	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
-	buyerNegoReq := utils.MakeRandomMsg(32)
-	sellerNegoReq := utils.MakeRandomMsg(32)
-	sellerNegoAck := utils.MakeRandomMsg(128)
+	BobNegoReq := utils.MakeRandomMsg(32)
+	AliceNegoReq := utils.MakeRandomMsg(32)
+	AliceNegoAck := utils.MakeRandomMsg(128)
 
 	wg.Add(1)
 	go startServer(t, &wg, serverAddr, serverKey, addrChan,
@@ -523,10 +523,10 @@ func TestOTNegoAckReq(t *testing.T) {
 			}
 
 			if err := node.SendNegoAckReq(
-				bytes.NewReader(sellerNegoAck),
-				bytes.NewReader(sellerNegoReq),
-				uint64(len(sellerNegoAck)),
-				uint64(len(sellerNegoReq)),
+				bytes.NewReader(AliceNegoAck),
+				bytes.NewReader(AliceNegoReq),
+				uint64(len(AliceNegoAck)),
+				uint64(len(AliceNegoReq)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send nego ack+req: %v", err)
@@ -566,8 +566,8 @@ func TestOTNegoAckReq(t *testing.T) {
 			}
 
 			if err := node.SendNegoRequest(
-				bytes.NewReader(buyerNegoReq),
-				uint64(len(buyerNegoReq)),
+				bytes.NewReader(BobNegoReq),
+				uint64(len(BobNegoReq)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send negotiation request: %v",
@@ -583,32 +583,32 @@ func TestOTNegoAckReq(t *testing.T) {
 				return fmt.Errorf(
 					"failed to receive nego ack+req: %v",
 					err)
-			} else if m != uint64(len(sellerNegoAck)) {
+			} else if m != uint64(len(AliceNegoAck)) {
 				return fmt.Errorf(
-					"invalid seller nego response size, get %d bytes, expect %d bytes",
-					m, len(sellerNegoAck))
-			} else if n != uint64(len(sellerNegoReq)) {
+					"invalid Alice nego response size, get %d bytes, expect %d bytes",
+					m, len(AliceNegoAck))
+			} else if n != uint64(len(AliceNegoReq)) {
 				return fmt.Errorf(
-					"invalid seller nego request size, get %d bytes, expect %d bytes",
-					n, len(sellerNegoReq))
+					"invalid Alice nego request size, get %d bytes, expect %d bytes",
+					n, len(AliceNegoReq))
 			}
 			if node.state != stateNegoAckReqRecvd {
 				return fmt.Errorf(
 					"client node not in NegoAckReqRecvd state")
 			}
 			negoResp := negoRespBuf.Bytes()
-			if !bytes.Equal(negoResp, sellerNegoAck) {
+			if !bytes.Equal(negoResp, AliceNegoAck) {
 				return fmt.Errorf(
 					"mismatch server nego response, get %s, expect %s",
 					hex.EncodeToString(negoResp),
-					hex.EncodeToString(sellerNegoAck))
+					hex.EncodeToString(AliceNegoAck))
 			}
 			negoReq := negoReqBuf.Bytes()
-			if !bytes.Equal(negoReq, sellerNegoReq) {
+			if !bytes.Equal(negoReq, AliceNegoReq) {
 				return fmt.Errorf(
 					"mismatch server nego reqeust, get %s, expect %s",
 					hex.EncodeToString(negoReq),
-					hex.EncodeToString(sellerNegoReq))
+					hex.EncodeToString(AliceNegoReq))
 			}
 
 			return nil
@@ -631,10 +631,10 @@ func TestOTNegoAck(t *testing.T) {
 	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
-	buyerNegoReq := utils.MakeRandomMsg(32)
-	buyerNegoAck := utils.MakeRandomMsg(128)
-	sellerNegoReq := utils.MakeRandomMsg(32)
-	sellerNegoAck := utils.MakeRandomMsg(128)
+	BobNegoReq := utils.MakeRandomMsg(32)
+	BobNegoAck := utils.MakeRandomMsg(128)
+	AliceNegoReq := utils.MakeRandomMsg(32)
+	AliceNegoAck := utils.MakeRandomMsg(128)
 
 	wg.Add(1)
 	go startServer(t, &wg, serverAddr, serverKey, addrChan,
@@ -666,10 +666,10 @@ func TestOTNegoAck(t *testing.T) {
 			}
 
 			if err := node.SendNegoAckReq(
-				bytes.NewReader(sellerNegoAck),
-				bytes.NewReader(sellerNegoReq),
-				uint64(len(sellerNegoAck)),
-				uint64(len(sellerNegoReq)),
+				bytes.NewReader(AliceNegoAck),
+				bytes.NewReader(AliceNegoReq),
+				uint64(len(AliceNegoAck)),
+				uint64(len(AliceNegoReq)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send nego ack+req: %v", err)
@@ -679,21 +679,21 @@ func TestOTNegoAck(t *testing.T) {
 			if n, err := node.RecvNegoAck(negoRespBuf); err != nil {
 				return fmt.Errorf(
 					"failed to receive nego ack: %v", err)
-			} else if n != uint64(len(buyerNegoAck)) {
+			} else if n != uint64(len(BobNegoAck)) {
 				return fmt.Errorf(
-					"invalid buyer nego ack size, get %d bytes, expect %d bytes",
-					n, len(buyerNegoAck))
+					"invalid Bob nego ack size, get %d bytes, expect %d bytes",
+					n, len(BobNegoAck))
 			}
 			if node.state != stateNegotiated {
 				return fmt.Errorf(
 					"server node not in Negotiated state")
 			}
 			negoResp := negoRespBuf.Bytes()
-			if !bytes.Equal(negoResp, buyerNegoAck) {
+			if !bytes.Equal(negoResp, BobNegoAck) {
 				return fmt.Errorf(
 					"mismatch nego ack, get %s, expect %v",
 					hex.EncodeToString(negoResp),
-					hex.EncodeToString(buyerNegoAck))
+					hex.EncodeToString(BobNegoAck))
 			}
 
 			return nil
@@ -726,8 +726,8 @@ func TestOTNegoAck(t *testing.T) {
 			}
 
 			if err := node.SendNegoRequest(
-				bytes.NewReader(buyerNegoReq),
-				uint64(len(buyerNegoReq)),
+				bytes.NewReader(BobNegoReq),
+				uint64(len(BobNegoReq)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send negotiation request: %v",
@@ -743,8 +743,8 @@ func TestOTNegoAck(t *testing.T) {
 			}
 
 			if err := node.SendNegoAck(
-				bytes.NewReader(buyerNegoAck),
-				uint64(len(buyerNegoAck)),
+				bytes.NewReader(BobNegoAck),
+				uint64(len(BobNegoAck)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send nego ack: %v", err)
@@ -774,10 +774,10 @@ func TestOTPod(t *testing.T) {
 	mode := uint8(ModePlainOTComplaintPoD)
 	sessionID := uint64(0xdeadbeaf)
 
-	buyerNegoReq := utils.MakeRandomMsg(32)
-	buyerNegoAck := utils.MakeRandomMsg(128)
-	sellerNegoReq := utils.MakeRandomMsg(32)
-	sellerNegoAck := utils.MakeRandomMsg(128)
+	BobNegoReq := utils.MakeRandomMsg(32)
+	BobNegoAck := utils.MakeRandomMsg(128)
+	AliceNegoReq := utils.MakeRandomMsg(32)
+	AliceNegoAck := utils.MakeRandomMsg(128)
 
 	txReq := utils.MakeRandomMsg(32)
 	txResponse := utils.MakeRandomMsg(128)
@@ -813,10 +813,10 @@ func TestOTPod(t *testing.T) {
 			}
 
 			if err := node.SendNegoAckReq(
-				bytes.NewReader(sellerNegoAck),
-				bytes.NewReader(sellerNegoReq),
-				uint64(len(sellerNegoAck)),
-				uint64(len(sellerNegoReq)),
+				bytes.NewReader(AliceNegoAck),
+				bytes.NewReader(AliceNegoReq),
+				uint64(len(AliceNegoAck)),
+				uint64(len(AliceNegoReq)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send nego ack+req: %v", err)
@@ -900,8 +900,8 @@ func TestOTPod(t *testing.T) {
 			}
 
 			if err := node.SendNegoRequest(
-				bytes.NewReader(buyerNegoReq),
-				uint64(len(buyerNegoReq)),
+				bytes.NewReader(BobNegoReq),
+				uint64(len(BobNegoReq)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send negotiation request: %v",
@@ -917,8 +917,8 @@ func TestOTPod(t *testing.T) {
 			}
 
 			if err := node.SendNegoAck(
-				bytes.NewReader(buyerNegoAck),
-				uint64(len(buyerNegoAck)),
+				bytes.NewReader(BobNegoAck),
+				uint64(len(BobNegoAck)),
 			); err != nil {
 				return fmt.Errorf(
 					"failed to send nego ack: %v", err)

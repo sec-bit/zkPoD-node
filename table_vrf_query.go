@@ -6,19 +6,19 @@ import (
 	tablevrf "github.com/sec-bit/zkPoD-lib/pod_go/table/vrfq"
 )
 
-type PoDSellerTQ struct {
-	SellerSession *tablevrf.SellerSession `json:"sellerSession"`
+type PoDAliceTQ struct {
+	AliceSession *tablevrf.AliceSession `json:"AliceSession"`
 }
 
-// sellerNewSessForTQ prepares seller's session while mode is table_vrf_query.
+// AliceNewSessForTQ prepares Alice's session while mode is table_vrf_query.
 //
-// It is provides an interface for NewSellerSession.
+// It is provides an interface for NewAliceSession.
 //
 // Return:
-//  If no error occurs, return a PoDSellerTQ struct and a nil error.
+//  If no error occurs, return a PoDAliceTQ struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForTQ(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerTQ, error) {
-	var tq PoDSellerTQ
+func AliceNewSessForTQ(publishPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDAliceTQ, error) {
+	var tq PoDAliceTQ
 	rs, err := pathExists(publishPath)
 	if err != nil {
 		Log.Warnf("Failed to check. err=%v", err)
@@ -30,25 +30,25 @@ func sellerNewSessForTQ(publishPath string, sellerID [40]uint8, buyerID [40]uint
 	}
 	Log.Debugf("publishPath=%v", publishPath)
 
-	tq.SellerSession, err = tablevrf.NewSellerSession(publishPath, sellerID, buyerID)
+	tq.AliceSession, err = tablevrf.NewAliceSession(publishPath, AliceID, BobID)
 	if err != nil {
-		Log.Warnf("failed to create session for seller. err=%v", err)
-		return tq, errors.New("failed to create session for seller")
+		Log.Warnf("failed to create session for Alice. err=%v", err)
+		return tq, errors.New("failed to create session for Alice")
 	}
 	Log.Debugf("success to create session")
 	return tq, nil
 }
 
-// sellerVerifyReq verifies request file and generates response file for seller while mode is table_vrf_query.
+// AliceVerifyReq verifies request file and generates response file for Alice while mode is table_vrf_query.
 //
 // It is provides an interface for OnRequest.
 //
 // Return:
 //  If verify transaction requset and generate transaction response successfully, return true.
 //  Otherwise, return false.
-func (tq PoDSellerTQ) sellerVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
+func (tq PoDAliceTQ) AliceVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
 
-	err := tq.SellerSession.OnRequest(requestFile, responseFile)
+	err := tq.AliceSession.OnRequest(requestFile, responseFile)
 	if err != nil {
 		Log.Warnf("Verify request and generate response....Failed. err=%v", err)
 		return false
@@ -57,16 +57,16 @@ func (tq PoDSellerTQ) sellerVerifyReq(requestFile string, responseFile string, L
 	return true
 }
 
-// sellerVerifyReceipt verifies receipt file and generate secret file for seller while mode is table_vrf_query.
+// AliceVerifyReceipt verifies receipt file and generate secret file for Alice while mode is table_vrf_query.
 //
 // It is provides an interface for OnReceipt.
 //
 // Return:
 //  If verify receipt file and generate secret file successfully, return true.
 //  Otherwise, return false.
-func (tq PoDSellerTQ) sellerVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
+func (tq PoDAliceTQ) AliceVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
 
-	err := tq.SellerSession.OnReceipt(receiptFile, secretFile)
+	err := tq.AliceSession.OnReceipt(receiptFile, secretFile)
 	if err != nil {
 		Log.Warnf("Verify receipt file and generate secret file.....Failed. err=%v", err)
 		return false
@@ -75,43 +75,43 @@ func (tq PoDSellerTQ) sellerVerifyReceipt(receiptFile string, secretFile string,
 	return true
 }
 
-type PoDBuyerTQ struct {
-	BuyerSession *tablevrf.BuyerSession `json:"buyerSession"`
-	KeyName      string                 `json:"keyName"`
-	KeyValue     []string               `json:"keyValue"`
+type PoDBobTQ struct {
+	BobSession *tablevrf.BobSession `json:"BobSession"`
+	KeyName    string               `json:"keyName"`
+	KeyValue   []string             `json:"keyValue"`
 }
 
-// buyerNewSessForTQ prepares buyer's session while mode is table_vrf_query.
+// BobNewSessForTQ prepares Bob's session while mode is table_vrf_query.
 //
-// It is provides an interface for NewBuyerSession.
+// It is provides an interface for NewBobSession.
 //
 // Return:
-//  If no error occurs, return a buyer's session and a nil error.
+//  If no error occurs, return a Bob's session and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForTQ(keyName string, keyValue []string, tableBulletin string, tablePublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerTQ, error) {
+func BobNewSessForTQ(keyName string, keyValue []string, tableBulletin string, tablePublicPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDBobTQ, error) {
 
-	var tq PoDBuyerTQ
-	Log.Debugf("tableBulletin=%v, tablePublicPath=%v, sellerID=%v, buyerID=%v, keyName=%v,keyValue=%v",
-		tableBulletin, tablePublicPath, sellerID, buyerID, keyName, keyValue)
-	session, err := tablevrf.NewBuyerSession(tableBulletin, tablePublicPath, sellerID, buyerID, keyName, keyValue)
+	var tq PoDBobTQ
+	Log.Debugf("tableBulletin=%v, tablePublicPath=%v, AliceID=%v, BobID=%v, keyName=%v,keyValue=%v",
+		tableBulletin, tablePublicPath, AliceID, BobID, keyName, keyValue)
+	session, err := tablevrf.NewBobSession(tableBulletin, tablePublicPath, AliceID, BobID, keyName, keyValue)
 	if err != nil {
-		Log.Warnf("Failed to create session for buyer. err=%v", err)
-		return tq, errors.New("Failed to create session for buyer")
+		Log.Warnf("Failed to create session for Bob. err=%v", err)
+		return tq, errors.New("Failed to create session for Bob")
 	}
 	Log.Debugf("success to create session.")
-	tq = PoDBuyerTQ{session, keyName, keyValue}
+	tq = PoDBobTQ{session, keyName, keyValue}
 	return tq, nil
 }
 
-// buyerNewReq creates request file for buyer while mode is table_vrf_query.
+// BobNewReq creates request file for Bob while mode is table_vrf_query.
 //
 // It is provides an interface for GetRequest.
 //
 // Return:
 //  If no error occurs, generate a request file and return a nil error.
 //  Otherwise, return the non-nil error.
-func (tq PoDBuyerTQ) buyerNewReq(requestFile string, Log ILogger) error {
-	err := tq.BuyerSession.GetRequest(requestFile)
+func (tq PoDBobTQ) BobNewReq(requestFile string, Log ILogger) error {
+	err := tq.BobSession.GetRequest(requestFile)
 	if err != nil {
 		Log.Warnf("Failed to create request file. err=%v", err)
 		return errors.New("Failed to create request file")
@@ -120,15 +120,15 @@ func (tq PoDBuyerTQ) buyerNewReq(requestFile string, Log ILogger) error {
 	return nil
 }
 
-// buyerVerifyResp verifies response data for buyer while mode is table_vrf_query.
+// BobVerifyResp verifies response data for Bob while mode is table_vrf_query.
 //
 // It is provides an interface for OnResponse.
 //
 // Return:
 //  If verify response and generate receipt successfully, return true.
 //  Otherwise, return false.
-func (tq PoDBuyerTQ) buyerVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
-	err := tq.BuyerSession.OnResponse(responseFile, receiptFile)
+func (tq PoDBobTQ) BobVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
+	err := tq.BobSession.OnResponse(responseFile, receiptFile)
 	if err != nil {
 		Log.Warnf("Verify response failure. err=%v", err)
 		return false
@@ -137,15 +137,15 @@ func (tq PoDBuyerTQ) buyerVerifyResp(responseFile string, receiptFile string, Lo
 	return true
 }
 
-// buyerVerifySecret verifies secret for buyer while mode is table_vrf_query.
+// BobVerifySecret verifies secret for Bob while mode is table_vrf_query.
 //
 // It is provides an interface for OnSecret.
 //
 // Return:
 //  If verify secret successfully, return true.
 //  Otherwise, return false.
-func (tq PoDBuyerTQ) buyerVerifySecret(secretFile string, tablePosition string, Log ILogger) bool {
-	err := tq.BuyerSession.OnSecret(secretFile, tablePosition)
+func (tq PoDBobTQ) BobVerifySecret(secretFile string, tablePosition string, Log ILogger) bool {
+	err := tq.BobSession.OnSecret(secretFile, tablePosition)
 	if err != nil {
 		Log.Warnf("Verify secret failure. err=%v", err)
 		return false

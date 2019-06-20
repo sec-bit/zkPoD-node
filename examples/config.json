@@ -1,7 +1,7 @@
 {
     "merkle_root":"12f66b3d75891853035b63dad37f9547f96737f1197d187c7c57fceec353ece7",
-    "seller_ip":"127.0.0.1:4321",
-    "seller_addr":"0xc871e471c098f032f17783f9902d939cae5191f7",
+    "Alice_ip":"127.0.0.1:4321",
+    "Alice_addr":"0xc871e471c098f032f17783f9902d939cae5191f7",
     "pub_path":"./public",
     "bulletin_file":"./bulletin",
     "mode":"plain",

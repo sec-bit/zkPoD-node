@@ -169,7 +169,7 @@ func signRecptForComplaint(key *keystore.Key, sessionID string, receipt Complain
 
 	receiptHash = solsha3.SoliditySHA3WithPrefix(receiptHash)
 
-	// Buyer sign the receipt
+	// Bob sign the receipt
 	sig, err := crypto.Sign(receiptHash, key.PrivateKey)
 	if err != nil {
 		Log.Warnf("generate signature for receipt hash error. err=%v", err)
@@ -239,7 +239,7 @@ func signRecptForAtomicSwap(key *keystore.Key, sessionID string, receipt AtomicS
 
 	receiptHash = solsha3.SoliditySHA3WithPrefix(receiptHash)
 
-	// Buyer sign the receipt
+	// Bob sign the receipt
 	sig, err := crypto.Sign(receiptHash, key.PrivateKey)
 	if err != nil {
 		Log.Warnf("generate signature for receipt hash error. err=%v", err)
@@ -314,7 +314,7 @@ func signRecptForVRFQ(key *keystore.Key, sessionID string, receipt VRFReceipt, p
 
 	receiptHash = solsha3.SoliditySHA3WithPrefix(receiptHash)
 
-	// Buyer sign the receipt
+	// Bob sign the receipt
 	sig, err := crypto.Sign(receiptHash, key.PrivateKey)
 	if err != nil {
 		Log.Warnf("generate signature for receipt hash error. err=%v", err)
@@ -340,11 +340,11 @@ func readSeed0ForComplaint(filePath string, Log ILogger) (s ComplaintSecret, err
 	return
 }
 
-func buyerSaveSecretForComplaint(secret ComplaintSecret, filePath string, Log ILogger) error {
+func BobSaveSecretForComplaint(secret ComplaintSecret, filePath string, Log ILogger) error {
 	sByte, err := json.Marshal(&secret)
 	if err != nil {
-		Log.Warnf("Failed to save secret for buyer. err=%v")
-		return errors.New("Failed to save secret for buyer")
+		Log.Warnf("Failed to save secret for Bob. err=%v")
+		return errors.New("Failed to save secret for Bob")
 	}
 	err = ioutil.WriteFile(filePath, sByte, 0644)
 	if err != nil {
@@ -371,11 +371,11 @@ func readSeed0ForAtomicSwap(filePath string, Log ILogger) (s AtomicSwapSecret, e
 	return
 }
 
-func buyerSaveSecretForAtomicSwap(secret AtomicSwapSecret, filePath string, Log ILogger) error {
+func BobSaveSecretForAtomicSwap(secret AtomicSwapSecret, filePath string, Log ILogger) error {
 	sByte, err := json.Marshal(&secret)
 	if err != nil {
-		Log.Warnf("Failed to save secret for buyer. err=%v")
-		return errors.New("Failed to save secret for buyer")
+		Log.Warnf("Failed to save secret for Bob. err=%v")
+		return errors.New("Failed to save secret for Bob")
 	}
 	err = ioutil.WriteFile(filePath, sByte, 0644)
 	if err != nil {
@@ -401,11 +401,11 @@ func readSeed0ForVRFQ(filePath string, Log ILogger) (s VRFSecret, err error) {
 	return
 }
 
-func buyerSaveSecretForVRFQ(secret VRFSecret, filePath string, Log ILogger) error {
+func BobSaveSecretForVRFQ(secret VRFSecret, filePath string, Log ILogger) error {
 	sByte, err := json.Marshal(&secret)
 	if err != nil {
-		Log.Warnf("Failed to save secret for buyer. err=%v")
-		return errors.New("Failed to save secret for buyer")
+		Log.Warnf("Failed to save secret for Bob. err=%v")
+		return errors.New("Failed to save secret for Bob")
 	}
 	err = ioutil.WriteFile(filePath, sByte, 0644)
 	if err != nil {
@@ -464,23 +464,23 @@ func saveBasicConfig(config BasicConfig, basicFile string) error {
 	return nil
 }
 
-func savePublishRawFile(fileByte []byte, sellerPublishDir string, dataFile string, Log ILogger) (string, error) {
+func savePublishRawFile(fileByte []byte, AlicePublishDir string, dataFile string, Log ILogger) (string, error) {
 	ts := fmt.Sprintf("%v", time.Now().UnixNano())
 
-	rs, err := pathExists(sellerPublishDir)
+	rs, err := pathExists(AlicePublishDir)
 	if err != nil {
 		Log.Errorf("check path exist error. err=%v", err)
 		return "", errors.New("save publish file error")
 	}
 	if !rs {
-		err = os.Mkdir(sellerPublishDir, os.ModePerm)
+		err = os.Mkdir(AlicePublishDir, os.ModePerm)
 		if err != nil {
-			Log.Errorf("create dictionary %v error. err=%v", sellerPublishDir, err)
+			Log.Errorf("create dictionary %v error. err=%v", AlicePublishDir, err)
 			return "", errors.New("save publish file error")
 		}
-		Log.Debugf("success to create dictionary. dir=%v", sellerPublishDir)
+		Log.Debugf("success to create dictionary. dir=%v", AlicePublishDir)
 	}
-	dir := sellerPublishDir + "/" + ts
+	dir := AlicePublishDir + "/" + ts
 	err = os.Mkdir(dir, os.ModePerm)
 	if err != nil {
 		Log.Errorf("create dictionary %v error. err=%v", dir, err)

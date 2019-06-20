@@ -18,7 +18,7 @@ import (
 type Config struct {
 	Operation             string      `json:"operation"`
 	Password              string      `json:"password"`
-	SellerAddress         string      `json:"seller_address"`
+	AliceAddress         string      `json:"Alice_address"`
 	BasicConfig           BasicConfig `json:"basic_config"`
 	RequestData           RequestData `json:"request_data"`
 	PurchaseConfigPath    string      `json:"purchase_path"`
@@ -32,18 +32,18 @@ type BasicConfig struct {
 	ECCBINPath     string `json:"ecc_bin_path"`
 	PublishBINPath string `json:"publish_bin_path"`
 	ContractAddr   string `json:"contract_addr"`
-	BuyerDir       string `json:"buyer_dir"`
-	SellerDir      string `json:"seller_dir"`
+	BobDir         string `json:"B_dir"`
+	AliceDir      string `json:"A_dir"`
 	KeyStoreFile   string `json:"keystore_file"`
 	NetIP          string `json:"net_ip"`
 	Port           string `json:"port"`
 }
 
-// RequestData is the struct of buyer's request data
+// RequestData is the struct of Bob's request data
 type RequestData struct {
 	MerkleRoot      string    `json:"merkle_root"`
-	SellerIP        string    `json:"seller_ip"`
-	SellerAddr      string    `json:"seller_addr"`
+	AliceIP        string    `json:"Alice_ip"`
+	AliceAddr      string    `json:"Alice_addr"`
 	PubPath         string    `json:"pub_path"`
 	BulletinFile    string    `json:"bulletin_file"`
 	SubMode         string    `json:"sub_mode"`
@@ -102,7 +102,7 @@ func initCli() (config Config) {
 		cli.StringFlag{
 			Name:  "ip",
 			Value: "",
-			Usage: "the seller's node ip addr for pod net.",
+			Usage: "the Alice's node ip addr for pod net.",
 		},
 		cli.StringFlag{
 			Name:  "port",
@@ -112,7 +112,7 @@ func initCli() (config Config) {
 		cli.StringFlag{
 			Name:  "c",
 			Value: "",
-			Usage: "config file path while buyer's operation is 'purchase'.",
+			Usage: "config file path while Bob's operation is 'purchase'.",
 		},
 		cli.StringFlag{
 			Name:  "mkl",
@@ -127,12 +127,12 @@ func initCli() (config Config) {
 		cli.StringFlag{
 			Name:  "init",
 			Value: "",
-			Usage: "the seller initializes a file for publishing.",
+			Usage: "the Alice initializes a file for publishing.",
 		},
 		cli.StringFlag{
 			Name:  "addr",
 			Value: "",
-			Usage: "the seller's address.",
+			Usage: "the Alice's address.",
 		},
 		cli.StringFlag{
 			Name:  "sid",
@@ -152,7 +152,7 @@ func initCli() (config Config) {
 		config.MerkleRoot = c.String("mkl")
 		config.ETHValue = c.String("eth")
 		config.InitPublishConfigPath = c.String("init")
-		config.SellerAddress = c.String("addr")
+		config.AliceAddress = c.String("addr")
 		config.SessionID = c.String("sid")
 		// config.BasicConfig.SyncthingID = c.String("id")
 		// config.BasicConfig.DataBase = c.String("db")
@@ -197,8 +197,8 @@ func readBasicFile(basic BasicConfig) (BasicConfig, error) {
 		}
 		basic.ECCBINPath = preBasic.ECCBINPath
 		basic.PublishBINPath = preBasic.PublishBINPath
-		basic.BuyerDir = preBasic.BuyerDir
-		basic.SellerDir = preBasic.SellerDir
+		basic.BobDir = preBasic.BobDir
+		basic.AliceDir = preBasic.AliceDir
 		basic.ContractAddr = preBasic.ContractAddr
 	}
 	if basic.Port == "" {
@@ -216,11 +216,11 @@ func readBasicFile(basic BasicConfig) (BasicConfig, error) {
 	if basic.PublishBINPath == "" {
 		basic.PublishBINPath = DEFAULT_PUBLISH_BIN_FILE
 	}
-	if basic.BuyerDir == "" {
-		basic.BuyerDir = DEFAULT_BUYER_DIR
+	if basic.BobDir == "" {
+		basic.BobDir = DEFAULT_BOB_DIR
 	}
-	if basic.SellerDir == "" {
-		basic.SellerDir = DEFAULT_SELLER_DIR
+	if basic.AliceDir == "" {
+		basic.AliceDir = DEFAULT_ALICE_DIR
 	}
 	if basic.ContractAddr == "" {
 		basic.ContractAddr = DEFAULT_PODEX_CONTRACT_ADDRESS
@@ -337,80 +337,80 @@ func readRequestData(configFile string) (RequestData, error) {
 }
 
 //initDir initializes node and check dictionary
-func initDir(buyerDir string, sellerDir string) error {
+func initDir(BobDir string, AliceDir string) error {
 
-	if buyerDir == "" || sellerDir == "" {
-		fmt.Errorf("invalid dictionary.  buyer dictionary=%v, seller dictionary=%v", buyerDir, sellerDir)
+	if BobDir == "" || AliceDir == "" {
+		fmt.Errorf("invalid dictionary.  Bob dictionary=%v, Alice dictionary=%v", BobDir, AliceDir)
 	}
-	buyerTxDir := buyerDir + "/transaction"
-	sellerTxDir := sellerDir + "/transaction"
-	sellerPublishDir := sellerDir + "/publish"
+	BobTxDir := BobDir + "/transaction"
+	AliceTxDir := AliceDir + "/transaction"
+	AlicePublishDir := AliceDir + "/publish"
 
-	rs, err := pathExists(buyerDir)
+	rs, err := pathExists(BobDir)
 	if err != nil {
-		return fmt.Errorf("failed to check dictionary. spath=%v, err=%v", buyerDir, err)
+		return fmt.Errorf("failed to check dictionary. spath=%v, err=%v", BobDir, err)
 	}
 	if !rs {
-		err = os.Mkdir(buyerDir, os.ModePerm)
+		err = os.Mkdir(BobDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("create dictionary %v error. err=%v", buyerDir, err)
+			return fmt.Errorf("create dictionary %v error. err=%v", BobDir, err)
 		}
-		fmt.Printf("success to create dictionary=%v.\n", buyerDir)
+		fmt.Printf("success to create dictionary=%v.\n", BobDir)
 	}
 
-	rs, err = pathExists(buyerTxDir)
+	rs, err = pathExists(BobTxDir)
 	if err != nil {
-		return fmt.Errorf("check dictonary exist error. path=%v, err=%v", buyerTxDir, err)
+		return fmt.Errorf("check dictonary exist error. path=%v, err=%v", BobTxDir, err)
 	}
 	if !rs {
-		err = os.Mkdir(buyerTxDir, os.ModePerm)
+		err = os.Mkdir(BobTxDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("create dictionary %v error. err=%v", buyerTxDir, err)
+			return fmt.Errorf("create dictionary %v error. err=%v", BobTxDir, err)
 		}
-		fmt.Printf("success to create dictionary=%v.\n", buyerTxDir)
+		fmt.Printf("success to create dictionary=%v.\n", BobTxDir)
 	}
 
-	rs, err = pathExists(sellerDir)
+	rs, err = pathExists(AliceDir)
 	if err != nil {
-		return fmt.Errorf("check dictonary error. path=%v, err=%v", sellerDir, err)
+		return fmt.Errorf("check dictonary error. path=%v, err=%v", AliceDir, err)
 	}
 	if !rs {
-		err = os.Mkdir(sellerDir, os.ModePerm)
+		err = os.Mkdir(AliceDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("create dictionary %v error. err=%v", sellerDir, err)
+			return fmt.Errorf("create dictionary %v error. err=%v", AliceDir, err)
 		}
-		fmt.Printf("success to create dictionary=%v.\n", sellerDir)
+		fmt.Printf("success to create dictionary=%v.\n", AliceDir)
 	}
 
-	rs, err = pathExists(sellerTxDir)
+	rs, err = pathExists(AliceTxDir)
 	if err != nil {
-		return fmt.Errorf("check dictonary error. path=%v, err=%v", sellerTxDir, err)
+		return fmt.Errorf("check dictonary error. path=%v, err=%v", AliceTxDir, err)
 	}
 	if !rs {
-		err = os.Mkdir(sellerTxDir, os.ModePerm)
+		err = os.Mkdir(AliceTxDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("create dictionary %v error. err=%v", sellerTxDir, err)
+			return fmt.Errorf("create dictionary %v error. err=%v", AliceTxDir, err)
 		}
-		fmt.Printf("success to create dictionary=%v.\n", sellerTxDir)
+		fmt.Printf("success to create dictionary=%v.\n", AliceTxDir)
 	}
 
-	rs, err = pathExists(sellerPublishDir)
+	rs, err = pathExists(AlicePublishDir)
 	if err != nil {
-		return fmt.Errorf("check dictonary error. path=%v, err=%v", sellerPublishDir, err)
+		return fmt.Errorf("check dictonary error. path=%v, err=%v", AlicePublishDir, err)
 	}
 	if !rs {
-		err = os.Mkdir(sellerPublishDir, os.ModePerm)
+		err = os.Mkdir(AlicePublishDir, os.ModePerm)
 		if err != nil {
-			return fmt.Errorf("create dictionary %v error. err=%v", sellerPublishDir, err)
+			return fmt.Errorf("create dictionary %v error. err=%v", AlicePublishDir, err)
 		}
-		fmt.Printf("success to create dictionary=%v.\n", sellerPublishDir)
+		fmt.Printf("success to create dictionary=%v.\n", AlicePublishDir)
 	}
 	return nil
 }
 
 func initMap() {
-	SellerTxMap = make(map[string]Transaction)
-	BuyerTxMap = make(map[string]BuyerTransaction)
+	AliceTxMap = make(map[string]Transaction)
+	BobTxMap = make(map[string]BobTransaction)
 	DepositLockMap = make(map[string]int64)
 }
 

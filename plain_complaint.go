@@ -7,19 +7,19 @@ import (
 	"github.com/sec-bit/zkPoD-lib/pod_go/types"
 )
 
-type PoDSellerPC struct {
-	SellerSession *plain_complaint.SellerSession `json:"sellerSession"`
+type PoDAlicePC struct {
+	AliceSession *plain_complaint.AliceSession `json:"AliceSession"`
 }
 
-// sellerNewSessForPC prepares seller's session while mode is plain_complaint.
+// AliceNewSessForPC prepares Alice's session while mode is plain_complaint.
 //
-// It is provides an interface for NewSellerSession.
+// It is provides an interface for NewAliceSession.
 //
 // Return:
-//  If no error occurs, return a PoDSellerPC struct and a nil error.
+//  If no error occurs, return a PoDAlicePC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForPC(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerPC, error) {
-	var pc PoDSellerPC
+func AliceNewSessForPC(publishPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDAlicePC, error) {
+	var pc PoDAlicePC
 	rs, err := pathExists(publishPath)
 	if err != nil {
 		Log.Warnf("Failed to check. err=%v", err)
@@ -31,25 +31,25 @@ func sellerNewSessForPC(publishPath string, sellerID [40]uint8, buyerID [40]uint
 	}
 	Log.Debugf("publishPath=%v", publishPath)
 
-	pc.SellerSession, err = plain_complaint.NewSellerSession(publishPath, sellerID, buyerID)
+	pc.AliceSession, err = plain_complaint.NewAliceSession(publishPath, AliceID, BobID)
 	if err != nil {
-		Log.Warnf("failed to create session for seller. err=%v", err)
-		return pc, errors.New("failed to create session for seller")
+		Log.Warnf("failed to create session for Alice. err=%v", err)
+		return pc, errors.New("failed to create session for Alice")
 	}
-	Log.Debugf("success to create session for seller")
+	Log.Debugf("success to create session for Alice")
 	return pc, nil
 }
 
-// sellerVerifyReq verifies request file and generates response file for seller while mode is plain_complaint.
+// AliceVerifyReq verifies request file and generates response file for Alice while mode is plain_complaint.
 //
 // It is provides an interface for OnRequest.
 //
 // Return:
 //  If verify transaction requset and generate transaction response successfully, return true.
 //  Otherwise, return false.
-func (pc PoDSellerPC) sellerVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
+func (pc PoDAlicePC) AliceVerifyReq(requestFile string, responseFile string, Log ILogger) bool {
 
-	err := pc.SellerSession.OnRequest(requestFile, responseFile)
+	err := pc.AliceSession.OnRequest(requestFile, responseFile)
 	if err != nil {
 		Log.Warnf("Verify request and generate response....Failed. err=%v", err)
 		return false
@@ -58,16 +58,16 @@ func (pc PoDSellerPC) sellerVerifyReq(requestFile string, responseFile string, L
 	return true
 }
 
-// sellerVerifyReceipt verifies receipt file and generate secret file for seller while mode is plain_complaint.
+// AliceVerifyReceipt verifies receipt file and generate secret file for Alice while mode is plain_complaint.
 //
 // It is provides an interface for OnReceipt.
 //
 // Return:
 //  If verify receipt file and generate secret file successfully, return true.
 //  Otherwise, return false.
-func (pc PoDSellerPC) sellerVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
+func (pc PoDAlicePC) AliceVerifyReceipt(receiptFile string, secretFile string, Log ILogger) bool {
 
-	err := pc.SellerSession.OnReceipt(receiptFile, secretFile)
+	err := pc.AliceSession.OnReceipt(receiptFile, secretFile)
 	if err != nil {
 		Log.Warnf("Verify receipt file and generate secret file.....Failed. err=%v", err)
 		return false
@@ -76,46 +76,46 @@ func (pc PoDSellerPC) sellerVerifyReceipt(receiptFile string, secretFile string,
 	return true
 }
 
-type PoDBuyerPC struct {
-	BuyerSession *plain_complaint.BuyerSession `json:"buyerSession"`
+type PoDBobPC struct {
+	BobSession *plain_complaint.BobSession `json:"BobSession"`
 	Demands      []Demand                      `json:"demands"`
 }
 
-// buyerNewSessForPC prepares buyer's session while mode is plain_complaint.
+// BobNewSessForPC prepares Bob's session while mode is plain_complaint.
 //
-// It is provides an interface for NewBuyerSession.
+// It is provides an interface for NewBobSession.
 //
 // Return:
-//  If no error occurs, return a PoDBuyerPC struct and a nil error.
+//  If no error occurs, return a PoDBobPC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForPC(demandArr []Demand, plainBulletin string, plainPublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerPC, error) {
+func BobNewSessForPC(demandArr []Demand, plainBulletin string, plainPublicPath string, AliceID [40]uint8, BobID [40]uint8, Log ILogger) (PoDBobPC, error) {
 
-	var pc PoDBuyerPC
+	var pc PoDBobPC
 	demands := make([]types.Range, 0)
 	for _, d := range demandArr {
 		demands = append(demands, types.Range{d.DemandStart, d.DemandCount})
 	}
 	pc.Demands = demandArr
 
-	session, err := plain_complaint.NewBuyerSession(plainBulletin, plainPublicPath, sellerID, buyerID, demands)
+	session, err := plain_complaint.NewBobSession(plainBulletin, plainPublicPath, AliceID, BobID, demands)
 	if err != nil {
-		Log.Warnf("failed to create session for buyer. err=%v", err)
-		return pc, errors.New("failed to create session for buyer")
+		Log.Warnf("failed to create session for Bob. err=%v", err)
+		return pc, errors.New("failed to create session for Bob")
 	}
-	pc.BuyerSession = session
-	Log.Debugf("success to create session for buyer")
+	pc.BobSession = session
+	Log.Debugf("success to create session for Bob")
 	return pc, nil
 }
 
-// buyerNewReq creates request file for buyer while mode is plain_complaint.
+// BobNewReq creates request file for Bob while mode is plain_complaint.
 //
 // It is provides an interface for GetRequest.
 //
 // Return:
 //  If no error occurs, generate a request file and return a nil error.
 //  Otherwise, return the non-nil error.
-func (pc PoDBuyerPC) buyerNewReq(requestFile string, Log ILogger) error {
-	err := pc.BuyerSession.GetRequest(requestFile)
+func (pc PoDBobPC) BobNewReq(requestFile string, Log ILogger) error {
+	err := pc.BobSession.GetRequest(requestFile)
 	if err != nil {
 		Log.Warnf("Failed to create request file. err=%v", err)
 		return errors.New("Failed to create request file")
@@ -124,15 +124,15 @@ func (pc PoDBuyerPC) buyerNewReq(requestFile string, Log ILogger) error {
 	return nil
 }
 
-// buyerVerifyResp verifies response data for buyer while mode is plain_complaint.
+// BobVerifyResp verifies response data for Bob while mode is plain_complaint.
 //
 // It is provides an interface for OnResponse.
 //
 // Return:
 //  If verify response and generate receipt successfully, return true.
 //  Otherwise, return false.
-func (pc PoDBuyerPC) buyerVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
-	err := pc.BuyerSession.OnResponse(responseFile, receiptFile)
+func (pc PoDBobPC) BobVerifyResp(responseFile string, receiptFile string, Log ILogger) bool {
+	err := pc.BobSession.OnResponse(responseFile, receiptFile)
 	if err != nil {
 		Log.Warnf("failed to verify response and generate receipt. err=%v", err)
 		return false
@@ -141,15 +141,15 @@ func (pc PoDBuyerPC) buyerVerifyResp(responseFile string, receiptFile string, Lo
 	return true
 }
 
-// buyerVerifySecret verifies secret for buyer while mode is plain_complaint.
+// BobVerifySecret verifies secret for Bob while mode is plain_complaint.
 //
 // It is provides an interface for OnSecret.
 //
 // Return:
 //  If verify secret successfully, return true.
 //  Otherwise, return false.
-func (pc PoDBuyerPC) buyerVerifySecret(secretFile string, Log ILogger) bool {
-	err := pc.BuyerSession.OnSecret(secretFile)
+func (pc PoDBobPC) BobVerifySecret(secretFile string, Log ILogger) bool {
+	err := pc.BobSession.OnSecret(secretFile)
 	if err != nil {
 		Log.Warnf("failed to verify secret. err=%v", err)
 		return false
@@ -158,15 +158,15 @@ func (pc PoDBuyerPC) buyerVerifySecret(secretFile string, Log ILogger) bool {
 	return true
 }
 
-// buyerGeneClaim generates claim with incorrect secret for buyer while mode is plain_complaint.
+// BobGeneClaim generates claim with incorrect secret for Bob while mode is plain_complaint.
 //
 // It is provides an interface for GenerateClaim.
 //
 // Return:
 //  If generate claim successfully, return true.
 //  Otherwise, return false.
-func (pc PoDBuyerPC) buyerGeneClaim(claimFile string, Log ILogger) bool {
-	err := pc.BuyerSession.GenerateClaim(claimFile)
+func (pc PoDBobPC) BobGeneClaim(claimFile string, Log ILogger) bool {
+	err := pc.BobSession.GenerateClaim(claimFile)
 	if err != nil {
 		Log.Warnf("generate claim failure. err=%v", err)
 		return false
@@ -175,15 +175,15 @@ func (pc PoDBuyerPC) buyerGeneClaim(claimFile string, Log ILogger) bool {
 	return true
 }
 
-// buyerDecrypt decrypts file for buyer while mode is plain_complaint.
+// BobDecrypt decrypts file for Bob while mode is plain_complaint.
 //
 // It is provides an interface for GenerateClaim.
 //
 // Return:
 //  If decrypt file successfully, return true.
 //  Otherwise, return false.
-func (pc PoDBuyerPC) buyerDecrypt(outFile string, Log ILogger) bool {
-	err := pc.BuyerSession.Decrypt(outFile)
+func (pc PoDBobPC) BobDecrypt(outFile string, Log ILogger) bool {
+	err := pc.BobSession.Decrypt(outFile)
 	if err != nil {
 		Log.Warnf("Failed to decrypt file. err=%v", err)
 		return false

@@ -6,15 +6,15 @@ import (
 	"net/url"
 )
 
-//BuyerPurchaseData purchases data.
-func BuyerPurchaseData(requestData RequestData, Log ILogger) {
+//BobPurchaseData purchases data.
+func BobPurchaseData(requestData RequestData, Log ILogger) {
 
 	data, err := json.Marshal(requestData)
 	if err != nil {
 		Log.Warnf("failed to marshal request data. err=%v", err)
 		return
 	}
-	Log.Debugf("data sigma merkle root=%v, seller ip=%v", requestData.MerkleRoot, requestData.SellerIP)
+	Log.Debugf("data sigma merkle root=%v, Alice ip=%v", requestData.MerkleRoot, requestData.AliceIP)
 
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/b/purchase"
 	body := make(url.Values)
@@ -30,13 +30,13 @@ func BuyerPurchaseData(requestData RequestData, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//BuyerDepositETH deposit ETH to a seller in contract.
-func BuyerDepositETH(value string, sellerAddress string, Log ILogger) {
+//BobDepositETH deposit ETH to a Alice in contract.
+func BobDepositETH(value string, AliceAddress string, Log ILogger) {
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/b/deposit"
 	body := make(url.Values)
 	body.Add("value", value)
-	body.Add("address", sellerAddress)
-	Log.Debugf("buyer deposit to seller. value=%v, seller address=%v", value, sellerAddress)
+	body.Add("address", AliceAddress)
+	Log.Debugf("Bob deposit to Alice. value=%v, Alice address=%v", value, AliceAddress)
 
 	Log.Debugf("start send request to deposit ETH. url=%v", urlStr)
 	responseBody, err := sendRequest(body, REQUEST_METHOD_POST, urlStr, Log)
@@ -48,12 +48,12 @@ func BuyerDepositETH(value string, sellerAddress string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//BuyerUnDepositETH undeposits ETH from a seller in contract.
-func BuyerUnDepositETH(sellerAddress string, Log ILogger) {
+//BobUnDepositETH undeposits ETH from a Alice in contract.
+func BobUnDepositETH(AliceAddress string, Log ILogger) {
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/b/undeposit"
 	body := make(url.Values)
-	body.Add("address", sellerAddress)
-	Log.Debugf("buyer undeposit from seller. seller address=%v", sellerAddress)
+	body.Add("address", AliceAddress)
+	Log.Debugf("Bob undeposit from Alice. Alice address=%v", AliceAddress)
 
 	Log.Debugf("start send request to undeposit ETH. url=%v", urlStr)
 	responseBody, err := sendRequest(body, REQUEST_METHOD_POST, urlStr, Log)
@@ -65,12 +65,12 @@ func BuyerUnDepositETH(sellerAddress string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//BuyerWithdrawETH withdraw ETH from a seller in contract.
-func BuyerWithdrawETH(sellerAddress string, Log ILogger) {
+//BobWithdrawETH withdraw ETH from a Alice in contract.
+func BobWithdrawETH(AliceAddress string, Log ILogger) {
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/b/withdraw"
 	body := make(url.Values)
-	body.Add("address", sellerAddress)
-	Log.Debugf("buyer withdraws for contract. seller address=%v", sellerAddress)
+	body.Add("address", AliceAddress)
+	Log.Debugf("Bob withdraws for contract. Alice address=%v", AliceAddress)
 
 	Log.Debugf("start send request to withdraw for contract. url=%v", urlStr)
 	responseBody, err := sendRequest(body, REQUEST_METHOD_POST, urlStr, Log)
@@ -82,8 +82,8 @@ func BuyerWithdrawETH(sellerAddress string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//SellerInitDataNode initialize data for publishing.
-func SellerInitDataNode(filepath string, Log ILogger) {
+//AliceInitDataNode initialize data for publishing.
+func AliceInitDataNode(filepath string, Log ILogger) {
 
 	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
@@ -106,9 +106,9 @@ func SellerInitDataNode(filepath string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-// SellerPublishData sends a request to server
-// to initializes data and publishes data to contract by seller.
-func SellerPublishData(merkleRoot string, value string, Log ILogger) {
+// AlicePublishData sends a request to server
+// to initializes data and publishes data to contract by Alice.
+func AlicePublishData(merkleRoot string, value string, Log ILogger) {
 
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/s/publish"
 	body := make(url.Values)
@@ -125,8 +125,8 @@ func SellerPublishData(merkleRoot string, value string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//SellerCloseData closes pushlished data in contract.
-func SellerCloseData(merkleRoot string, Log ILogger) {
+//AliceCloseData closes pushlished data in contract.
+func AliceCloseData(merkleRoot string, Log ILogger) {
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/s/close"
 	body := make(url.Values)
 	body.Add("merkle_root", merkleRoot)
@@ -141,8 +141,8 @@ func SellerCloseData(merkleRoot string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//SellerWithdrawETHForData withdraw ETH from a seller in contract.
-func SellerWithdrawETHForData(merkle_root string, Log ILogger) {
+//AliceWithdrawETHForData withdraw ETH from a Alice in contract.
+func AliceWithdrawETHForData(merkle_root string, Log ILogger) {
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/s/withdraw/data"
 	body := make(url.Values)
 	body.Add("merkle_root", merkle_root)
@@ -157,12 +157,12 @@ func SellerWithdrawETHForData(merkle_root string, Log ILogger) {
 	Log.Debugf("%s", string(responseBody))
 }
 
-//SellerWithdrawETHForTx withdraw ETH from a seller in contract.
-func SellerWithdrawETHForTx(sessionID string, Log ILogger) {
+//AliceWithdrawETHForTx withdraw ETH from a Alice in contract.
+func AliceWithdrawETHForTx(sessionID string, Log ILogger) {
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/s/withdraw/tx"
 	body := make(url.Values)
 	body.Add("session_id", sessionID)
-	Log.Debugf("buyer withdraws for contract. sessionID=%v", sessionID)
+	Log.Debugf("Bob withdraws for contract. sessionID=%v", sessionID)
 
 	Log.Debugf("start send request to withdraw for contract...url=%v", urlStr)
 	responseBody, err := sendRequest(body, REQUEST_METHOD_POST, urlStr, Log)

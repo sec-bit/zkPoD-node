@@ -1,1 +1,1 @@
-{"ecc_bin_path":"./ecc_pub.bin","publish_bin_path":"./pod_publish","contract_addr":"0x9607C590d758AE8D4B29D6Ff8971F13cdc1bB600","buyer_dir":"./buyer","seller_dir":"./seller","keystore_file":"./keystore","net_ip":"localhost:4321","port":"1234"}
+{"ecc_bin_path":"./ecc_pub.bin","publish_bin_path":"./pod_publish","contract_addr":"0x9607C590d758AE8D4B29D6Ff8971F13cdc1bB600","B_dir":"./B","A_dir":"./A","keystore_file":"./keystore","net_ip":"localhost:4321","port":"1234"}

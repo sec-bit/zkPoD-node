@@ -14,28 +14,28 @@ import (
 	pod_net "github.com/sec-bit/zkPoD-node/net"
 )
 
-//Transaction shows the transaction data for seller.
+//Transaction shows the transaction data for Alice.
 type Transaction struct {
 	SessionID        string           `json:"sessionId"`
 	Status           string           `json:"status"`
 	Bulletin         Bulletin         `json:"bulletin"`
-	BuyerPubKey      *ecdsa.PublicKey `json:"buyerPubkey"`
-	BuyerAddr        string           `json:"buyerAddr"`
-	SellerAddr       string           `json:"sellerAddr"`
+	BobPubKey      *ecdsa.PublicKey `json:"BobPubkey"`
+	BobAddr        string           `json:"BobAddr"`
+	AliceAddr       string           `json:"AliceAddr"`
 	Mode             string           `json:"mode"`
 	SubMode          string           `json:"sub_mode"`
 	OT               bool             `json:"ot"`
 	Price            int64            `json:"price"`
 	UnitPrice        int64            `json:"unitPrice"`
 	ExpireAt         int64            `json:"expireAt"`
-	PlainComplaint   PoDSellerPC      `json:"PlainComplaint"`
-	PlainOTComplaint PoDSellerPOC     `json:"PlainOTComplaint"`
-	PlainAtomicSwap  PoDSellerPAS     `json:"TableAtomicSwap"`
-	TableComplaint   PoDSellerTC      `json:"TableComplaint"`
-	TableOTComplaint PoDSellerTOC     `json:"TableOTComplaint"`
-	TableAtomicSwap  PoDSellerTAS     `json:"TableAtomicSwap"`
-	TableVRF         PoDSellerTQ      `json:"Tablevrf"`
-	TableOTVRF       PoDSellerTOQ     `json:"TableOTvrf"`
+	PlainComplaint   PoDAlicePC      `json:"PlainComplaint"`
+	PlainOTComplaint PoDAlicePOC     `json:"PlainOTComplaint"`
+	PlainAtomicSwap  PoDAlicePAS     `json:"TableAtomicSwap"`
+	TableComplaint   PoDAliceTC      `json:"TableComplaint"`
+	TableOTComplaint PoDAliceTOC     `json:"TableOTComplaint"`
+	TableAtomicSwap  PoDAliceTAS     `json:"TableAtomicSwap"`
+	TableVRF         PoDAliceTQ      `json:"Tablevrf"`
+	TableOTVRF       PoDAliceTOQ     `json:"TableOTvrf"`
 }
 
 func newSessID() (string, error) {
@@ -47,16 +47,16 @@ func newSessID() (string, error) {
 	return randStr, nil
 }
 
-//preSellerTx prepares for transaction.
-func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam, requestExtra, error) {
-	var params SellerConnParam
-	bulletinPath := BConf.SellerDir + "/publish/" + mklroot + "/bulletin"
+//preAliceTx prepares for transaction.
+func preAliceTx(mklroot string, re requestExtra, Log ILogger) (AliceConnParam, requestExtra, error) {
+	var params AliceConnParam
+	bulletinPath := BConf.AliceDir + "/publish/" + mklroot + "/bulletin"
 	bulletin, err := readBulletinFile(bulletinPath, Log)
 	if err != nil {
 		Log.Warnf("failed to read bulletin. err=%v", err)
 		return params, re, fmt.Errorf("failed to read bulletin")
 	}
-	extraPath := BConf.SellerDir + "/publish/" + mklroot + "/extra.json"
+	extraPath := BConf.AliceDir + "/publish/" + mklroot + "/extra.json"
 	extra, err := readExtraFile(extraPath)
 	if err != nil {
 		Log.Warnf("failed to extra file. err=%v", err)
@@ -118,11 +118,11 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	params.SessionID = sessionID
 	// err = savePublishFileForTransaction(sessionID, bulletin.SigmaMKLRoot, Log)
 	// if err != nil {
-	// 	Log.Warnf("Failed to save bulletin for seller. err=%v", err)
+	// 	Log.Warnf("Failed to save bulletin for Alice. err=%v", err)
 	// 	return params, re, errors.New("failed to save bulletin")
 	// }
 	// Log.Debugf("success to save publish file.")
-	dir := BConf.SellerDir + "/transaction/" + sessionID
+	dir := BConf.AliceDir + "/transaction/" + sessionID
 	err = os.Mkdir(dir, os.ModePerm)
 	if err != nil {
 		Log.Errorf("create folder %v error. err=%v", dir, err)
@@ -133,107 +133,107 @@ func preSellerTx(mklroot string, re requestExtra, Log ILogger) (SellerConnParam,
 	return params, re, nil
 }
 
-//sellerTxForPC is the transaction while mode is plain_range.
-func sellerTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+//AliceTxForPC is the transaction while mode is plain_range.
+func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 
-	requestFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/request"
-	responseFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/response"
-	receiptFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/receipt"
-	secretFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/secret"
+	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
+	responseFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/response"
+	receiptFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/receipt"
+	secretFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/secret"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerRcvPODReq(node, requestFile)
+	err := AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive transaction request for seller.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive transaction request for Alice.")
 
-	rs := tx.PlainComplaint.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.PlainComplaint.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to verify transaction request and generate transaction response for seller")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to verify transaction request and generate transaction response for Alice")
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to send transaction response for seller")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send transaction response for Alice")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction receipt for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction receipt")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive transaction receipt.")
 
-	rs = tx.PlainComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.PlainComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -244,195 +244,195 @@ func sellerTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send secret to contract. err=%v", err)
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract")
 	return nil
 }
 
-//sellerTxForPOC is the transaction while mode is plain_ot_range.
-func sellerTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
+//AliceTxForPOC is the transaction while mode is plain_ot_range.
+func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
 	secretFile := dir + "/secret"
-	buyerNegoRequestFile := dir + "/buyer_nego_request"
-	buyerNegoResponseFile := dir + "/buyer_nego_response"
-	sellerNegoRequestFile := dir + "/seller_nego_request"
-	sellerNegoResponseFile := dir + "/seller_nego_response"
+	BobNegoRequestFile := dir + "/Bob_nego_request"
+	BobNegoResponseFile := dir + "/Bob_nego_response"
+	AliceNegoRequestFile := dir + "/Alice_nego_request"
+	AliceNegoResponseFile := dir + "/Alice_nego_response"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerReceiveNegoReq(node, buyerNegoRequestFile)
+	err := AliceReceiveNegoReq(node, BobNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to receive transaction nego request. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego request")
 	}
 	Log.Debugf("success to receive transaction nego request.")
 
-	rs := tx.PlainOTComplaint.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
+	rs := tx.PlainOTComplaint.AliceGeneNegoResp(BobNegoRequestFile, AliceNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid nego request file or nego response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid nego request file or nego response file")
 	}
 	Log.Debugf("success to verify nego request and generate nego response.")
 
-	rs = tx.PlainOTComplaint.sellerGeneNegoReq(sellerNegoRequestFile, Log)
+	rs = tx.PlainOTComplaint.AliceGeneNegoReq(AliceNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to generate nego request file. err=%v", err)
 		return fmt.Errorf(
 			"failed to generate nego request file")
 	}
-	Log.Debugf("success to generate nego request for seller.")
+	Log.Debugf("success to generate nego request for Alice.")
 
-	err = sellerSendNegoResp(node, sellerNegoResponseFile, sellerNegoRequestFile)
+	err = AliceSendNegoResp(node, AliceNegoResponseFile, AliceNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send transaction nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego response")
 	}
 	Log.Debugf("success to send transaction nego response.")
 
-	err = sellerRcvNegoResp(node, buyerNegoResponseFile)
+	err = AliceRcvNegoResp(node, BobNegoResponseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to receive transaction nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego response")
 	}
 	Log.Debugf("success to receive transaction nego response.")
 
-	rs = tx.PlainOTComplaint.sellerDealNegoResp(buyerNegoResponseFile, Log)
+	rs = tx.PlainOTComplaint.AliceDealNegoResp(BobNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to deal with nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to deal with nego response")
 	}
 	Log.Debugf("success to deal with nego response.")
 	tx.Status = TRANSACTION_STATUS_NEGO
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	err = sellerRcvPODReq(node, requestFile)
+	err = AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	Log.Debugf("success to receive transaction request.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainOTComplaint.sellerVerifyReq(requestFile, responseFile, Log)
+	rs = tx.PlainOTComplaint.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid transaction request file or transaction response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file.")
 	}
 	Log.Debugf("success to verify transaction request and generate transaction response.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	Log.Debugf("success to send transaction response.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction receipt for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction receipt")
 	}
-	Log.Debugf("success to receive transaction receipt for seller.")
+	Log.Debugf("success to receive transaction receipt for Alice.")
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainOTComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.PlainOTComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	Log.Debugf("success to verify receipt and generate secret.")
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -443,127 +443,127 @@ func sellerTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract. err=%v", err)
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract.")
 	return nil
 }
 
-//sellerTxForPAS is the transaction while mode is plain_range.
-func sellerTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	requestFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/request"
-	responseFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/response"
-	receiptFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/receipt"
-	secretFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/secret"
+//AliceTxForPAS is the transaction while mode is plain_range.
+func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
+	responseFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/response"
+	receiptFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/receipt"
+	secretFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/secret"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerRcvPODReq(node, requestFile)
+	err := AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	Log.Debugf("success to receive transaction request.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.PlainAtomicSwap.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.PlainAtomicSwap.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	Log.Debugf("success to verify request and generate response.")
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response to buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response to Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
-	Log.Debugf("success to send transaction response to buyer.")
+	Log.Debugf("success to send transaction response to Bob.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction receipt from buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt from Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction receipt")
 	}
-	Log.Debugf("success to receive transaction receipt from buyer.")
+	Log.Debugf("success to receive transaction receipt from Bob.")
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainAtomicSwap.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.PlainAtomicSwap.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	Log.Debugf("success to verify receipt file and generate secret file.")
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth.")
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -574,129 +574,129 @@ func sellerTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	txid, err := submitScrtForAtomicSwap(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForAtomicSwap(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForAtomicSwap(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract.")
 	return nil
 }
 
-//sellerTxForTC is the transaction while mode is plain_range.
-func sellerTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
+//AliceTxForTC is the transaction while mode is plain_range.
+func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
 	secretFile := dir + "/secret"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerRcvPODReq(node, requestFile)
+	err := AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	Log.Debugf("success to receive transaction request.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.TableComplaint.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.TableComplaint.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate transaction response.")
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response to buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response to Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to send transaction response to buyer.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send transaction response to Bob.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction receipt for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction receipt")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive receipt from buyer.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive receipt from Bob.")
 
-	rs = tx.TableComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -707,195 +707,195 @@ func sellerTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract. err=%v", err)
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract")
 	return nil
 }
 
-//sellerTxForTOC is the transaction while mode is plain_range.
-func sellerTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
+//AliceTxForTOC is the transaction while mode is plain_range.
+func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
 	secretFile := dir + "/secret"
-	buyerNegoRequestFile := dir + "/buyer_nego_request"
-	buyerNegoResponseFile := dir + "/buyer_nego_response"
-	sellerNegoRequestFile := dir + "/seller_nego_request"
-	sellerNegoResponseFile := dir + "/seller_nego_response"
+	BobNegoRequestFile := dir + "/Bob_nego_request"
+	BobNegoResponseFile := dir + "/Bob_nego_response"
+	AliceNegoRequestFile := dir + "/Alice_nego_request"
+	AliceNegoResponseFile := dir + "/Alice_nego_response"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerReceiveNegoReq(node, buyerNegoRequestFile)
+	err := AliceReceiveNegoReq(node, BobNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to receive transaction nego request. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego request")
 	}
 	Log.Debugf("receive transaction nego request...")
 
-	rs := tx.TableOTComplaint.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
+	rs := tx.TableOTComplaint.AliceGeneNegoResp(BobNegoRequestFile, AliceNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid nego request file or nego response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid nego request file or nego response file")
 	}
 	Log.Debugf("generate nego request file or nego response file...")
 
-	rs = tx.TableOTComplaint.sellerGeneNegoReq(sellerNegoRequestFile, Log)
+	rs = tx.TableOTComplaint.AliceGeneNegoReq(AliceNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to generate nego request file. err=%v", err)
 		return fmt.Errorf(
 			"failed to generate nego request file")
 	}
-	Log.Debugf("seller generates nego request file...")
+	Log.Debugf("Alice generates nego request file...")
 
-	err = sellerSendNegoResp(node, sellerNegoResponseFile, sellerNegoRequestFile)
+	err = AliceSendNegoResp(node, AliceNegoResponseFile, AliceNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send transaction nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego response")
 	}
 	Log.Debugf("send nego response and nego request ...")
 
-	err = sellerRcvNegoResp(node, buyerNegoResponseFile)
+	err = AliceRcvNegoResp(node, BobNegoResponseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to receive transaction nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego response")
 	}
 	Log.Debugf("receive transaction nego response...")
 
-	rs = tx.TableOTComplaint.sellerDealNegoResp(buyerNegoResponseFile, Log)
+	rs = tx.TableOTComplaint.AliceDealNegoResp(BobNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to deal with nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to deal with nego response")
 	}
 	tx.Status = TRANSACTION_STATUS_NEGO
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("deal with nego response...")
 
-	err = sellerRcvPODReq(node, requestFile)
+	err = AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("receive transaction request for seller...")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("receive transaction request for Alice...")
 
-	rs = tx.TableOTComplaint.sellerVerifyReq(requestFile, responseFile, Log)
+	rs = tx.TableOTComplaint.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("verify transaction request file and GENERATE response file...")
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("send transaction response...")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction receipt for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction receipt")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("receive transaction receipt...")
 
-	rs = tx.TableOTComplaint.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableOTComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("verify receipt file and GENERATE secret file...")
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -906,129 +906,129 @@ func sellerTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	txid, err := submitScrtForComplaint(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract. err=%v", err)
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForComplaint(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForComplaint(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("send secret to contract...")
 	return nil
 }
 
-//sellerTxForTAS is the transaction while mode is plain_range.
-func sellerTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
+//AliceTxForTAS is the transaction while mode is plain_range.
+func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
 	secretFile := dir + "/secret"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerRcvPODReq(node, requestFile)
+	err := AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	Log.Debugf("success to receive transaction request.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.TableAtomicSwap.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.TableAtomicSwap.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate response.")
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response to buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response to Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to send transaction response to buyer.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send transaction response to Bob.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction receipt from buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt from Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction receipt")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive receipt from buyer.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive receipt from Bob.")
 
-	rs = tx.TableAtomicSwap.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableAtomicSwap.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -1039,128 +1039,128 @@ func sellerTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	txid, err := submitScrtForAtomicSwap(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForAtomicSwap(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForAtomicSwap(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract.")
 	return nil
 }
 
-//sellerTxForTQ is the transaction while mode is plain_range.
-func sellerTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	requestFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/request"
-	responseFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/response"
-	receiptFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/receipt"
-	secretFile := BConf.SellerDir + "/transaction/" + tx.SessionID + "/secret"
+//AliceTxForTQ is the transaction while mode is plain_range.
+func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
+	responseFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/response"
+	receiptFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/receipt"
+	secretFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/secret"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerRcvPODReq(node, requestFile)
+	err := AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive transaction request for seller.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive transaction request for Alice.")
 
-	rs := tx.TableVRF.sellerVerifyReq(requestFile, responseFile, Log)
+	rs := tx.TableVRF.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify request file and generate respons file.")
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to send transaction response for seller.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send transaction response for Alice.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive receipt from buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive receipt from Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive receipt")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIPT
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive receipt from buyer.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive receipt from Bob.")
 
-	rs = tx.TableVRF.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableVRF.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt.")
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -1171,195 +1171,195 @@ func sellerTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	txid, err := submitScrtForVRFQ(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForVRFQ(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForVRFQ(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract.")
 	return nil
 }
 
-//sellerTxForTOQ is the transaction while mode is plain_range.
-func sellerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
-	dir := BConf.SellerDir + "/transaction/" + tx.SessionID
+//AliceTxForTOQ is the transaction while mode is plain_range.
+func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
 	responseFile := dir + "/response"
 	receiptFile := dir + "/receipt"
 	secretFile := dir + "/secret"
-	buyerNegoRequestFile := dir + "/buyer_nego_request"
-	buyerNegoResponseFile := dir + "/buyer_nego_response"
-	sellerNegoRequestFile := dir + "/seller_nego_request"
-	sellerNegoResponseFile := dir + "/seller_nego_response"
+	BobNegoRequestFile := dir + "/Bob_nego_request"
+	BobNegoResponseFile := dir + "/Bob_nego_response"
+	AliceNegoRequestFile := dir + "/Alice_nego_request"
+	AliceNegoResponseFile := dir + "/Alice_nego_response"
 
 	defer func() {
-		err := updateSellerTxToDB(tx)
+		err := updateAliceTxToDB(tx)
 		if err != nil {
-			Log.Warnf("failed to update transaction for seller. err=%v", err)
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
 			return
 		}
-		delete(SellerTxMap, tx.SessionID)
+		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := sellerReceiveNegoReq(node, buyerNegoRequestFile)
+	err := AliceReceiveNegoReq(node, BobNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to receive transaction nego request. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego request")
 	}
 	Log.Debugf("success to receive transaction nego request.")
 
-	rs := tx.TableOTVRF.sellerGeneNegoResp(buyerNegoRequestFile, sellerNegoResponseFile, Log)
+	rs := tx.TableOTVRF.AliceGeneNegoResp(BobNegoRequestFile, AliceNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid nego request file or nego response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid nego request file or nego response file")
 	}
 	Log.Debugf("success to generate nego request and generate nego response")
 
-	rs = tx.TableOTVRF.sellerGeneNegoReq(sellerNegoRequestFile, Log)
+	rs = tx.TableOTVRF.AliceGeneNegoReq(AliceNegoRequestFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to generate nego request file. err=%v", err)
 		return fmt.Errorf(
 			"failed to generate nego request file")
 	}
-	Log.Debugf("success to generate nego request for seller")
+	Log.Debugf("success to generate nego request for Alice")
 
-	err = sellerSendNegoResp(node, sellerNegoResponseFile, sellerNegoRequestFile)
+	err = AliceSendNegoResp(node, AliceNegoResponseFile, AliceNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send transaction nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego response")
 	}
 	Log.Debugf("success to send transaction nego response")
 
-	err = sellerRcvNegoResp(node, buyerNegoResponseFile)
+	err = AliceRcvNegoResp(node, BobNegoResponseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to receive transaction nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction nego response")
 	}
 	Log.Debugf("success to receive transaction nego response")
 
-	rs = tx.TableOTVRF.sellerDealNegoResp(buyerNegoResponseFile, Log)
+	rs = tx.TableOTVRF.AliceDealNegoResp(BobNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to deal with nego response. err=%v", err)
 		return fmt.Errorf(
 			"failed to deal with nego response")
 	}
 	tx.Status = TRANSACTION_STATUS_NEGO
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to deal with nego response.")
 
-	err = sellerRcvPODReq(node, requestFile)
+	err = AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive transaction request from buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request from Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive transaction request")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive transaction request from buyer.")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive transaction request from Bob.")
 
-	rs = tx.TableOTVRF.sellerVerifyReq(requestFile, responseFile, Log)
+	rs = tx.TableOTVRF.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid request file or response file. err=%v", err)
 		return fmt.Errorf(
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify request and generate response.")
 
-	err = sellerSendPODResp(node, responseFile)
+	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to send transaction response to buyer. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response to Bob. err=%v", err)
 		return fmt.Errorf(
 			"failed to send transaction response")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to send transaction response to buyer")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send transaction response to Bob")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = sellerRcvPODRecpt(node, receiptFile)
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
-		SellerTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to receive receipt for seller. err=%v", err)
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive receipt for Alice. err=%v", err)
 		return fmt.Errorf(
 			"failed to receive receipt")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
-	SellerTxMap[tx.SessionID] = tx
-	Log.Debugf("success to receive receipt for seller")
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive receipt for Alice")
 
-	rs = tx.TableOTVRF.sellerVerifyReceipt(receiptFile, secretFile, Log)
+	rs = tx.TableOTVRF.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
 			"invalid receipt file or secret file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret")
 
-	rs, err = verifyDeposit(tx.SellerAddr, tx.BuyerAddr, tx.Price)
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to verify deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"failed to verify deposit eth")
 	}
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("no enough deposit eth. err=%v", err)
 		return fmt.Errorf(
 			"no enough deposit eth")
 	}
 
 	defer func() {
-		DepositLockMap[tx.SellerAddr+tx.BuyerAddr] -= tx.Price
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
@@ -1370,24 +1370,24 @@ func sellerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log I
 	txid, err := submitScrtForVRFQ(tx, sign, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to send Secret to contract")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
-	_, err = readScrtForVRFQ(tx.SessionID, tx.SellerAddr, tx.BuyerAddr, Log)
+	_, err = readScrtForVRFQ(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
-		SellerTxMap[tx.SessionID] = tx
+		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("failed to read secret from contract.")
 		return fmt.Errorf(
 			"failed to send secret")
 	}
 
 	tx.Status = TRANSACTION_STATUS_CLOSED
-	SellerTxMap[tx.SessionID] = tx
+	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to send secret to contract")
 	return nil
 }
