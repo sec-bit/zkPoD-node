@@ -18,7 +18,7 @@ type PoDSellerPC struct {
 // Return:
 //  If no error occurs, return a PoDSellerPC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForPC(publishPath string, Log ILogger) (PoDSellerPC, error) {
+func sellerNewSessForPC(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerPC, error) {
 	var pc PoDSellerPC
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -88,7 +88,7 @@ type PoDBuyerPC struct {
 // Return:
 //  If no error occurs, return a PoDBuyerPC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForPC(demandArr []Demand, plainBulletin string, plainPublicPath string, Log ILogger) (PoDBuyerPC, error) {
+func buyerNewSessForPC(demandArr []Demand, plainBulletin string, plainPublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerPC, error) {
 
 	var pc PoDBuyerPC
 	demands := make([]types.Range, 0)

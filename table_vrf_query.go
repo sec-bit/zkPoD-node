@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	
 
 	tablevrf "github.com/sec-bit/zkPoD-lib/pod_go/table/vrfq"
 )
@@ -18,7 +17,7 @@ type PoDSellerTQ struct {
 // Return:
 //  If no error occurs, return a PoDSellerTQ struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForTQ(publishPath string, Log ILogger) (PoDSellerTQ, error) {
+func sellerNewSessForTQ(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerTQ, error) {
 	var tq PoDSellerTQ
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -89,7 +88,7 @@ type PoDBuyerTQ struct {
 // Return:
 //  If no error occurs, return a buyer's session and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForTQ(keyName string, keyValue []string, tableBulletin string, tablePublicPath string, Log ILogger) (PoDBuyerTQ, error) {
+func buyerNewSessForTQ(keyName string, keyValue []string, tableBulletin string, tablePublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerTQ, error) {
 
 	var tq PoDBuyerTQ
 	Log.Debugf("tableBulletin=%v, tablePublicPath=%v, sellerID=%v, buyerID=%v, keyName=%v,keyValue=%v",

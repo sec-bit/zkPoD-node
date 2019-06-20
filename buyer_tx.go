@@ -8,6 +8,20 @@ import (
 	pod_net "github.com/sec-bit/zkPoD-node/net"
 )
 
+func converAddr(address string) [40]uint8 {
+	var uAddr [40]uint8
+	if len(address) < 40 {
+		return uAddr
+	}
+	var addrByte = []byte(address[len(address)-40:])
+
+	for i, b := range addrByte {
+		uAddr[i] = b
+	}
+
+	return uAddr
+}
+
 // BuyerTransaction shows the transaction data for buyer.
 type BuyerTransaction struct {
 	SessionID        string      `json:"sessionId"`
@@ -65,7 +79,7 @@ func buyerTxForPC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, de
 
 	Log.Debugf("[%v]step1: prepare for pod's session...", tx.SessionID)
 	var err error
-	tx.PlainComplaint, err = buyerNewSessForPC(demands, bulletinFile, publicPath, Log)
+	tx.PlainComplaint, err = buyerNewSessForPC(demands, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -252,7 +266,7 @@ func buyerTxForPOC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.PlainOTComplaint, err = buyerNewSessForPOC(demands, phantoms, bulletinFile, publicPath, Log)
+	tx.PlainOTComplaint, err = buyerNewSessForPOC(demands, phantoms, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -493,7 +507,7 @@ func buyerTxForPAS(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.PlainAtomicSwap, err = buyerNewSessForPAS(demands, bulletinFile, publicPath, Log)
+	tx.PlainAtomicSwap, err = buyerNewSessForPAS(demands, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		Log.Warnf("[%v]step1: failed to create session for buyer. err=%v", tx.SessionID, err)
@@ -657,7 +671,7 @@ func buyerTxForTC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, de
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableComplaint, err = buyerNewSessForTC(demands, bulletinFile, publicPath, Log)
+	tx.TableComplaint, err = buyerNewSessForTC(demands, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -843,7 +857,7 @@ func buyerTxForTOC(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableOTComplaint, err = buyerNewSessForTOC(demands, phantoms, bulletinFile, publicPath, Log)
+	tx.TableOTComplaint, err = buyerNewSessForTOC(demands, phantoms, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1084,7 +1098,7 @@ func buyerTxForTAS(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, d
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableAtomicSwap, err = buyerNewSessForTAS(demands, bulletinFile, publicPath, Log)
+	tx.TableAtomicSwap, err = buyerNewSessForTAS(demands, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1246,7 +1260,7 @@ func buyerTxForTQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, ke
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableVRF, err = buyerNewSessForTQ(keyName, keyValue, bulletinFile, publicPath, Log)
+	tx.TableVRF, err = buyerNewSessForTQ(keyName, keyValue, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx
@@ -1406,7 +1420,7 @@ func buyerTxForTOQ(node *pod_net.Node, key *keystore.Key, tx BuyerTransaction, k
 
 	Log.Debugf("[%v]step1: prepare for buyer's session...", tx.SessionID)
 	var err error
-	tx.TableOTVRF, err = buyerNewSessForTOQ(keyName, keyValue, phantomKeyValue, bulletinFile, publicPath, Log)
+	tx.TableOTVRF, err = buyerNewSessForTOQ(keyName, keyValue, phantomKeyValue, bulletinFile, publicPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_START_FAILED
 		BuyerTxMap[tx.SessionID] = tx

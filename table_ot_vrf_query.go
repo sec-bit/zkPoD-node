@@ -17,7 +17,7 @@ type PoDSellerTOQ struct {
 // Return:
 //  If no error occurs, return a PoDSellerTOQ struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForTOQ(publishPath string, Log ILogger) (PoDSellerTOQ, error) {
+func sellerNewSessForTOQ(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerTOQ, error) {
 	var toq PoDSellerTOQ
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -141,7 +141,7 @@ type PoDBuyerTOQ struct {
 // Return:
 //  If no error occurs, return a PoDBuyerTOQ struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForTOQ(keyName string, keyValue []string, phantomKeyValue []string, tableBulletin string, tablePublicPath string, Log ILogger) (PoDBuyerTOQ, error) {
+func buyerNewSessForTOQ(keyName string, keyValue []string, phantomKeyValue []string, tableBulletin string, tablePublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerTOQ, error) {
 	var toq PoDBuyerTOQ
 	session, err := table_ot_vrf.NewBuyerSession(tableBulletin, tablePublicPath, sellerID, buyerID, keyName, keyValue, phantomKeyValue)
 	if err != nil {

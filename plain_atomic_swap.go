@@ -18,7 +18,7 @@ type PoDSellerPAS struct {
 // Return:
 //  If no error occurs, return a PoDSellerPAS struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForPAS(publishPath string, Log ILogger) (PoDSellerPAS, error) {
+func sellerNewSessForPAS(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerPAS, error) {
 	var pas PoDSellerPAS
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -88,7 +88,7 @@ type PoDBuyerPAS struct {
 // Return:
 //  If no error occurs, return a buyer's session and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForPAS(demandArr []Demand, plainBulletin string, plainPublicPath string, Log ILogger) (PoDBuyerPAS, error) {
+func buyerNewSessForPAS(demandArr []Demand, plainBulletin string, plainPublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerPAS, error) {
 
 	var pas PoDBuyerPAS
 	demands := make([]types.Range, 0)

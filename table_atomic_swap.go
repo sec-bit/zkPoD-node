@@ -18,7 +18,7 @@ type PoDSellerTAS struct {
 // Return:
 //  If no error occurs, return a PoDSellerTAS struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForTAS(publishPath string, Log ILogger) (PoDSellerTAS, error) {
+func sellerNewSessForTAS(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerTAS, error) {
 	var tas PoDSellerTAS
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -88,7 +88,7 @@ type PoDBuyerTAS struct {
 // Return:
 //  If no error occurs, return a PoDBuyerTAS struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForTAS(demandArr []Demand, tableBulletin string, tablePublicPath string, Log ILogger) (PoDBuyerTAS, error) {
+func buyerNewSessForTAS(demandArr []Demand, tableBulletin string, tablePublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerTAS, error) {
 
 	var tas PoDBuyerTAS
 	demands := make([]types.Range, 0)

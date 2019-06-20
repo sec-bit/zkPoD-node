@@ -22,7 +22,6 @@ var BuyerTxMap map[string]BuyerTransaction
 var DepositLockMap map[string]int64
 
 func main() {
-
 	var err error
 	// read command
 	config := initCli()

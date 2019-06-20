@@ -109,6 +109,9 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 	tx.UnitPrice = params.UnitPrice
 	tx.SellerAddr = key.Address.Hex()
 
+	text := []uint8(tx.BuyerAddr)
+	Log.Debugf("text:%v", text)
+
 	SellerTxMap[tx.SessionID] = tx
 	err = insertSellerTxToDB(tx)
 	if err != nil {
@@ -122,7 +125,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				tx.PlainOTComplaint, err = sellerNewSessForPOC(publishPath, Log)
+				tx.PlainOTComplaint, err = sellerNewSessForPOC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 				if err != nil {
 					Log.Warnf("failed to prepare for seller's session. err=%v", err)
 					return
@@ -139,7 +142,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.PlainComplaint, err = sellerNewSessForPC(publishPath, Log)
+				tx.PlainComplaint, err = sellerNewSessForPC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 				if err != nil {
 					Log.Warnf("failed to prepare for seller's session. err=%v", err)
 					return
@@ -157,7 +160,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				Log.Debugf("transaction finish...")
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
-			tx.PlainAtomicSwap, err = sellerNewSessForPAS(publishPath, Log)
+			tx.PlainAtomicSwap, err = sellerNewSessForPAS(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 			if err != nil {
 				Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 				return
@@ -178,7 +181,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
-				tx.TableOTComplaint, err = sellerNewSessForTOC(publishPath, Log)
+				tx.TableOTComplaint, err = sellerNewSessForTOC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 				if err != nil {
 					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 					return
@@ -195,7 +198,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.TableComplaint, err = sellerNewSessForTC(publishPath, Log)
+				tx.TableComplaint, err = sellerNewSessForTC(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 				if err != nil {
 					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 					return
@@ -213,7 +216,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				Log.Debugf("transaction finish...")
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
-			tx.TableAtomicSwap, err = sellerNewSessForTAS(publishPath, Log)
+			tx.TableAtomicSwap, err = sellerNewSessForTAS(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 			if err != nil {
 				Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 				return
@@ -231,7 +234,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 			Log.Debugf("transaction finish...")
 		case TRANSACTION_SUB_MODE_VRF:
 			if tx.OT {
-				tx.TableOTVRF, err = sellerNewSessForTOQ(publishPath, Log)
+				tx.TableOTVRF, err = sellerNewSessForTOQ(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 				if err != nil {
 					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 					return
@@ -248,7 +251,7 @@ func sellerAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key
 				}
 				Log.Debugf("transaction finish...")
 			} else {
-				tx.TableVRF, err = sellerNewSessForTQ(publishPath, Log)
+				tx.TableVRF, err = sellerNewSessForTQ(publishPath, converAddr(tx.SellerAddr), converAddr(tx.BuyerAddr), Log)
 				if err != nil {
 					Log.Warnf("Failed to prepare for seller's session. err=%v", err)
 					return

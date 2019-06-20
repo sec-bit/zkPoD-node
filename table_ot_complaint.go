@@ -18,7 +18,7 @@ type PoDSellerTOC struct {
 // Return:
 //  If no error occurs, return a PoDSellerTOC struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForTOC(publishPath string, Log ILogger) (PoDSellerTOC, error) {
+func sellerNewSessForTOC(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerTOC, error) {
 	var toc PoDSellerTOC
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -141,7 +141,7 @@ type PoDBuyerTOC struct {
 // Return:
 //  If no error occurs, return a buyer's session and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForTOC(demandArr []Demand, phantomArr []Phantom, tableBulletin string, tablePublicPath string, Log ILogger) (PoDBuyerTOC, error) {
+func buyerNewSessForTOC(demandArr []Demand, phantomArr []Phantom, tableBulletin string, tablePublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerTOC, error) {
 
 	var toc PoDBuyerTOC
 	demands := make([]types.Range, 0)

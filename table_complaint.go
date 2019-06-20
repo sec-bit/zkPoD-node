@@ -18,7 +18,7 @@ type PoDSellerTC struct {
 // Return:
 //  If no error occurs, return a seller's session and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func sellerNewSessForTC(publishPath string, Log ILogger) (PoDSellerTC, error) {
+func sellerNewSessForTC(publishPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDSellerTC, error) {
 	var tc PoDSellerTC
 	rs, err := pathExists(publishPath)
 	if err != nil {
@@ -88,7 +88,7 @@ type PoDBuyerTC struct {
 // Return:
 //  If no error occurs, return a PoDBuyer struct and a nil error.
 //  Otherwise, return a nil session and the non-nil error.
-func buyerNewSessForTC(demandArr []Demand, tableBulletin string, tablePublicPath string, Log ILogger) (PoDBuyerTC, error) {
+func buyerNewSessForTC(demandArr []Demand, tableBulletin string, tablePublicPath string, sellerID [40]uint8, buyerID [40]uint8, Log ILogger) (PoDBuyerTC, error) {
 
 	var tc PoDBuyerTC
 	demands := make([]types.Range, 0)
