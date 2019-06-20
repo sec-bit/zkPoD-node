@@ -234,7 +234,7 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 ![](img/overview.png)
 
-- [zkPoD-node](https://github.com/sec-bit/zkPoD-node) Node application written in Golang for buyers (A) and sellers (B). It deals with communication, smart contract calling, data transferring, and other zkPoD protocol interactions.
+- [zkPoD-node](https://github.com/sec-bit/zkPoD-node) Node application written in Golang for sellers (Alice) and buyers (Bob). It deals with communication, smart contract calling, data transferring, and other zkPoD protocol interactions.
 - [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD core library written in C++ shipping with Golang bindings.
 - [zkPoD-contract](https://github.com/sec-bit/zkPoD-contract) Smart contracts for zkPoD *Decentralized Exchange*.
 
