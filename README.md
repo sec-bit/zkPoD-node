@@ -91,7 +91,7 @@ We use *verifiable random function*, VRF, to support queries with keywords. Curr
 
 ```shell
 mkdir zkPoD && cd zkPoD
-git clone zkPoD-lib
+git clone https://github.com/sec-bit/zkPoD-lib.git
 cd zkPoD-lib
 make
 
@@ -110,7 +110,7 @@ make test
 
 ```shell
 cd zkPoD
-git clone zkPoD-node
+git clone https://github.com/sec-bit/zkPoD-node.git
 cd zkPoD-node
 export GO111MODULE=on
 make
