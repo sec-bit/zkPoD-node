@@ -101,7 +101,7 @@ make
 # pod_core/libpod_core.so
 # pod_core/pod_core
 
-cd pod-go
+cd pod_go
 export GO111MODULE=on
 make test
 ```
