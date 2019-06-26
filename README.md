@@ -5,9 +5,9 @@
 
 zkPoD is a decentralized platform for data exchanging between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*.  Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchanging. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
 
-Data Downloading: Buyers may pay-and-download a data file from a data seller. zkPoD supports data fragments downloading, i.e., buyers may download specific data chunks in one batched transaction. 
+- ***Data Downloading***: Buyers may pay-and-download a data file from a data seller. zkPoD supports data fragments downloading, i.e., buyers may download specific data chunks in one batched transaction. 
 
-Data Query:  zkPoD supports structured data; e.g., the seller organizes data as tables. Multiple columns can be selected as indexed-columns, such that users may pay-and-query records in the table with one or more keywords, and get the records matched. zkPoD ensures that the query results are trustworthy, i.e. (i) if data seller replies with $n$ records, it is impossible that more records are matching that keyword in the table; (ii) these n records are precisely in the table, and any forged records cannot be allowed. 
+- ***Data Query***:  zkPoD supports structured data; e.g., the seller organizes data as tables. Multiple columns can be selected as indexed-columns, such that users may pay-and-query records in the table with one or more keywords, and get the records matched. zkPoD ensures that the query results are trustworthy, i.e. (i) if data seller replies with $n$ records, it is impossible that more records are matching that keyword in the table; (ii) these n records are precisely in the table, and any forged records cannot be allowed. 
 
 The three main issues being tackled by zkPoD are
 
@@ -270,13 +270,9 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 #### Gas Cost on Ethereum
 
-##### Complaint Mode
-
-![](img/Gas-Cost-vs-Data-Size-Batch1.svg)
-
-##### Atomic-swap Mode
-
-![](img/Gas-Cost-vs-Data-Size-Batch2.svg)
+Complaint Mode             |  Atomic-swap Mode
+:-------------------------:|:-------------------------:
+![](img/Gas-Cost-vs-Data-Size-Batch1.svg)  |  ![](img/Gas-Cost-vs-Data-Size-Batch2.svg)
 
 ## Learn more?
 
