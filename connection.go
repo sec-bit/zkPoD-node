@@ -75,7 +75,7 @@ func AliceStartNode(AliceIPAddr string, key *keystore.Key, Log ILogger) error {
 
 //AliceAcceptTx connects with Bob and handle transaction for Alice.
 func AliceAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key, Log ILogger) {
-	Log.Debugf("start connect with Bob node....")
+	Log.Infof("start connect with Bob node....")
 	defer func() {
 		wg.Done()
 		if err := recover(); err != nil {
@@ -108,6 +108,7 @@ func AliceAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key,
 	tx.OT = params.OT
 	tx.UnitPrice = params.UnitPrice
 	tx.AliceAddr = key.Address.Hex()
+	tx.Count = 1
 
 	text := []uint8(tx.BobAddr)
 	Log.Debugf("text:%v", text)
@@ -176,6 +177,23 @@ func AliceAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key,
 				return
 			}
 			Log.Debugf("transaction finish...")
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			tx.PlainAtomicSwapVc, err = AliceNewSessForPASVC(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
+			if err != nil {
+				Log.Warnf("failed to prepare for Alice's session. err=%v", err)
+				return
+			}
+			defer func() {
+				tx.PlainAtomicSwapVc.AliceSession.Free()
+			}()
+			Log.Debugf("success to prepare Alice session for plain_atomic_swap_vc")
+
+			err = AliceTxForPASVC(node, key, tx, Log)
+			if err != nil {
+				Log.Warnf("transaction error. err=%v", err)
+				return
+			}
+			Log.Debugf("transaction finish...")
 		}
 	} else if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
@@ -227,6 +245,23 @@ func AliceAcceptTx(wg *sync.WaitGroup, conn *rlpx.Connection, key *keystore.Key,
 			Log.Debugf("success to prepare Alice session for table_atomic_swap")
 
 			err = AliceTxForTAS(node, key, tx, Log)
+			if err != nil {
+				Log.Warnf("transaction error. err=%v", err)
+				return
+			}
+			Log.Debugf("transaction finish...")
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			tx.TableAtomicSwapVc, err = AliceNewSessForTASVC(publishPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
+			if err != nil {
+				Log.Warnf("failed to prepare for Alice's session. err=%v", err)
+				return
+			}
+			defer func() {
+				tx.TableAtomicSwapVc.AliceSession.Free()
+			}()
+			Log.Debugf("success to prepare Alice session for table_atomic_swap_vc")
+
+			err = AliceTxForTASVC(node, key, tx, Log)
 			if err != nil {
 				Log.Warnf("transaction error. err=%v", err)
 				return
@@ -430,6 +465,8 @@ func modeToInt(mode string, subMode string, ot bool) (netMode uint8, err error) 
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
 			netMode = pod_net.ModePlainAtomicSwapPoD
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			netMode = pod_net.ModePlainAtomicSwapVcPoD
 		default:
 			err = errors.New("invalid mode")
 		}
@@ -443,6 +480,8 @@ func modeToInt(mode string, subMode string, ot bool) (netMode uint8, err error) 
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
 			netMode = pod_net.ModeTableAtomicSwapPoD
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			netMode = pod_net.ModeTableAtomicSwapVcPoD
 		case TRANSACTION_SUB_MODE_VRF:
 			if !ot {
 				netMode = pod_net.ModeTableVRFQuery
@@ -472,6 +511,10 @@ func modeFromInt(netMode uint8) (mode string, subMode string, ot bool, err error
 		mode = TRANSACTION_MODE_PLAIN_POD
 		subMode = TRANSACTION_SUB_MODE_ATOMIC_SWAP
 		ot = false
+	case pod_net.ModePlainAtomicSwapVcPoD:
+		mode = TRANSACTION_MODE_PLAIN_POD
+		subMode = TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC
+		ot = false
 	case pod_net.ModeTableComplaintPoD:
 		mode = TRANSACTION_MODE_TABLE_POD
 		subMode = TRANSACTION_SUB_MODE_COMPLAINT
@@ -483,6 +526,10 @@ func modeFromInt(netMode uint8) (mode string, subMode string, ot bool, err error
 	case pod_net.ModeTableAtomicSwapPoD:
 		mode = TRANSACTION_MODE_TABLE_POD
 		subMode = TRANSACTION_SUB_MODE_ATOMIC_SWAP
+		ot = false
+	case pod_net.ModeTableAtomicSwapVcPoD:
+		mode = TRANSACTION_MODE_TABLE_POD
+		subMode = TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC
 		ot = false
 	case pod_net.ModeTableVRFQuery:
 		mode = TRANSACTION_MODE_TABLE_POD
@@ -627,12 +674,12 @@ func AliceRcvNegoResp(node *pod_net.Node, BobNegoResponseFile string) error {
 type BobConnParam struct {
 	AliceIPAddr string
 	AliceAddr   string
-	Mode         string
-	SubMode      string
-	OT           bool
-	UnitPrice    int64
-	SessionID    string
-	MerkleRoot   string
+	Mode        string
+	SubMode     string
+	OT          bool
+	UnitPrice   int64
+	SessionID   string
+	MerkleRoot  string
 }
 
 func preBobConn(params BobConnParam, key *keystore.Key, Log ILogger) (*pod_net.Node, *rlpx.Connection, BobConnParam, error) {

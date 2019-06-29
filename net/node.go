@@ -51,12 +51,13 @@ const (
 	ModePlainComplaintPoD = iota
 	ModePlainOTComplaintPoD
 	ModePlainAtomicSwapPoD
-
+	ModePlainAtomicSwapVcPoD
 	ModeTableVRFQuery
 	ModeTableOTVRFQuery
 	ModeTableComplaintPoD
 	ModeTableOTComplaintPoD
 	ModeTableAtomicSwapPoD
+	ModeTableAtomicSwapVcPoD
 
 	modeMax // Leave at the end intentionally
 )

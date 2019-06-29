@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sec-bit/zkPoD-node/net/rlpx"
-
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/sec-bit/zkPoD-node/net/rlpx"
 )
 
 var Logger = NewSimpleLogger("zkPoD-node")
@@ -41,9 +40,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		b := preparePOD(BConf.ECCBINPath)
+		b := preparePOD(BConf.InitKeyPath)
 		if !b {
-			panic("failed to prepare ecc")
+			panic("failed to prepare setup bin")
 		}
 		err := initDir(BConf.BobDir, BConf.AliceDir)
 		if err != nil {

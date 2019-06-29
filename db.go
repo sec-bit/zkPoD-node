@@ -68,35 +68,36 @@ func connectSQLite(dbpath string) (*xorm.Engine, error) {
 		Log.Warnf("table pod_log sync error, err=%v", err)
 		return nil, err
 	}
-	db.ShowSQL(true)
+	db.ShowSQL(false)
 	db.ShowExecTime(true)
 	return db, err
 }
 
 type BobTx struct {
-	SessionId         string    `json:"sessionId" xorm:"text pk not null"`
-	Status            string    `json:"status" xorm:"text not null"`
+	SessionId        string    `json:"sessionId" xorm:"text pk not null"`
+	Status           string    `json:"status" xorm:"text not null"`
 	AliceIP          string    `json:"AliceIP" xorm:"text not null"`
 	AliceAddr        string    `json:"AliceAddr" xorm:"text not null"`
 	AliceSyncthingId string    `json:"AliceSyncthingId" xorm:"text"`
-	BobAddr         string    `json:"BobAddr" xorm:"text not null"`
-	Mode              string    `json:"mode" xorm:"text not null"`
-	SubMode           string    `json:"subMode" xorm:"text not null"`
-	OT                bool      `json:"ot" xorm:"bool"`
-	Size              string    `json:"size" xorm:"text not null"`
-	S                 string    `json:"s" xorm:"text not null"`
-	N                 string    `json:"n" xorm:"text not null"`
-	SigmaMKLRoot      string    `json:"sigmaMklRoot" xorm:"text not null"`
-	Price             int64     `json:"price" xorm:"INTEGER"`
-	UnitPrice         int64     `json:"unit_price" xorm:"INTEGER"`
-	ExpireAt          int64     `json:"expireAt" xorm:"INTEGER"`
-	Demands           string    `json:"demands" xorm:"text"`
-	Phantoms          string    `json:"phantoms" xorm:"text"`
-	KeyName           string    `json:"keyName" xorm:"text"`
-	KeyValue          string    `json:"keyValue" xorm:"text"`
-	PhantomKeyValue   string    `json:"phantomKeyValue" xorm:"text"`
-	CreateDate        time.Time `json:"createDate" xorm:"created"`
-	UpdateDate        time.Time `json:"updateDate" xorm:"updated"`
+	BobAddr          string    `json:"BobAddr" xorm:"text not null"`
+	Mode             string    `json:"mode" xorm:"text not null"`
+	SubMode          string    `json:"subMode" xorm:"text not null"`
+	OT               bool      `json:"ot" xorm:"bool"`
+	Size             string    `json:"size" xorm:"text not null"`
+	S                string    `json:"s" xorm:"text not null"`
+	N                string    `json:"n" xorm:"text not null"`
+	SigmaMKLRoot     string    `json:"sigmaMklRoot" xorm:"text not null"`
+	Price            int64     `json:"price" xorm:"INTEGER"`
+	UnitPrice        int64     `json:"unit_price" xorm:"INTEGER"`
+	ExpireAt         int64     `json:"expireAt" xorm:"INTEGER"`
+	Count            int64     `json:"count" xorm:"INTEGER"`
+	Demands          string    `json:"demands" xorm:"text"`
+	Phantoms         string    `json:"phantoms" xorm:"text"`
+	KeyName          string    `json:"keyName" xorm:"text"`
+	KeyValue         string    `json:"keyValue" xorm:"text"`
+	PhantomKeyValue  string    `json:"phantomKeyValue" xorm:"text"`
+	CreateDate       time.Time `json:"createDate" xorm:"created"`
+	UpdateDate       time.Time `json:"updateDate" xorm:"updated"`
 }
 
 func insertBobTxToDB(transaction BobTransaction) error {
@@ -115,6 +116,7 @@ func insertBobTxToDB(transaction BobTransaction) error {
 	tx.N = transaction.Bulletin.N
 	tx.SigmaMKLRoot = transaction.Bulletin.SigmaMKLRoot
 	tx.Price = transaction.Price
+	tx.Count = transaction.Count
 	tx.ExpireAt = transaction.ExpireAt
 
 	if tx.Mode == TRANSACTION_MODE_TABLE_POD {
@@ -144,6 +146,12 @@ func insertBobTxToDB(transaction BobTransaction) error {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
 			tx.Demands = string(demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			demands, err := json.Marshal(&transaction.PlainAtomicSwapVc.Demands)
+			if err != nil {
+				return fmt.Errorf("failed to parse demands: %v", err)
+			}
+			tx.Demands = string(demands)
 		}
 	} else {
 		switch tx.SubMode {
@@ -168,6 +176,12 @@ func insertBobTxToDB(transaction BobTransaction) error {
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
 			demands, err := json.Marshal(&transaction.TableAtomicSwap.Demands)
+			if err != nil {
+				return fmt.Errorf("failed to parse demands: %v", err)
+			}
+			tx.Demands = string(demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			demands, err := json.Marshal(&transaction.TableAtomicSwapVc.Demands)
 			if err != nil {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -221,6 +235,7 @@ func updateBobTxToDB(transaction BobTransaction) error {
 	tx.SigmaMKLRoot = transaction.Bulletin.SigmaMKLRoot
 	tx.Price = transaction.Price
 	tx.UnitPrice = transaction.UnitPrice
+	tx.Count = transaction.Count
 	tx.ExpireAt = transaction.ExpireAt
 
 	if tx.Mode == TRANSACTION_MODE_TABLE_POD {
@@ -250,6 +265,12 @@ func updateBobTxToDB(transaction BobTransaction) error {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
 			tx.Demands = string(demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			demands, err := json.Marshal(&transaction.PlainAtomicSwapVc.Demands)
+			if err != nil {
+				return fmt.Errorf("failed to parse demands: %v", err)
+			}
+			tx.Demands = string(demands)
 		}
 	} else {
 		switch tx.SubMode {
@@ -274,6 +295,12 @@ func updateBobTxToDB(transaction BobTransaction) error {
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
 			demands, err := json.Marshal(&transaction.TableAtomicSwap.Demands)
+			if err != nil {
+				return fmt.Errorf("failed to parse demands: %v", err)
+			}
+			tx.Demands = string(demands)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			demands, err := json.Marshal(&transaction.TableAtomicSwapVc.Demands)
 			if err != nil {
 				return fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -337,6 +364,7 @@ func loadBobTxFromDB(sessionID string) (BobTransaction, error) {
 	transaction.Bulletin.Mode = tx.Mode
 	transaction.Price = tx.Price
 	transaction.UnitPrice = tx.UnitPrice
+	transaction.Count = tx.Count
 	transaction.ExpireAt = tx.ExpireAt
 
 	if transaction.Mode == TRANSACTION_MODE_TABLE_POD {
@@ -362,6 +390,11 @@ func loadBobTxFromDB(sessionID string) (BobTransaction, error) {
 			if err != nil {
 				return transaction, fmt.Errorf("failed to parse demands: %v", err)
 			}
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			err := json.Unmarshal([]byte(tx.Demands), &transaction.PlainAtomicSwapVc.Demands)
+			if err != nil {
+				return transaction, fmt.Errorf("failed to parse demands: %v", err)
+			}
 		}
 	} else {
 		switch transaction.SubMode {
@@ -383,6 +416,11 @@ func loadBobTxFromDB(sessionID string) (BobTransaction, error) {
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
 			err := json.Unmarshal([]byte(tx.Demands), &transaction.TableAtomicSwap.Demands)
+			if err != nil {
+				return transaction, fmt.Errorf("failed to parse demands: %v", err)
+			}
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			err := json.Unmarshal([]byte(tx.Demands), &transaction.TableAtomicSwapVc.Demands)
 			if err != nil {
 				return transaction, fmt.Errorf("failed to parse demands: %v", err)
 			}
@@ -436,6 +474,7 @@ func loadBobTxListFromDB() ([]BobTransaction, error) {
 		transactions[i].Bulletin.Mode = tx.Mode
 		transactions[i].Price = tx.Price
 		transactions[i].UnitPrice = tx.UnitPrice
+		transactions[i].Count = tx.Count
 		transactions[i].ExpireAt = tx.ExpireAt
 
 		if transactions[i].Mode == TRANSACTION_MODE_TABLE_POD {
@@ -461,6 +500,11 @@ func loadBobTxListFromDB() ([]BobTransaction, error) {
 				if err != nil {
 					return transactions, fmt.Errorf("failed to parse demands: %v", err)
 				}
+			case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].PlainAtomicSwapVc.Demands)
+				if err != nil {
+					return transactions, fmt.Errorf("failed to parse demands: %v", err)
+				}
 			}
 		} else {
 			switch transactions[i].SubMode {
@@ -482,6 +526,11 @@ func loadBobTxListFromDB() ([]BobTransaction, error) {
 				}
 			case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
 				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableAtomicSwap.Demands)
+				if err != nil {
+					return transactions, fmt.Errorf("failed to parse demands: %v", err)
+				}
+			case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+				err := json.Unmarshal([]byte(tx.Demands), &transactions[i].TableAtomicSwapVc.Demands)
 				if err != nil {
 					return transactions, fmt.Errorf("failed to parse demands: %v", err)
 				}
@@ -511,28 +560,24 @@ func loadBobTxListFromDB() ([]BobTransaction, error) {
 }
 
 type AliceTx struct {
-	SessionId    string `json:"sessionId" xorm:"text pk not null"`
-	Status       string `json:"status" xorm:"text not null"`
-	AliceAddr   string `json:"AliceAddr" xorm:"text not null"`
-	BobPubKey  string `json:"BobPubkey" xorm:"text not null"`
-	BobAddr    string `json:"BobAddr" xorm:"text not null"`
-	Mode         string `json:"mode" xorm:"text not null"`
-	SubMode      string `json:"subMode" xorm:"text not null"`
-	OT           bool   `json:"ot" xorm:"bool"`
-	Size         string `json:"size" xorm:"text not null"`
-	S            string `json:"s" xorm:"text not null"`
-	N            string `json:"n" xorm:"text not null"`
-	SigmaMKLRoot string `json:"sigmaMklRoot" xorm:"text not null"`
-	Price        int64  `json:"price" xorm:"INTEGER"`
-	UnitPrice    int64  `json:"unit_price" xorm:"INTEGER"`
-	ExpireAt     int64  `json:"expireAt" xorm:"text"`
-	// Demands         string `json:"demands" xorm:"text"`
-	// Phantoms        string `json:"phantoms" xorm:"text"`
-	// KeyName         string `json:"keyName" xorm:"text"`
-	// KeyValue        string `json:"keyValue" xorm:"text"`
-	// PhantomKeyValue string `json:"phantomKeyValue" xorm:"text"`
-	CreateDate time.Time `json:"createDate" xorm:"created"`
-	UpdateDate time.Time `json:"updateDate" xorm:"updated"`
+	SessionId    string    `json:"sessionId" xorm:"text pk not null"`
+	Status       string    `json:"status" xorm:"text not null"`
+	AliceAddr    string    `json:"AliceAddr" xorm:"text not null"`
+	BobPubKey    string    `json:"BobPubkey" xorm:"text not null"`
+	BobAddr      string    `json:"BobAddr" xorm:"text not null"`
+	Mode         string    `json:"mode" xorm:"text not null"`
+	SubMode      string    `json:"subMode" xorm:"text not null"`
+	OT           bool      `json:"ot" xorm:"bool"`
+	Size         string    `json:"size" xorm:"text not null"`
+	S            string    `json:"s" xorm:"text not null"`
+	N            string    `json:"n" xorm:"text not null"`
+	SigmaMKLRoot string    `json:"sigmaMklRoot" xorm:"text not null"`
+	Price        int64     `json:"price" xorm:"INTEGER"`
+	UnitPrice    int64     `json:"unit_price" xorm:"INTEGER"`
+	ExpireAt     int64     `json:"expireAt" xorm:"text"`
+	Count        int64     `json:"count" xorm:"INTEGER"`
+	CreateDate   time.Time `json:"createDate" xorm:"created"`
+	UpdateDate   time.Time `json:"updateDate" xorm:"updated"`
 }
 
 func insertAliceTxToDB(transaction Transaction) error {
@@ -553,6 +598,7 @@ func insertAliceTxToDB(transaction Transaction) error {
 	tx.Price = transaction.Price
 	tx.UnitPrice = transaction.UnitPrice
 	tx.ExpireAt = transaction.ExpireAt
+	tx.Count = transaction.Count
 
 	_, err := DBConn.Insert(&tx)
 	if err != nil {
@@ -580,6 +626,7 @@ func updateAliceTxToDB(transaction Transaction) error {
 	tx.Price = transaction.Price
 	tx.UnitPrice = transaction.UnitPrice
 	tx.ExpireAt = transaction.ExpireAt
+	tx.Count = transaction.Count
 
 	_, err := DBConn.Where("session_id = ?", tx.SessionId).Update(&tx)
 	if err != nil {
@@ -617,6 +664,7 @@ func loadAliceFromDB(sessionID string) (Transaction, bool, error) {
 	transaction.Price = tx.Price
 	transaction.UnitPrice = tx.UnitPrice
 	transaction.ExpireAt = tx.ExpireAt
+	transaction.Count = tx.Count
 
 	return transaction, true, nil
 }
@@ -648,6 +696,7 @@ func loadAliceTxListToDB() ([]Transaction, error) {
 		transactions[i].Price = tx.Price
 		transactions[i].UnitPrice = tx.UnitPrice
 		transactions[i].ExpireAt = tx.ExpireAt
+		transactions[i].Count = tx.Count
 	}
 
 	return transactions, nil

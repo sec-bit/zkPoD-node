@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,22 +19,52 @@ import (
 	"github.com/miguelmota/go-solidity-sha3"
 )
 
-//ComplaintSecret is the struct of secret for compalint mode
+// ComplaintRequest is the structure of request for complaint request
+type ComplaintRequest struct {
+	S string   `json:"s"`
+	D []string `json:"d"`
+}
+
+// OtComplaintRequest is the structure of request for ot complaint request
+type OtComplaintRequest struct {
+	S string   `json:"s"`
+	P []string `json:"p"`
+}
+
+// AtomicSwapRequest is the structure of request for atomic_swap request
+type AtomicSwapRequest struct {
+	S string   `json:"s"`
+	P []string `json:"p"`
+}
+
+// AtomicSwapVcRequest is the structure of request for atomic_swap_vc request
+type AtomicSwapVcRequest struct {
+	S string   `json:"s"`
+	P []string `json:"p"`
+}
+
+//ComplaintSecret is the structure of secret for complaint mode
 type ComplaintSecret struct {
 	S string `json:"s"`
 }
 
-//AtomicSwapSecret is the struct of secret for atomic swap mode
+//AtomicSwapSecret is the structure of secret for atomic swap mode
 type AtomicSwapSecret struct {
 	S string `json:"s"`
 }
 
-//VRFSecret is the struct of secret for vrf mode
+//AtomicSwapVcSecret is the structure of secret for atomic swap mode
+type AtomicSwapVcSecret struct {
+	S string `json:"s"`
+	R string `json:"r"`
+}
+
+//VRFSecret is the structure of secret for vrf mode
 type VRFSecret struct {
 	R string `json:"r"`
 }
 
-//Claim is the struct of claim
+//Claim is the structure of claim
 type Claim struct {
 	I uint64   `json:"i"`
 	J uint64   `json:"j"`
@@ -41,7 +72,7 @@ type Claim struct {
 	M []string `json:"m"`
 }
 
-//ComplaintReceipt is the struct of receipt for compalint mode
+//ComplaintReceipt is the struct of receipt for complaint mode
 type ComplaintReceipt struct {
 	S string `json:"s"`
 	K string `json:"k"`
@@ -53,6 +84,11 @@ type AtomicSwapReceipt struct {
 	S  string `json:"s"`
 	VW string `json:"vw"`
 	C  uint64 `json:"c"`
+}
+
+//AtomicSwapVcReceipt is the struct of receipt for atomic swap mode
+type AtomicSwapVcReceipt struct {
+	D string `json:"d"`
 }
 
 //VRFReceipt is the struct of receipt for vrf mode
@@ -250,6 +286,66 @@ func signRecptForAtomicSwap(key *keystore.Key, sessionID string, receipt AtomicS
 	return sig, nil
 }
 
+func readReceiptForAtomicSwapVc(filePath string, Log ILogger) ([]byte, AtomicSwapVcReceipt, error) {
+	var r AtomicSwapVcReceipt
+	rf, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Log.Warnf("failed to read receipt file. err=%v", err)
+		return rf, r, errors.New("failed to read receipt file")
+	}
+	// config := string(conf)
+
+	err = json.Unmarshal(rf, &r)
+	if err != nil {
+		Log.Warnf("failed to parse receipt file. err=%v", err)
+		return rf, r, errors.New("failed to parse receipt file")
+	}
+
+	return rf, r, nil
+}
+
+func signRecptForAtomicSwapVc(key *keystore.Key, sessionID string, receipt AtomicSwapVcReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+
+	sessionInt := new(big.Int)
+	sessionInt, rs := sessionInt.SetString(sessionID, 10)
+	if !rs {
+		Log.Warnf("failed to convert sessionId.")
+		return nil, errors.New("convert sessionId error")
+	}
+	digestInt := new(big.Int)
+	digestInt, rs = digestInt.SetString(receipt.D, 10)
+	if !rs {
+		Log.Warnf("failed to convert digestInt. receipt.D=%v", receipt.D)
+		return nil, errors.New("failed to convert digestInt")
+	}
+
+	receiptHash := solsha3.SoliditySHA3( // types
+		[]string{"uint256", "address", "uint256", "uint256", "uint256"},
+
+		// values
+		[]interface{}{
+			sessionInt,
+			fmt.Sprintf("%v", key.Address.Hex()),
+			digestInt,
+			big.NewInt(price),
+			big.NewInt(expireAt),
+		})
+
+	Log.Debugf("generate receipt receiptHash=0x%02x\n", receiptHash)
+
+	receiptHash = solsha3.SoliditySHA3WithPrefix(receiptHash)
+
+	// Bob sign the receipt
+	sig, err := crypto.Sign(receiptHash, key.PrivateKey)
+	if err != nil {
+		Log.Warnf("generate signature for receipt hash error. err=%v", err)
+		return nil, errors.New("signature error")
+	}
+	Log.Debugf("generate receipt signature=%v", hexutil.Encode(sig))
+
+	return sig, nil
+}
+
 func readVRFReceipt(filePath string, Log ILogger) ([]byte, VRFReceipt, error) {
 	var r VRFReceipt
 	rf, err := ioutil.ReadFile(filePath)
@@ -385,6 +481,37 @@ func BobSaveSecretForAtomicSwap(secret AtomicSwapSecret, filePath string, Log IL
 	return nil
 }
 
+func readSeed0ForAtomicSwapVc(filePath string, Log ILogger) (s AtomicSwapVcSecret, err error) {
+
+	sf, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		Log.Warnf("failed to open seed2 file. err=%v", err)
+		return s, errors.New("failed to open seed2 file")
+	}
+	// config := string(conf)
+	err = json.Unmarshal(sf, &s)
+	if err != nil {
+		Log.Warnf("failed to parse seed2 file. err=%v", err)
+		return s, errors.New("failed to parse seed2 file")
+	}
+
+	return
+}
+
+func BobSaveSecretForAtomicSwapVc(secret AtomicSwapVcSecret, filePath string, Log ILogger) error {
+	sByte, err := json.Marshal(&secret)
+	if err != nil {
+		Log.Warnf("failed to save secret for Bob. err=%v")
+		return errors.New("failed to save secret for Bob")
+	}
+	err = ioutil.WriteFile(filePath, sByte, 0644)
+	if err != nil {
+		Log.Errorf("failed to save bulletin file. err=%v", err)
+		return errors.New("save bulletin file error")
+	}
+	return nil
+}
+
 func readSeed0ForVRFQ(filePath string, Log ILogger) (s VRFSecret, err error) {
 
 	sf, err := ioutil.ReadFile(filePath)
@@ -506,16 +633,16 @@ func publishRawData(filePath string, fileName string, mode string, column string
 
 	var cmd *exec.Cmd
 	if mode == TRANSACTION_MODE_PLAIN_POD {
-		cmd = exec.Command(BConf.PublishBINPath, "-e", BConf.ECCBINPath, "-m", mode, "-f", filePath+"/"+fileName, "-o", filePath, "-c", column)
+		cmd = exec.Command(BConf.PublishBINPath, "-m", mode, "-f", filePath+"/"+fileName, "-o", filePath, "-c", column)
 	} else {
 		fs := strings.Split(fileName, ".")
-		parameters := []string{"-e", BConf.ECCBINPath, "-m", mode, "-f", filePath + "/" + fileName, "-o", filePath, "-t", fs[len(fs)-1], "-k"}
+		parameters := []string{"-m", mode, "-f", filePath + "/" + fileName, "-o", filePath, "-t", fs[len(fs)-1], "-k"}
 		for _, k := range keys {
 			parameters = append(parameters, fmt.Sprintf("%v", k))
 		}
 		cmd = exec.Command(BConf.PublishBINPath, parameters...)
 	}
-	fmt.Printf("exec command: %v\n", cmd)
+	// fmt.Printf("exec command: %v\n", cmd)
 
 	rs, err := cmd.Output()
 	if err != nil {
@@ -564,4 +691,112 @@ func readExtraFile(filepath string) (extra PublishExtraInfo, err error) {
 		return
 	}
 	return
+}
+
+func calcuCntforComplaint(requestFile string) (int64, error) {
+	var req ComplaintRequest
+	request, err := ioutil.ReadFile(requestFile)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	err = json.Unmarshal(request, &req)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	var count int64
+	for _, d := range req.D {
+		cs := strings.Split(d, "-")
+		if len(cs) != 2 {
+			return 0, fmt.Errorf("invalid demand. %v", d)
+		}
+		c, err := strconv.ParseInt(cs[len(cs)-1], 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("invalid demand. %v", d)
+		}
+		count += c
+	}
+	return count, nil
+}
+
+func calcuCntforOtComplaint(requestFile string) (int64, error) {
+	var req OtComplaintRequest
+	request, err := ioutil.ReadFile(requestFile)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	err = json.Unmarshal(request, &req)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	var count int64
+	for _, p := range req.P {
+		cs := strings.Split(p, "-")
+		if len(cs) != 2 {
+			return 0, fmt.Errorf("invalid phantoms. %v", p)
+		}
+		c, err := strconv.ParseInt(cs[len(cs)-1], 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("invalid phantoms. %v", p)
+		}
+		count += c
+	}
+	return count, nil
+}
+
+func calcuCntforAS(requestFile string) (int64, error) {
+	var req AtomicSwapRequest
+	request, err := ioutil.ReadFile(requestFile)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	err = json.Unmarshal(request, &req)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	var count int64
+	for _, p := range req.P {
+		cs := strings.Split(p, "-")
+		if len(cs) != 2 {
+			return 0, fmt.Errorf("invalid demands. %v", p)
+		}
+		c, err := strconv.ParseInt(cs[len(cs)-1], 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("invalid demands. %v", p)
+		}
+		count += c
+	}
+	return count, nil
+}
+
+func calcuCntforASVC(requestFile string) (int64, error) {
+	var req AtomicSwapRequest
+	request, err := ioutil.ReadFile(requestFile)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	err = json.Unmarshal(request, &req)
+	if err != nil {
+		return 0, fmt.Errorf("failed to read request file. err=%v", err)
+	}
+
+	var count int64
+	for _, p := range req.P {
+		cs := strings.Split(p, "-")
+		if len(cs) != 2 {
+			return 0, fmt.Errorf("invalid demands. %v", p)
+		}
+		c, err := strconv.ParseInt(cs[len(cs)-1], 10, 64)
+		if err != nil {
+			return 0, fmt.Errorf("invalid demands. %v", p)
+		}
+		count += c
+	}
+	return count, nil
 }

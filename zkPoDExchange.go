@@ -28,7 +28,7 @@ var (
 )
 
 // ZkPoDExchangeABI is the input ABI used to generate the binding from.
-const ZkPoDExchangeABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"publicVar_\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"bobDeposits_\",\"outputs\":[{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"pendingCnt\",\"type\":\"uint256\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"s_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint64\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t3\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"bulletins_\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"size\",\"type\":\"uint64\"},{\"name\":\"s\",\"type\":\"uint64\"},{\"name\":\"n\",\"type\":\"uint64\"},{\"name\":\"sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"pledge_value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"blt_type\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t1\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t4\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_publicVar\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_mode\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnComplaintKey\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"OnComplaintClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnComplaintDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnAtomicSwapDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_r\",\"type\":\"uint256\"}],\"name\":\"OnVRFDeal\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"_size\",\"type\":\"uint64\"},{\"name\":\"_s\",\"type\":\"uint64\"},{\"name\":\"_n\",\"type\":\"uint64\"},{\"name\":\"_sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"_vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"_blt_type\",\"type\":\"uint256\"}],\"name\":\"publish\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"unPublish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"bobDeposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"bobUnDeposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"withdrawA\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"withdrawB\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofComplaint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_i\",\"type\":\"uint64\"},{\"name\":\"_j\",\"type\":\"uint64\"},{\"name\":\"_tx\",\"type\":\"uint256\"},{\"name\":\"_ty\",\"type\":\"uint256\"},{\"name\":\"_mkl_path\",\"type\":\"bytes32[]\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"}],\"name\":\"claimComplaint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"settleComplaintDeal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_sigma_vw\",\"type\":\"uint256\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofAtomicSwap\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_s_r\",\"type\":\"uint256\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_g_exp_r\",\"type\":\"uint256[2]\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofVRF\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getSessionRecord\",\"outputs\":[{\"name\":\"submitAt\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordComplaint\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"seed2\",\"type\":\"bytes32\"},{\"name\":\"k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"count\",\"type\":\"uint64\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"expireAt\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordAtomicSwap\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordVRF\",\"outputs\":[{\"name\":\"r\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ZkPoDExchangeABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"publicVar_\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"}],\"name\":\"bobDeposits_\",\"outputs\":[{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"pendingCnt\",\"type\":\"uint256\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"s_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint64\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t3\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"bulletins_\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"size\",\"type\":\"uint64\"},{\"name\":\"s\",\"type\":\"uint64\"},{\"name\":\"n\",\"type\":\"uint64\"},{\"name\":\"sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"pledge_value\",\"type\":\"uint256\"},{\"name\":\"unDepositAt\",\"type\":\"uint256\"},{\"name\":\"pendingCnt\",\"type\":\"uint256\"},{\"name\":\"blt_type\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t1\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"t4\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_publicVar\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_mode\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnComplaintKey\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"OnComplaintClaim\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_price\",\"type\":\"uint256\"}],\"name\":\"OnComplaintDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"bytes32\"}],\"name\":\"OnAtomicSwapDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_seed0_rand\",\"type\":\"uint256\"}],\"name\":\"OnAtomicSwapVCDeal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_a\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_b\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"_sid\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_r\",\"type\":\"uint256\"}],\"name\":\"OnVRFDeal\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"_size\",\"type\":\"uint64\"},{\"name\":\"_s\",\"type\":\"uint64\"},{\"name\":\"_n\",\"type\":\"uint64\"},{\"name\":\"_sigma_mkl_root\",\"type\":\"uint256\"},{\"name\":\"_vrf_meta_digest\",\"type\":\"uint256\"},{\"name\":\"_blt_type\",\"type\":\"uint256\"}],\"name\":\"publish\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"unPublish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"bobDeposit\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"bobUnDeposit\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"}],\"name\":\"withdrawA\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_to\",\"type\":\"address\"}],\"name\":\"withdrawB\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_bltKey\",\"type\":\"bytes32\"},{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofComplaint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_i\",\"type\":\"uint64\"},{\"name\":\"_j\",\"type\":\"uint64\"},{\"name\":\"_tx\",\"type\":\"uint256\"},{\"name\":\"_ty\",\"type\":\"uint256\"},{\"name\":\"_mkl_path\",\"type\":\"bytes32[]\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"}],\"name\":\"claimComplaint\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"settleComplaintDeal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"bytes32\"},{\"name\":\"_sCnt\",\"type\":\"uint64\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed2\",\"type\":\"bytes32\"},{\"name\":\"_sigma_vw\",\"type\":\"uint256\"},{\"name\":\"_count\",\"type\":\"uint64\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofAtomicSwap\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_seed0\",\"type\":\"uint256\"},{\"name\":\"_seed0_rand\",\"type\":\"uint256\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_seed0_mimc3_digest\",\"type\":\"uint256\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofAtomicSwapVC\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_s_r\",\"type\":\"uint256\"},{\"name\":\"_sid\",\"type\":\"uint256\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_g_exp_r\",\"type\":\"uint256[2]\"},{\"name\":\"_price\",\"type\":\"uint256\"},{\"name\":\"_expireAt\",\"type\":\"uint256\"},{\"name\":\"_sig\",\"type\":\"bytes\"}],\"name\":\"submitProofVRF\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getSessionRecord\",\"outputs\":[{\"name\":\"submitAt\",\"type\":\"uint256\"},{\"name\":\"mode\",\"type\":\"uint8\"},{\"name\":\"stat\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordComplaint\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"seed2\",\"type\":\"bytes32\"},{\"name\":\"k_mkl_root\",\"type\":\"bytes32\"},{\"name\":\"count\",\"type\":\"uint64\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"expireAt\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordAtomicSwap\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"bytes32\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordAtomicSwapVC\",\"outputs\":[{\"name\":\"seed0\",\"type\":\"uint256\"},{\"name\":\"seed0_rand\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_a\",\"type\":\"address\"},{\"name\":\"_b\",\"type\":\"address\"},{\"name\":\"_sid\",\"type\":\"uint256\"}],\"name\":\"getRecordVRF\",\"outputs\":[{\"name\":\"r\",\"type\":\"uint256\"},{\"name\":\"submitAt\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // ZkPoDExchange is an auto generated Go binding around an Ethereum contract.
 type ZkPoDExchange struct {
@@ -218,7 +218,7 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) BobDeposits(arg0 common.Addres
 
 // Bulletins is a free data retrieval call binding the contract method 0xd9417785.
 //
-// Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint8 blt_type, uint8 stat)
+// Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint256 pendingCnt, uint8 blt_type, uint8 stat)
 func (_ZkPoDExchange *ZkPoDExchangeCaller) Bulletins(opts *bind.CallOpts, arg0 [32]byte) (struct {
 	Owner         common.Address
 	Size          uint64
@@ -228,6 +228,7 @@ func (_ZkPoDExchange *ZkPoDExchangeCaller) Bulletins(opts *bind.CallOpts, arg0 [
 	VrfMetaDigest *big.Int
 	PledgeValue   *big.Int
 	UnDepositAt   *big.Int
+	PendingCnt    *big.Int
 	BltType       uint8
 	Stat          uint8
 }, error) {
@@ -240,6 +241,7 @@ func (_ZkPoDExchange *ZkPoDExchangeCaller) Bulletins(opts *bind.CallOpts, arg0 [
 		VrfMetaDigest *big.Int
 		PledgeValue   *big.Int
 		UnDepositAt   *big.Int
+		PendingCnt    *big.Int
 		BltType       uint8
 		Stat          uint8
 	})
@@ -250,7 +252,7 @@ func (_ZkPoDExchange *ZkPoDExchangeCaller) Bulletins(opts *bind.CallOpts, arg0 [
 
 // Bulletins is a free data retrieval call binding the contract method 0xd9417785.
 //
-// Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint8 blt_type, uint8 stat)
+// Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint256 pendingCnt, uint8 blt_type, uint8 stat)
 func (_ZkPoDExchange *ZkPoDExchangeSession) Bulletins(arg0 [32]byte) (struct {
 	Owner         common.Address
 	Size          uint64
@@ -260,6 +262,7 @@ func (_ZkPoDExchange *ZkPoDExchangeSession) Bulletins(arg0 [32]byte) (struct {
 	VrfMetaDigest *big.Int
 	PledgeValue   *big.Int
 	UnDepositAt   *big.Int
+	PendingCnt    *big.Int
 	BltType       uint8
 	Stat          uint8
 }, error) {
@@ -268,7 +271,7 @@ func (_ZkPoDExchange *ZkPoDExchangeSession) Bulletins(arg0 [32]byte) (struct {
 
 // Bulletins is a free data retrieval call binding the contract method 0xd9417785.
 //
-// Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint8 blt_type, uint8 stat)
+// Solidity: function bulletins_(bytes32 ) constant returns(address owner, uint64 size, uint64 s, uint64 n, uint256 sigma_mkl_root, uint256 vrf_meta_digest, uint256 pledge_value, uint256 unDepositAt, uint256 pendingCnt, uint8 blt_type, uint8 stat)
 func (_ZkPoDExchange *ZkPoDExchangeCallerSession) Bulletins(arg0 [32]byte) (struct {
 	Owner         common.Address
 	Size          uint64
@@ -278,6 +281,7 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) Bulletins(arg0 [32]byte) (stru
 	VrfMetaDigest *big.Int
 	PledgeValue   *big.Int
 	UnDepositAt   *big.Int
+	PendingCnt    *big.Int
 	BltType       uint8
 	Stat          uint8
 }, error) {
@@ -318,6 +322,46 @@ func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordAtomicSwap(_a common.
 	SubmitAt *big.Int
 }, error) {
 	return _ZkPoDExchange.Contract.GetRecordAtomicSwap(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
+}
+
+// GetRecordAtomicSwapVC is a free data retrieval call binding the contract method 0xa7e7b767.
+//
+// Solidity: function getRecordAtomicSwapVC(address _a, address _b, uint256 _sid) constant returns(uint256 seed0, uint256 seed0_rand, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeCaller) GetRecordAtomicSwapVC(opts *bind.CallOpts, _a common.Address, _b common.Address, _sid *big.Int) (struct {
+	Seed0     *big.Int
+	Seed0Rand *big.Int
+	SubmitAt  *big.Int
+}, error) {
+	ret := new(struct {
+		Seed0     *big.Int
+		Seed0Rand *big.Int
+		SubmitAt  *big.Int
+	})
+	out := ret
+	err := _ZkPoDExchange.contract.Call(opts, out, "getRecordAtomicSwapVC", _a, _b, _sid)
+	return *ret, err
+}
+
+// GetRecordAtomicSwapVC is a free data retrieval call binding the contract method 0xa7e7b767.
+//
+// Solidity: function getRecordAtomicSwapVC(address _a, address _b, uint256 _sid) constant returns(uint256 seed0, uint256 seed0_rand, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeSession) GetRecordAtomicSwapVC(_a common.Address, _b common.Address, _sid *big.Int) (struct {
+	Seed0     *big.Int
+	Seed0Rand *big.Int
+	SubmitAt  *big.Int
+}, error) {
+	return _ZkPoDExchange.Contract.GetRecordAtomicSwapVC(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
+}
+
+// GetRecordAtomicSwapVC is a free data retrieval call binding the contract method 0xa7e7b767.
+//
+// Solidity: function getRecordAtomicSwapVC(address _a, address _b, uint256 _sid) constant returns(uint256 seed0, uint256 seed0_rand, uint256 submitAt)
+func (_ZkPoDExchange *ZkPoDExchangeCallerSession) GetRecordAtomicSwapVC(_a common.Address, _b common.Address, _sid *big.Int) (struct {
+	Seed0     *big.Int
+	Seed0Rand *big.Int
+	SubmitAt  *big.Int
+}, error) {
+	return _ZkPoDExchange.Contract.GetRecordAtomicSwapVC(&_ZkPoDExchange.CallOpts, _a, _b, _sid)
 }
 
 // GetRecordComplaint is a free data retrieval call binding the contract method 0x1f31e95e.
@@ -708,25 +752,46 @@ func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofAtomicSwap(_see
 	return _ZkPoDExchange.Contract.SubmitProofAtomicSwap(&_ZkPoDExchange.TransactOpts, _seed0, _sCnt, _sid, _b, _seed2, _sigma_vw, _count, _price, _expireAt, _sig)
 }
 
-// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x13efc6f8.
+// SubmitProofAtomicSwapVC is a paid mutator transaction binding the contract method 0xb74c92aa.
 //
-// Solidity: function submitProofComplaint(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofComplaint(opts *bind.TransactOpts, _seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.contract.Transact(opts, "submitProofComplaint", _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofAtomicSwapVC(uint256 _seed0, uint256 _seed0_rand, uint256 _sid, address _b, uint256 _seed0_mimc3_digest, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofAtomicSwapVC(opts *bind.TransactOpts, _seed0 *big.Int, _seed0_rand *big.Int, _sid *big.Int, _b common.Address, _seed0_mimc3_digest *big.Int, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "submitProofAtomicSwapVC", _seed0, _seed0_rand, _sid, _b, _seed0_mimc3_digest, _price, _expireAt, _sig)
 }
 
-// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x13efc6f8.
+// SubmitProofAtomicSwapVC is a paid mutator transaction binding the contract method 0xb74c92aa.
 //
-// Solidity: function submitProofComplaint(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofComplaint(_seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SubmitProofComplaint(&_ZkPoDExchange.TransactOpts, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofAtomicSwapVC(uint256 _seed0, uint256 _seed0_rand, uint256 _sid, address _b, uint256 _seed0_mimc3_digest, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofAtomicSwapVC(_seed0 *big.Int, _seed0_rand *big.Int, _sid *big.Int, _b common.Address, _seed0_mimc3_digest *big.Int, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofAtomicSwapVC(&_ZkPoDExchange.TransactOpts, _seed0, _seed0_rand, _sid, _b, _seed0_mimc3_digest, _price, _expireAt, _sig)
 }
 
-// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x13efc6f8.
+// SubmitProofAtomicSwapVC is a paid mutator transaction binding the contract method 0xb74c92aa.
 //
-// Solidity: function submitProofComplaint(bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
-func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofComplaint(_seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
-	return _ZkPoDExchange.Contract.SubmitProofComplaint(&_ZkPoDExchange.TransactOpts, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+// Solidity: function submitProofAtomicSwapVC(uint256 _seed0, uint256 _seed0_rand, uint256 _sid, address _b, uint256 _seed0_mimc3_digest, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofAtomicSwapVC(_seed0 *big.Int, _seed0_rand *big.Int, _sid *big.Int, _b common.Address, _seed0_mimc3_digest *big.Int, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofAtomicSwapVC(&_ZkPoDExchange.TransactOpts, _seed0, _seed0_rand, _sid, _b, _seed0_mimc3_digest, _price, _expireAt, _sig)
+}
+
+// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x96a96ceb.
+//
+// Solidity: function submitProofComplaint(bytes32 _bltKey, bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofComplaint(opts *bind.TransactOpts, _bltKey [32]byte, _seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.contract.Transact(opts, "submitProofComplaint", _bltKey, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+}
+
+// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x96a96ceb.
+//
+// Solidity: function submitProofComplaint(bytes32 _bltKey, bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeSession) SubmitProofComplaint(_bltKey [32]byte, _seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofComplaint(&_ZkPoDExchange.TransactOpts, _bltKey, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
+}
+
+// SubmitProofComplaint is a paid mutator transaction binding the contract method 0x96a96ceb.
+//
+// Solidity: function submitProofComplaint(bytes32 _bltKey, bytes32 _seed0, uint256 _sid, address _b, bytes32 _seed2, bytes32 _k_mkl_root, uint64 _count, uint256 _price, uint256 _expireAt, bytes _sig) returns()
+func (_ZkPoDExchange *ZkPoDExchangeTransactorSession) SubmitProofComplaint(_bltKey [32]byte, _seed0 [32]byte, _sid *big.Int, _b common.Address, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte) (*types.Transaction, error) {
+	return _ZkPoDExchange.Contract.SubmitProofComplaint(&_ZkPoDExchange.TransactOpts, _bltKey, _seed0, _sid, _b, _seed2, _k_mkl_root, _count, _price, _expireAt, _sig)
 }
 
 // SubmitProofVRF is a paid mutator transaction binding the contract method 0x50f9b445.
@@ -944,6 +1009,158 @@ func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnAtomicSwapDeal(opts *bind.Wa
 				// New log arrived, parse the event and forward to the user
 				event := new(ZkPoDExchangeOnAtomicSwapDeal)
 				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnAtomicSwapDeal", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ZkPoDExchangeOnAtomicSwapVCDealIterator is returned from FilterOnAtomicSwapVCDeal and is used to iterate over the raw logs and unpacked data for OnAtomicSwapVCDeal events raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnAtomicSwapVCDealIterator struct {
+	Event *ZkPoDExchangeOnAtomicSwapVCDeal // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *ZkPoDExchangeOnAtomicSwapVCDealIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(ZkPoDExchangeOnAtomicSwapVCDeal)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(ZkPoDExchangeOnAtomicSwapVCDeal)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *ZkPoDExchangeOnAtomicSwapVCDealIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *ZkPoDExchangeOnAtomicSwapVCDealIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// ZkPoDExchangeOnAtomicSwapVCDeal represents a OnAtomicSwapVCDeal event raised by the ZkPoDExchange contract.
+type ZkPoDExchangeOnAtomicSwapVCDeal struct {
+	A         common.Address
+	B         common.Address
+	Sid       *big.Int
+	Seed0     *big.Int
+	Seed0Rand *big.Int
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterOnAtomicSwapVCDeal is a free log retrieval operation binding the contract event 0x8bae2e4a75f8ccb83905dd727dbb4bf26457ca31ce29f776d48db5ed1794f028.
+//
+// Solidity: event OnAtomicSwapVCDeal(address indexed _a, address indexed _b, uint256 indexed _sid, uint256 _seed0, uint256 _seed0_rand)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) FilterOnAtomicSwapVCDeal(opts *bind.FilterOpts, _a []common.Address, _b []common.Address, _sid []*big.Int) (*ZkPoDExchangeOnAtomicSwapVCDealIterator, error) {
+
+	var _aRule []interface{}
+	for _, _aItem := range _a {
+		_aRule = append(_aRule, _aItem)
+	}
+	var _bRule []interface{}
+	for _, _bItem := range _b {
+		_bRule = append(_bRule, _bItem)
+	}
+	var _sidRule []interface{}
+	for _, _sidItem := range _sid {
+		_sidRule = append(_sidRule, _sidItem)
+	}
+
+	logs, sub, err := _ZkPoDExchange.contract.FilterLogs(opts, "OnAtomicSwapVCDeal", _aRule, _bRule, _sidRule)
+	if err != nil {
+		return nil, err
+	}
+	return &ZkPoDExchangeOnAtomicSwapVCDealIterator{contract: _ZkPoDExchange.contract, event: "OnAtomicSwapVCDeal", logs: logs, sub: sub}, nil
+}
+
+// WatchOnAtomicSwapVCDeal is a free log subscription operation binding the contract event 0x8bae2e4a75f8ccb83905dd727dbb4bf26457ca31ce29f776d48db5ed1794f028.
+//
+// Solidity: event OnAtomicSwapVCDeal(address indexed _a, address indexed _b, uint256 indexed _sid, uint256 _seed0, uint256 _seed0_rand)
+func (_ZkPoDExchange *ZkPoDExchangeFilterer) WatchOnAtomicSwapVCDeal(opts *bind.WatchOpts, sink chan<- *ZkPoDExchangeOnAtomicSwapVCDeal, _a []common.Address, _b []common.Address, _sid []*big.Int) (event.Subscription, error) {
+
+	var _aRule []interface{}
+	for _, _aItem := range _a {
+		_aRule = append(_aRule, _aItem)
+	}
+	var _bRule []interface{}
+	for _, _bItem := range _b {
+		_bRule = append(_bRule, _bItem)
+	}
+	var _sidRule []interface{}
+	for _, _sidItem := range _sid {
+		_sidRule = append(_sidRule, _sidItem)
+	}
+
+	logs, sub, err := _ZkPoDExchange.contract.WatchLogs(opts, "OnAtomicSwapVCDeal", _aRule, _bRule, _sidRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(ZkPoDExchangeOnAtomicSwapVCDeal)
+				if err := _ZkPoDExchange.contract.UnpackLog(event, "OnAtomicSwapVCDeal", log); err != nil {
 					return err
 				}
 				event.Raw = log

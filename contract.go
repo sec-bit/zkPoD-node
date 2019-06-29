@@ -28,7 +28,6 @@ var ZkPoDExchangeClient *ZkPoDExchange
 //ConnectToProvider connects to contract
 func ConnectToProvider(key *keystore.Key, zkPODEXAddr string, Log ILogger) error {
 
-	fmt.Printf("%x\n", key.PrivateKey.D.Bytes())
 	fmt.Println(key.Address.Hex())
 	/**
 	 * Connecting to provider
@@ -185,12 +184,18 @@ func submitScrtForComplaint(tx Transaction, receiptSign []byte, Log ILogger) (st
 	}
 	seedByte, err := hex.DecodeString(secret.S)
 	if err != nil {
-		Log.Warnf("failed to decode seed s. seedstring=%v, err=%v", secret.S, err)
-		return "", errors.New("failed to parse seed2 file")
+		Log.Warnf("failed to decode seed. seedstring=%v, err=%v", secret.S, err)
+		return "", errors.New("failed to parse seed file")
+	}
+
+	bltKey, err := calcuBltKey(tx.Bulletin)
+	if err != nil {
+		Log.Warnf("failed to calculate blt key. tx.Bulletin=%v, err=%v", tx.Bulletin, err)
+		return "", errors.New("failed to calculate blt key")
 	}
 
 	t := time.Now()
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofComplaint(GAdminAuth, *byte32(seedByte), sessionInt,
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofComplaint(GAdminAuth, bltKey, *byte32(seedByte), sessionInt,
 		common.HexToAddress(tx.BobAddr), *byte32(seed2Byte), *byte32(mklByte), receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
 		Log.Warnf("failed to submit proof. err=%v", err)
@@ -218,7 +223,7 @@ func verifySigntureForComplaint(tx Transaction, sessionInt *big.Int, receiptSign
 			"0x" + receipt.S,
 			"0x" + receipt.K,
 			receipt.C,
-			big.NewInt(tx.UnitPrice * int64(receipt.C)),
+			big.NewInt(tx.UnitPrice * tx.Count),
 			big.NewInt(tx.ExpireAt),
 		})
 	Log.Debugf("generate receipt receiptHash=0x%02x\n", receiptHash)
@@ -427,7 +432,7 @@ func verifySigntureForAtomicSwap(tx Transaction, sessionInt *big.Int, vwInt *big
 			"0x" + receipt.S,
 			vwInt,
 			receipt.C,
-			big.NewInt(tx.UnitPrice * int64(receipt.C)),
+			big.NewInt(tx.UnitPrice * tx.Count),
 			big.NewInt(tx.ExpireAt),
 		})
 	Log.Debugf("generate receipt receiptHash=0x%02x\n", receiptHash)
@@ -473,6 +478,140 @@ func readScrtForAtomicSwap(sessionID string, AliceAddr string, BobAddr string, L
 		}
 
 		secret.S = hex.EncodeToString(records.Seed0[:])
+		return secret, nil
+	}
+
+	return secret, errors.New("No secret to be read")
+}
+
+func submitScrtForAtomicSwapVc(tx Transaction, receiptSign []byte, Log ILogger) (string, error) {
+	seed0Path := BConf.AliceDir + "/transaction/" + tx.SessionID + "/secret"
+	receiptPath := BConf.AliceDir + "/transaction/" + tx.SessionID + "/receipt"
+
+	sessionInt := new(big.Int)
+	sessionInt, rs := sessionInt.SetString(tx.SessionID, 10)
+	if !rs {
+		Log.Warnf("failed to convert sessionId.")
+		return "", errors.New("failed to convert sessionId")
+	}
+
+	_, receipt, err := readReceiptForAtomicSwapVc(receiptPath, Log)
+	if err != nil {
+		Log.Warnf("failed to read receipt. err=%v", err)
+		return "", errors.New("failed to read receipt")
+	}
+
+	digestInt := new(big.Int)
+	digestInt, rs = digestInt.SetString(receipt.D, 10)
+	if !rs {
+		Log.Warnf("failed to convert digestInt. receipt.D=%v", receipt.D)
+		return "", errors.New("failed to convert digestInt")
+	}
+	Log.Debugf(" _sessionId=%v, Bob address=%v, digestInt=%v", sessionInt, tx.BobAddr, digestInt)
+
+	err = verifySigntureForAtomicSwapVc(tx, sessionInt, receiptSign, digestInt, Log)
+	if err != nil {
+		Log.Warnf("verify signature error! err=%v", err)
+		return "", errors.New("verify signature error")
+	}
+
+	secret, err := readSeed0ForAtomicSwapVc(seed0Path, Log)
+	if err != nil {
+		Log.Warnf("failed to read seed0. err=%v", err)
+		return "", errors.New("failed to read seed0")
+	}
+
+	seed0Int := new(big.Int)
+	seed0Int, rs = seed0Int.SetString(secret.S, 10)
+	if !rs {
+		Log.Warnf("failed to convert seed0Int. secret.S=%v", secret.S)
+		return "", errors.New("failed to convert seed0Int")
+	}
+
+	randInt := new(big.Int)
+	randInt, rs = randInt.SetString(secret.R, 10)
+	if !rs {
+		Log.Warnf("failed to convert digestInt. secret.R=%v", secret.R)
+		return "", errors.New("failed to convert digestInt")
+	}
+	Log.Debugf("seedByte=%v, randByte=%v, sessionInt=%v, BobAddr=%v, receipt.D=%v, tx.Price=%v, tx.ExpireAt=%v, receiptSign=%v",
+		seed0Int, randInt, sessionInt, tx.BobAddr, receipt.D, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
+
+	t := time.Now()
+	// SubmitProofAtomicSwapVC func(opts *bind.TransactOpts, _seed0 *big.Int, _seed0_rand *big.Int,
+	// 	_sid *big.Int, _b common.Address, _seed0_mimc3_digest *big.Int,
+	// 	_price *big.Int, _expireAt *big.Int, _sig []byte)
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofAtomicSwapVC(GAdminAuth, seed0Int, randInt,
+		sessionInt, common.HexToAddress(tx.BobAddr), digestInt,
+		big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
+	if err != nil {
+		Log.Warnf("failed to submit proof. err=%v", err)
+		return "", errors.New("failed to submit proof")
+	}
+	Log.Debugf("POD submit proof successfully,  time cost=%v\n",
+		time.Since(t))
+	return ctx.Hash().Hex(), nil
+}
+
+func verifySigntureForAtomicSwapVc(tx Transaction, sessionInt *big.Int, receiptSign []byte, digestInt *big.Int, Log ILogger) error {
+	if len(receiptSign) != 65 {
+		Log.Warnf("invalid signature. sig=%v, len(sig)=%v", hexutil.Encode(receiptSign), len(receiptSign))
+		return errors.New("invalid signature")
+	}
+
+	receiptHash := solsha3.SoliditySHA3( // types
+		[]string{"uint256", "address", "uint256", "uint256", "uint256"},
+
+		// values
+		[]interface{}{
+			sessionInt,
+			common.HexToAddress(tx.BobAddr),
+			digestInt,
+			big.NewInt(tx.UnitPrice * tx.Count),
+			big.NewInt(tx.ExpireAt),
+		})
+	Log.Debugf("generate receipt receiptHash=0x%02x\n", receiptHash)
+
+	receiptHash = solsha3.SoliditySHA3WithPrefix(receiptHash)
+
+	sigPublicKeyECDSA, err := crypto.SigToPub(receiptHash, receiptSign)
+	if err != nil {
+		Log.Warnf("failed to generate pub key from signature. err=%v", err)
+		return errors.New("verify signature error")
+	}
+
+	if crypto.PubkeyToAddress(*sigPublicKeyECDSA) != common.HexToAddress(tx.BobAddr) {
+		Log.Warnf("failed to verify signature.")
+		return errors.New("failed to verify signature")
+	}
+
+	return nil
+}
+
+func readScrtForAtomicSwapVc(sessionID string, AliceAddr string, BobAddr string, Log ILogger) (AtomicSwapVcSecret, error) {
+	var secret AtomicSwapVcSecret
+	for i := 0; i < 20; i++ {
+		Log.Debugf("round %v, read secret from contract. sessionId=%v", i+1, sessionID)
+		sessionInt := new(big.Int)
+		sessionInt, rs := sessionInt.SetString(sessionID, 10)
+		if !rs {
+			Log.Warnf("Failed to convert sessionId.")
+			return secret, errors.New("Failed to convert sessionId")
+		}
+		t := time.Now()
+		records, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.GetRecordAtomicSwapVC(&bind.CallOpts{}, common.HexToAddress(AliceAddr), common.HexToAddress(BobAddr), sessionInt)
+		if err != nil {
+			Log.Warnf("Failed to read session record: %v", err)
+			return secret, errors.New("Failed to read session record")
+		}
+		Log.Debugf("POD reads secret from contract...time cost=%v\n",
+			time.Since(t))
+		if records.SubmitAt.Int64() == 0 {
+			time.Sleep(30 * time.Second)
+			continue
+		}
+		secret.S = records.Seed0.String()
+		secret.R = records.Seed0Rand.String()
 		return secret, nil
 	}
 
@@ -561,7 +700,7 @@ func verifySigntureForVRFQ(tx Transaction, sessionInt *big.Int, _g_exp_r [2]*big
 			common.HexToAddress(tx.BobAddr),
 			_g_exp_r[0],
 			_g_exp_r[1],
-			big.NewInt(tx.UnitPrice),
+			big.NewInt(tx.UnitPrice * tx.Count),
 			big.NewInt(tx.ExpireAt),
 		})
 	Log.Debugf("generate receipt receiptHash=0x%02x\n", receiptHash)
@@ -617,9 +756,6 @@ func verifyDeposit(AliceAddr string, BobAddr string, value int64) (bool, error) 
 	if err != nil {
 		return false, fmt.Errorf("failed to read deposit. err=%v", err)
 	}
-	fmt.Printf("dpst = %v\n", dpst)
-	fmt.Printf("value = %v\n", value)
-	fmt.Printf("DepositLockMap[AliceAddr+BobAddr] = %v\n", DepositLockMap[AliceAddr+BobAddr])
 	if value+DepositLockMap[AliceAddr+BobAddr] > dpst.Value.Int64() {
 		return false, nil
 	}

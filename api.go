@@ -210,16 +210,16 @@ func InitPublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	if config.Mode == TRANSACTION_MODE_PLAIN_POD {
 		for _, s := range config.SubMode {
-			if s != TRANSACTION_SUB_MODE_COMPLAINT && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP {
-				Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
+			if s != TRANSACTION_SUB_MODE_COMPLAINT && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC {
+				Log.Warnf("parameters are invalid. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 				fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 				return
 			}
 		}
 	} else if config.Mode == TRANSACTION_MODE_TABLE_POD {
 		for _, s := range config.SubMode {
-			if s != TRANSACTION_SUB_MODE_COMPLAINT && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP && s != TRANSACTION_SUB_MODE_VRF {
-				Log.Warnf("parameters are incomplete. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
+			if s != TRANSACTION_SUB_MODE_COMPLAINT && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP && s != TRANSACTION_SUB_MODE_VRF && s != TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC {
+				Log.Warnf("parameters are invalid. mode=%v, subMode=%v, column=%v, keys=%v", config.Mode, config.SubMode, config.Column, config.Keys)
 				fmt.Fprintf(w, RESPONSE_INCOMPLETE_PARAM)
 				return
 			}
@@ -683,24 +683,37 @@ func BobPurchaseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
+				tx.Count = calcuPCnt(data.Phantoms)
 				response = BobTxForPOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
+				tx.Count = calcuDCnt(data.Demands)
 				response = BobTxForPC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			tx.Count = calcuDCnt(data.Demands)
 			response = BobTxForPAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			tx.Count = calcuDCnt(data.Demands)
+			response = BobTxForPASVC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		}
 	} else if tx.Mode == TRANSACTION_MODE_TABLE_POD {
 		switch tx.SubMode {
 		case TRANSACTION_SUB_MODE_COMPLAINT:
 			if tx.OT {
+				tx.Count = calcuPCnt(data.Phantoms)
 				response = BobTxForTOC(node, ETHKey, tx, data.Demands, data.Phantoms, data.BulletinFile, data.PubPath, Log)
 			} else {
+				tx.Count = calcuDCnt(data.Demands)
 				response = BobTxForTC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 			}
 		case TRANSACTION_SUB_MODE_ATOMIC_SWAP:
+			tx.Count = calcuDCnt(data.Demands)
 			response = BobTxForTAS(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
+		case TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC:
+			tx.Count = calcuDCnt(data.Demands)
+			response = BobTxForTASVC(node, ETHKey, tx, data.Demands, data.BulletinFile, data.PubPath, Log)
 		case TRANSACTION_SUB_MODE_VRF:
+			tx.Count = 1
 			if tx.OT {
 				response = BobTxForTOQ(node, ETHKey, tx, data.KeyName, data.KeyValue, data.PhantomKeyValue, data.BulletinFile, data.PubPath, Log)
 			} else {

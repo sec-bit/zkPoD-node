@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/sec-bit/zkPoD-lib/pod_go/ecc"
+	"github.com/sec-bit/zkPoD-lib/pod_go/setup"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +18,7 @@ import (
 type Config struct {
 	Operation             string      `json:"operation"`
 	Password              string      `json:"password"`
-	AliceAddress         string      `json:"Alice_address"`
+	AliceAddress          string      `json:"Alice_address"`
 	BasicConfig           BasicConfig `json:"basic_config"`
 	RequestData           RequestData `json:"request_data"`
 	PurchaseConfigPath    string      `json:"purchase_path"`
@@ -29,11 +29,11 @@ type Config struct {
 }
 
 type BasicConfig struct {
-	ECCBINPath     string `json:"ecc_bin_path"`
+	InitKeyPath    string `json:"init_key_path"`
 	PublishBINPath string `json:"publish_bin_path"`
 	ContractAddr   string `json:"contract_addr"`
 	BobDir         string `json:"B_dir"`
-	AliceDir      string `json:"A_dir"`
+	AliceDir       string `json:"A_dir"`
 	KeyStoreFile   string `json:"keystore_file"`
 	NetIP          string `json:"net_ip"`
 	Port           string `json:"port"`
@@ -42,8 +42,8 @@ type BasicConfig struct {
 // RequestData is the struct of Bob's request data
 type RequestData struct {
 	MerkleRoot      string    `json:"merkle_root"`
-	AliceIP        string    `json:"Alice_ip"`
-	AliceAddr      string    `json:"Alice_addr"`
+	AliceIP         string    `json:"Alice_ip"`
+	AliceAddr       string    `json:"Alice_addr"`
 	PubPath         string    `json:"pub_path"`
 	BulletinFile    string    `json:"bulletin_file"`
 	SubMode         string    `json:"sub_mode"`
@@ -74,7 +74,7 @@ func initCli() (config Config) {
 	app := cli.NewApp()
 
 	app.Version = "0.0.1"
-	app.Name = "secbit-pod-node"
+	app.Name = "zkPod-node"
 	app.Authors = []cli.Author{
 		cli.Author{
 			Name:  "SECBIT Labs",
@@ -195,7 +195,7 @@ func readBasicFile(basic BasicConfig) (BasicConfig, error) {
 		if basic.KeyStoreFile == "" {
 			basic.KeyStoreFile = preBasic.KeyStoreFile
 		}
-		basic.ECCBINPath = preBasic.ECCBINPath
+		basic.InitKeyPath = preBasic.InitKeyPath
 		basic.PublishBINPath = preBasic.PublishBINPath
 		basic.BobDir = preBasic.BobDir
 		basic.AliceDir = preBasic.AliceDir
@@ -210,8 +210,8 @@ func readBasicFile(basic BasicConfig) (BasicConfig, error) {
 	if basic.NetIP == "" {
 		basic.NetIP = DEFAULT_NET_IP
 	}
-	if basic.ECCBINPath == "" {
-		basic.ECCBINPath = DEFAULT_ECC_FILE
+	if basic.InitKeyPath == "" {
+		basic.InitKeyPath = DEFAULT_KEY_PATH
 	}
 	if basic.PublishBINPath == "" {
 		basic.PublishBINPath = DEFAULT_PUBLISH_BIN_FILE
@@ -414,8 +414,49 @@ func initMap() {
 	DepositLockMap = make(map[string]int64)
 }
 
-func preparePOD(EccPubFile string) bool {
+func preparePOD(initKeyPath string) bool {
 
-	ecc.Init()
-	return ecc.Load(EccPubFile)
+	Log := Logger.NewSessionLogger()
+
+	rs, err := pathExists(initKeyPath)
+	if err != nil {
+		Log.Errorf("check path exist error. path=%v, err=%v", initKeyPath, err)
+		return false
+	}
+	if !rs {
+		Log.Warnf("no key.")
+		return false
+	}
+
+	zksnarkPath := initKeyPath + "/zksnark_key"
+	rs, err = pathExists(zksnarkPath)
+	if err != nil {
+		Log.Errorf("check path exist error. path=%v, err=%v", zksnarkPath, err)
+		return false
+	}
+	if !rs {
+		Log.Warnf("no zksnark key.")
+		return false
+	}
+
+	zksnarkpkPath := zksnarkPath + "/atomic_swap_vc.pk"
+	rs1, err := pathExists(zksnarkpkPath)
+	if err != nil {
+		Log.Errorf("check path exist error. path=%v, err=%v", zksnarkpkPath, err)
+		return false
+	}
+
+	zksnarkvkPath := zksnarkPath + "/atomic_swap_vc.vk"
+	rs2, err := pathExists(zksnarkvkPath)
+	if err != nil {
+		Log.Errorf("check path exist error. path=%v, err=%v", zksnarkvkPath, err)
+		return false
+	}
+
+	if !rs1 || !rs2 {
+		Log.Warnf("zksnark keys are incomplete.")
+		return false
+	}
+
+	return setup.Load(initKeyPath)
 }

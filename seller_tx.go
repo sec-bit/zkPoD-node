@@ -16,26 +16,29 @@ import (
 
 //Transaction shows the transaction data for Alice.
 type Transaction struct {
-	SessionID        string           `json:"sessionId"`
-	Status           string           `json:"status"`
-	Bulletin         Bulletin         `json:"bulletin"`
-	BobPubKey      *ecdsa.PublicKey `json:"BobPubkey"`
-	BobAddr        string           `json:"BobAddr"`
-	AliceAddr       string           `json:"AliceAddr"`
-	Mode             string           `json:"mode"`
-	SubMode          string           `json:"sub_mode"`
-	OT               bool             `json:"ot"`
-	Price            int64            `json:"price"`
-	UnitPrice        int64            `json:"unitPrice"`
-	ExpireAt         int64            `json:"expireAt"`
-	PlainComplaint   PoDAlicePC      `json:"PlainComplaint"`
-	PlainOTComplaint PoDAlicePOC     `json:"PlainOTComplaint"`
-	PlainAtomicSwap  PoDAlicePAS     `json:"TableAtomicSwap"`
-	TableComplaint   PoDAliceTC      `json:"TableComplaint"`
-	TableOTComplaint PoDAliceTOC     `json:"TableOTComplaint"`
-	TableAtomicSwap  PoDAliceTAS     `json:"TableAtomicSwap"`
-	TableVRF         PoDAliceTQ      `json:"Tablevrf"`
-	TableOTVRF       PoDAliceTOQ     `json:"TableOTvrf"`
+	SessionID         string           `json:"sessionId"`
+	Status            string           `json:"status"`
+	Bulletin          Bulletin         `json:"bulletin"`
+	BobPubKey         *ecdsa.PublicKey `json:"BobPubkey"`
+	BobAddr           string           `json:"BobAddr"`
+	AliceAddr         string           `json:"AliceAddr"`
+	Mode              string           `json:"mode"`
+	SubMode           string           `json:"sub_mode"`
+	OT                bool             `json:"ot"`
+	Price             int64            `json:"price"`
+	UnitPrice         int64            `json:"unitPrice"`
+	Count             int64            `json:"count"`
+	ExpireAt          int64            `json:"expireAt"`
+	PlainComplaint    PoDAlicePC       `json:"PlainComplaint"`
+	PlainOTComplaint  PoDAlicePOC      `json:"PlainOTComplaint"`
+	PlainAtomicSwap   PoDAlicePAS      `json:"TableAtomicSwap"`
+	PlainAtomicSwapVc PoDAlicePASVC    `json:"TableAtomicSwapVc"`
+	TableComplaint    PoDAliceTC       `json:"TableComplaint"`
+	TableOTComplaint  PoDAliceTOC      `json:"TableOTComplaint"`
+	TableAtomicSwap   PoDAliceTAS      `json:"TableAtomicSwap"`
+	TableAtomicSwapVc PoDAliceTASVC    `json:"TableAtomicSwapVc"`
+	TableVRF          PoDAliceTQ       `json:"Tablevrf"`
+	TableOTVRF        PoDAliceTOQ      `json:"TableOTvrf"`
 }
 
 func newSessID() (string, error) {
@@ -86,7 +89,7 @@ func preAliceTx(mklroot string, re requestExtra, Log ILogger) (AliceConnParam, r
 	re.SubMode = subMode
 	params.Mode = bulletin.Mode
 	params.SubMode = subMode
-	if params.SubMode == TRANSACTION_SUB_MODE_ATOMIC_SWAP {
+	if params.SubMode == TRANSACTION_SUB_MODE_ATOMIC_SWAP || params.SubMode == TRANSACTION_SUB_MODE_ATOMIC_SWAP_VC {
 		re.Ot = false
 	}
 	params.OT = re.Ot
@@ -100,7 +103,7 @@ func preAliceTx(mklroot string, re requestExtra, Log ILogger) (AliceConnParam, r
 
 	status, err := readDataStatusAtContract(bltByte)
 	if err != nil {
-		Log.Warnf("Failed to check whether the data(merkle root = %v) is in sale. err=%v", bulletin.SigmaMKLRoot, err)
+		Log.Warnf("failed to check whether the data(merkle root = %v) is in sale. err=%v", bulletin.SigmaMKLRoot, err)
 		return params, re, errors.New("Failed to check data")
 	}
 	if status != "OK" {
@@ -133,7 +136,7 @@ func preAliceTx(mklroot string, re requestExtra, Log ILogger) (AliceConnParam, r
 	return params, re, nil
 }
 
-//AliceTxForPC is the transaction while mode is plain_range.
+//AliceTxForPC is the transaction while mode is plain_complaint.
 func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 
 	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
@@ -171,6 +174,12 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
+	tx.Count, err = calcuCntforComplaint(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate transaction response for Alice")
 
@@ -266,7 +275,7 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	return nil
 }
 
-//AliceTxForPOC is the transaction while mode is plain_ot_range.
+//AliceTxForPOC is the transaction while mode is plain_ot_complaint.
 func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
@@ -371,6 +380,12 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	}
 	Log.Debugf("success to verify transaction request and generate transaction response.")
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
+	tx.Count, err = calcuCntforOtComplaint(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
 	AliceTxMap[tx.SessionID] = tx
 
 	err = AliceSendPODResp(node, responseFile)
@@ -465,7 +480,7 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	return nil
 }
 
-//AliceTxForPAS is the transaction while mode is plain_range.
+//AliceTxForPAS is the transaction while mode is plain_atomic_swap.
 func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
 	responseFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/response"
@@ -503,6 +518,12 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	}
 	Log.Debugf("success to verify request and generate response.")
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
+	tx.Count, err = calcuCntforAS(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
 	AliceTxMap[tx.SessionID] = tx
 
 	err = AliceSendPODResp(node, responseFile)
@@ -596,7 +617,144 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	return nil
 }
 
-//AliceTxForTC is the transaction while mode is plain_range.
+//AliceTxForPASVC is the transaction while mode is plain_atomic_swap_vc.
+func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
+	responseFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/response"
+	receiptFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/receipt"
+	secretFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/secret"
+
+	defer func() {
+		err := updateAliceTxToDB(tx)
+		if err != nil {
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
+			return
+		}
+		delete(AliceTxMap, tx.SessionID)
+	}()
+
+	err := AliceRcvPODReq(node, requestFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
+		return fmt.Errorf(
+			"failed to receive transaction request")
+	}
+	Log.Debugf("success to receive transaction request.")
+	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
+	AliceTxMap[tx.SessionID] = tx
+
+	rs := tx.PlainAtomicSwapVc.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	Log.Debugf("success to verify request and generate response.")
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
+	tx.Count, err = calcuCntforASVC(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	AliceTxMap[tx.SessionID] = tx
+
+	err = AliceSendPODResp(node, responseFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response to Bob. err=%v", err)
+		return fmt.Errorf(
+			"failed to send transaction response")
+	}
+	Log.Debugf("success to send transaction response to Bob.")
+	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
+	AliceTxMap[tx.SessionID] = tx
+
+	var sign []byte
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt from Bob. err=%v", err)
+		return fmt.Errorf(
+			"failed to receive transaction receipt")
+	}
+	Log.Debugf("success to receive transaction receipt from Bob.")
+	tx.Status = TRANSACTION_STATUS_RECEIPT
+	AliceTxMap[tx.SessionID] = tx
+
+	rs = tx.PlainAtomicSwapVc.AliceVerifyReceipt(receiptFile, secretFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid receipt file or secret file. err=%v", err)
+		return fmt.Errorf(
+			"invalid receipt file or secret file")
+	}
+	Log.Debugf("success to verify receipt file and generate secret file.")
+	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
+	AliceTxMap[tx.SessionID] = tx
+
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth.")
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
+	if time.Now().Unix()+600 > tx.ExpireAt {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("the receipt signature will timeout soon.")
+		return fmt.Errorf(
+			"the receipt signature timeout")
+	}
+
+	Log.Debugf("start send transaction to submit contract from contract...")
+	t := time.Now()
+	txid, err := submitScrtForAtomicSwapVc(tx, sign, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send Secret to contract")
+		return fmt.Errorf(
+			"failed to send secret")
+	}
+	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
+
+	_, err = readScrtForAtomicSwapVc(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to read secret from contract.")
+		return fmt.Errorf(
+			"failed to send secret")
+	}
+
+	tx.Status = TRANSACTION_STATUS_CLOSED
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send secret to contract.")
+	return nil
+}
+
+//AliceTxForTC is the transaction while mode is table_complaint.
 func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
@@ -634,6 +792,12 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
+	tx.Count, err = calcuCntforComplaint(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate transaction response.")
 
@@ -729,7 +893,7 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	return nil
 }
 
-//AliceTxForTOC is the transaction while mode is plain_range.
+//AliceTxForTOC is the transaction while mode is table_ot_complaint.
 func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
@@ -833,6 +997,12 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
+	tx.Count, err = calcuCntforOtComplaint(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("verify transaction request file and GENERATE response file...")
 
@@ -928,7 +1098,7 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	return nil
 }
 
-//AliceTxForTAS is the transaction while mode is plain_range.
+//AliceTxForTAS is the transaction while mode is table_atomic_swap.
 func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"
@@ -966,6 +1136,12 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 			"invalid request file or response file")
 	}
 	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
+	tx.Count, err = calcuCntforAS(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate response.")
 
@@ -1061,7 +1237,146 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	return nil
 }
 
-//AliceTxForTQ is the transaction while mode is plain_range.
+//AliceTxForTASVC is the transaction while mode is table_atomic_swap_vc.
+func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
+	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
+	requestFile := dir + "/request"
+	responseFile := dir + "/response"
+	receiptFile := dir + "/receipt"
+	secretFile := dir + "/secret"
+
+	defer func() {
+		err := updateAliceTxToDB(tx)
+		if err != nil {
+			Log.Warnf("failed to update transaction for Alice. err=%v", err)
+			return
+		}
+		delete(AliceTxMap, tx.SessionID)
+	}()
+
+	err := AliceRcvPODReq(node, requestFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction request for Alice. err=%v", err)
+		return fmt.Errorf(
+			"failed to receive transaction request")
+	}
+	Log.Debugf("success to receive transaction request.")
+	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
+	AliceTxMap[tx.SessionID] = tx
+
+	rs := tx.TableAtomicSwapVc.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
+	tx.Count, err = calcuCntforASVC(requestFile)
+	if err != nil {
+		Log.Warnf("failed to calculate count by request")
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to verify transaction request and generate response.")
+
+	err = AliceSendPODResp(node, responseFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send transaction response to Bob. err=%v", err)
+		return fmt.Errorf(
+			"failed to send transaction response")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send transaction response to Bob.")
+
+	var sign []byte
+	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction receipt from Bob. err=%v", err)
+		return fmt.Errorf(
+			"failed to receive transaction receipt")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIPT
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to receive receipt from Bob.")
+
+	rs = tx.TableAtomicSwapVc.AliceVerifyReceipt(receiptFile, secretFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid receipt file or secret file. err=%v", err)
+		return fmt.Errorf(
+			"invalid receipt file or secret file")
+	}
+	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to verify receipt and generate secret.")
+
+	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
+	if time.Now().Unix()+600 > tx.ExpireAt {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("the receipt signature will timeout soon.")
+		return fmt.Errorf(
+			"the receipt signature timeout")
+	}
+
+	Log.Debugf("start send transaction to submit contract from contract...")
+	t := time.Now()
+	txid, err := submitScrtForAtomicSwapVc(tx, sign, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to send Secret to contract")
+		return fmt.Errorf(
+			"failed to send secret")
+	}
+	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
+
+	_, err = readScrtForAtomicSwapVc(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to read secret from contract.")
+		return fmt.Errorf(
+			"failed to send secret")
+	}
+
+	tx.Status = TRANSACTION_STATUS_CLOSED
+	AliceTxMap[tx.SessionID] = tx
+	Log.Debugf("success to send secret to contract.")
+	return nil
+}
+
+//AliceTxForTQ is the transaction while mode is table_vrf_query.
 func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	requestFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/request"
 	responseFile := BConf.AliceDir + "/transaction/" + tx.SessionID + "/response"
@@ -1193,7 +1508,7 @@ func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	return nil
 }
 
-//AliceTxForTOQ is the transaction while mode is plain_range.
+//AliceTxForTOQ is the transaction while mode is table_ot_vrf_query.
 func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILogger) error {
 	dir := BConf.AliceDir + "/transaction/" + tx.SessionID
 	requestFile := dir + "/request"

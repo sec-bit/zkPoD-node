@@ -22,28 +22,47 @@ func converAddr(address string) [40]uint8 {
 	return uAddr
 }
 
+func calcuDCnt(demands []Demand) int64 {
+	var count int64 = 0
+	for _, d := range demands {
+		count += int64(d.DemandCount)
+	}
+	return count
+}
+
+func calcuPCnt(phantoms []Phantom) int64 {
+	var count int64 = 0
+	for _, p := range phantoms {
+		count += int64(p.PhantomCount)
+	}
+	return count
+}
+
 // BobTransaction shows the transaction data for Bob.
 type BobTransaction struct {
-	SessionID        string    `json:"sessionId"`
-	Status           string    `json:"status"`
-	AliceIP         string    `json:"AliceIp"`
-	AliceAddr       string    `json:"AliceAddr"`
-	BobAddr          string    `json:"BobAddr"`
-	Mode             string    `json:"mode"`
-	SubMode          string    `json:"sub_mode"`
-	OT               bool      `json:"ot"`
-	Bulletin         Bulletin  `json:"bulletin"`
-	Price            int64     `json:"price" xorm:"INTEGER"`
-	UnitPrice        int64     `json:"unit_price"`
-	ExpireAt         int64     `json:"expireAt" xorm:"INTEGER"`
-	PlainComplaint   PoDBobPC  `json:"PlainComplaint"`
-	PlainOTComplaint PoDBobPOC `json:"PlainOTComplaint"`
-	PlainAtomicSwap  PoDBobPAS `json:"PlainAtomicSwap"`
-	TableComplaint   PoDBobTC  `json:"TableComplaint"`
-	TableOTComplaint PoDBobTOC `json:"TableOTComplaint"`
-	TableAtomicSwap  PoDBobTAS `json:"TableAtomicSwap"`
-	TableVRF         PoDBobTQ  `json:"tablevrf"`
-	TableOTVRF       PoDBobTOQ `json:"tableOTvrf"`
+	SessionID         string      `json:"sessionId"`
+	Status            string      `json:"status"`
+	AliceIP           string      `json:"AliceIp"`
+	AliceAddr         string      `json:"AliceAddr"`
+	BobAddr           string      `json:"BobAddr"`
+	Mode              string      `json:"mode"`
+	SubMode           string      `json:"sub_mode"`
+	OT                bool        `json:"ot"`
+	Bulletin          Bulletin    `json:"bulletin"`
+	Price             int64       `json:"price" xorm:"INTEGER"`
+	UnitPrice         int64       `json:"unit_price"`
+	Count             int64       `json:"count"`
+	ExpireAt          int64       `json:"expireAt" xorm:"INTEGER"`
+	PlainComplaint    PoDBobPC    `json:"PlainComplaint"`
+	PlainOTComplaint  PoDBobPOC   `json:"PlainOTComplaint"`
+	PlainAtomicSwap   PoDBobPAS   `json:"PlainAtomicSwap"`
+	PlainAtomicSwapVc PoDBobPASVC `json:"PlainAtomicSwapVc"`
+	TableComplaint    PoDBobTC    `json:"TableComplaint"`
+	TableOTComplaint  PoDBobTOC   `json:"TableOTComplaint"`
+	TableAtomicSwap   PoDBobTAS   `json:"TableAtomicSwap"`
+	TableAtomicSwapVc PoDBobTASVC `json:"TableAtomicSwapVc"`
+	TableVRF          PoDBobTQ    `json:"tablevrf"`
+	TableOTVRF        PoDBobTOQ   `json:"tableOTvrf"`
 }
 
 // BobTxForPC executes transaction for Bob while mode is plain_complaint.
@@ -143,7 +162,7 @@ func BobTxForPC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, demand
 	}
 	Log.Debugf("[%v]step4: finish read receipt...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice * int64(receipt.C)
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -389,7 +408,7 @@ func BobTxForPOC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	}
 	Log.Debugf("[%v]step5: finish read receipt...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice * int64(receipt.C)
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -554,7 +573,7 @@ func BobTxForPAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
 		BobTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to invalid data. ")
+		Log.Warnf("failed to verify response and generate receipt. ")
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step3: failed to purchase data.")
 	}
 	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
@@ -571,7 +590,7 @@ func BobTxForPAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	}
 	Log.Debugf("[%v]step4: finish read receipt...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice * int64(receipt.C)
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForAtomicSwap(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -624,6 +643,169 @@ func BobTxForPAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	} else {
 		Log.Debugf("[%v]step6: start decrypt data...", tx.SessionID)
 		rs = tx.PlainAtomicSwap.BobDecrypt(outputFile, Log)
+		if !rs {
+			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
+			BobTxMap[tx.SessionID] = tx
+			Log.Warnf("[%v]step6: failed to decrypt file.", tx.SessionID)
+			return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step6: failed to purchase data.")
+		}
+		tx.Status = TRANSACTION_STATUS_CLOSED
+		BobTxMap[tx.SessionID] = tx
+		Log.Debugf("[%v]step6: decrypt file successfully, path=%v", tx.SessionID, outputFile)
+	}
+	Log.Debugf("[%v]purchase finish...", tx.SessionID)
+	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
+}
+
+// BobTxForPASVC executes transaction for Bob while mode is plain_atomic_swap.
+//
+// step1: prepare session,
+// step2: create transaction request,
+// step3: receive transaction response,
+// step4: create transaction receipt,
+// step5: read,save and verify secret from contract,
+// step6: decrypt data.
+//
+// return: response string for api request.
+func BobTxForPASVC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
+
+	dir := BConf.BobDir + "/transaction/" + tx.SessionID
+	// bulletinFile := dir + "/bulletin"
+	// publicPath := dir + "/public"
+	requestFile := dir + "/request"
+	responseFile := dir + "/response"
+	receiptFile := dir + "/receipt"
+	secretFile := dir + "/secret"
+	outputFile := dir + "/output"
+
+	defer func() {
+		err := updateBobTxToDB(tx)
+		if err != nil {
+			Log.Warnf("[%v]failed to update transaction to db for Bob. err=%v", tx.SessionID, err)
+			return
+		}
+		delete(BobTxMap, tx.SessionID)
+	}()
+
+	Log.Debugf("[%v]step1: prepare for Bob's session...", tx.SessionID)
+	var err error
+	tx.PlainAtomicSwapVc, err = BobNewSessForPASVC(demands, bulletinFile, publicPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_START_FAILED
+		Log.Warnf("[%v]step1: failed to create session for Bob. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
+	}
+	defer func() {
+		tx.PlainAtomicSwapVc.BobSession.Free()
+	}()
+	Log.Debugf("[%v]step1: finish preparing for Bob's session...", tx.SessionID)
+
+	Log.Debugf("[%v]step2: start create and send transaction request to Alice...", tx.SessionID)
+	err = tx.PlainAtomicSwapVc.BobNewReq(requestFile, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step2: failed to create transaction request. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step2: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step2: finish create transaction request...", tx.SessionID)
+
+	err = BobSendPODReq(node, requestFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step2: failed to send transaction request to Alice. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step2: failed to purchase data.")
+	}
+
+	Log.Debugf("[%v]step2: finish send transaction request to Alice...", tx.SessionID)
+	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
+	BobTxMap[tx.SessionID] = tx
+
+	Log.Debugf("[%v]step3: start receive and verify transaction response from Alice...", tx.SessionID)
+	err = BobRcvPODResp(node, responseFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to receive transaction response from Alice. err=%v", err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step3: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step3: finish receive response from Alice...", tx.SessionID)
+
+	rs := tx.PlainAtomicSwapVc.BobVerifyResp(responseFile, receiptFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify response and generate receipt. ")
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step3: failed to purchase data.")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
+	BobTxMap[tx.SessionID] = tx
+	Log.Debugf("[%v]step3: finish verify response from Alice...", tx.SessionID)
+
+	Log.Debugf("[%v]step4: start read, send and verify receipt to Alice...", tx.SessionID)
+	receiptByte, receipt, err := readReceiptForAtomicSwapVc(receiptFile, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step4: failed to read receipt. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step4: finish read receipt...", tx.SessionID)
+
+	tx.Price = tx.UnitPrice * tx.Count
+	tx.ExpireAt = time.Now().Unix() + 36000
+	sign, err := signRecptForAtomicSwapVc(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step4: failed to generate signature. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step4: finish generate signature for receipt...", tx.SessionID)
+
+	err = BobSendPODRecpt(node, tx.Price, tx.ExpireAt, receiptByte, sign)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step4: failed to send transaction receipt to Alice. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIPT
+	BobTxMap[tx.SessionID] = tx
+	Log.Debugf("[%v]step4: finish send receipt to Alice...", tx.SessionID)
+
+	Log.Debugf("[%v]step5: start read, save and verify secret from contract...", tx.SessionID)
+	secret, err := readScrtForAtomicSwapVc(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step5: failed to read secret from contract. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step5: finish read secret from contract...", tx.SessionID)
+
+	err = BobSaveSecretForAtomicSwapVc(secret, secretFile, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step5: failed to save secret for Bob. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step5: finish save secret...", tx.SessionID)
+
+	rs = tx.PlainAtomicSwapVc.BobVerifySecret(secretFile, Log)
+	Log.Debugf("[%v]step5: finish verify secret...result=%v", tx.SessionID, rs)
+	tx.Status = TRANSACTION_STATUS_GOT_SECRET
+	BobTxMap[tx.SessionID] = tx
+
+	if !rs {
+		Log.Warnf("purchase failed.")
+		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
+	} else {
+		Log.Debugf("[%v]step6: start decrypt data...", tx.SessionID)
+		rs = tx.PlainAtomicSwapVc.BobDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BobTxMap[tx.SessionID] = tx
@@ -733,7 +915,7 @@ func BobTxForTC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, demand
 	}
 	Log.Debugf("[%v]step4: finish read receipt...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice * int64(receipt.C)
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -980,7 +1162,7 @@ func BobTxForTOC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	}
 	Log.Debugf("[%v]step5: finish read receipt...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice * int64(receipt.C)
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -1161,7 +1343,7 @@ func BobTxForTAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	}
 	Log.Debugf("[%v]step4: finish read receipt from Alice...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice * int64(receipt.C)
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForAtomicSwap(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -1214,6 +1396,167 @@ func BobTxForTAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 	} else {
 		Log.Debugf("[%v]step6: start decrypt file...")
 		rs = tx.TableAtomicSwap.BobDecrypt(outputFile, Log)
+		if !rs {
+			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
+			BobTxMap[tx.SessionID] = tx
+			Log.Warnf("[%v]step6: failed to decrypt File.", tx.SessionID)
+			return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step6: failed to purchase data.")
+		}
+		tx.Status = TRANSACTION_STATUS_CLOSED
+		BobTxMap[tx.SessionID] = tx
+		Log.Debugf("[%v]step6: finish decrypt file, path=%v", tx.SessionID, outputFile)
+	}
+	Log.Debugf("[%v]purchase finish...", tx.SessionID)
+	return fmt.Sprintf(RESPONSE_SUCCESS, "purchase data successfully. sessionID="+tx.SessionID)
+}
+
+// BobTxForTASVC executes transaction for Bob while mode is table_atomic_swap_vc.
+//
+// step1: prepare session,
+// step2: create transaction request,
+// step3: receive transaction response,
+// step4: create transaction receipt,
+// step5: read,save and verify secret from contract,
+// step6: claim to contract or decrypt data.
+//
+// return: response string for api request.
+func BobTxForTASVC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, demands []Demand, bulletinFile string, publicPath string, Log ILogger) string {
+	dir := BConf.BobDir + "/transaction/" + tx.SessionID
+	// bulletinFile := dir + "/bulletin"
+	// publicFile := dir + "/public"
+	requestFile := dir + "/request"
+	responseFile := dir + "/response"
+	receiptFile := dir + "/receipt"
+	secretFile := dir + "/secret"
+	outputFile := dir + "/output"
+
+	defer func() {
+		err := updateBobTxToDB(tx)
+		if err != nil {
+			Log.Warnf("[%v]failed to update transaction to db for Bob. err=%v", tx.SessionID, err)
+			return
+		}
+		delete(BobTxMap, tx.SessionID)
+	}()
+
+	Log.Debugf("[%v]step1: prepare for Bob's session...", tx.SessionID)
+	var err error
+	tx.TableAtomicSwapVc, err = BobNewSessForTASVC(demands, bulletinFile, publicPath, converAddr(tx.AliceAddr), converAddr(tx.BobAddr), Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_START_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step1: failed to create session for Bob. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step1: failed to purchase data.")
+	}
+	defer func() {
+		tx.TableAtomicSwapVc.BobSession.Free()
+	}()
+	Log.Debugf("[%v]step1: finish prepare for Bob's session...", tx.SessionID)
+
+	Log.Debugf("[%v]step2: start create and send transaction request to Alice...", tx.SessionID)
+	err = tx.TableAtomicSwapVc.BobNewReq(requestFile, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step2: failed to create request. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step2: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step2: finish create transaction request to Alice...", tx.SessionID)
+
+	err = BobSendPODReq(node, requestFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step2: failed to send request data to Alice. err=%v", err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step2: failed to purchase data.")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
+	BobTxMap[tx.SessionID] = tx
+	Log.Debugf("[%v]step2: finish send request to Alice...", tx.SessionID)
+
+	Log.Debugf("[%v]step3: start receive and verify transaction response from Alice...", tx.SessionID)
+	err = BobRcvPODResp(node, responseFile)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
+		Log.Warnf("[%v]step3: Failed to receive data to Alice. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step3: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step3: finish receive response from Alice...", tx.SessionID)
+
+	rs := tx.TableAtomicSwapVc.BobVerifyResp(responseFile, receiptFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step3: verify transaction response failed.", tx.SessionID)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step3: failed to purchase data.")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
+	BobTxMap[tx.SessionID] = tx
+	Log.Debugf("[%v]step3: finish receive transaction response from Alice...", tx.SessionID)
+
+	Log.Debugf("[%v]step4: start read, sign and send receipt to Alice...", tx.SessionID)
+	receiptByte, receipt, err := readReceiptForAtomicSwapVc(receiptFile, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step4: failed to read receipt. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step4: finish read receipt from Alice...", tx.SessionID)
+
+	tx.Price = tx.UnitPrice * tx.Count
+	tx.ExpireAt = time.Now().Unix() + 36000
+	sign, err := signRecptForAtomicSwapVc(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step4: failed to generate signature. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step4: finish generate signature for receipt...", tx.SessionID)
+
+	err = BobSendPODRecpt(node, tx.Price, tx.ExpireAt, receiptByte, sign)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step4: failed to send receipt to Alice. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step4: failed to purchase data.")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIPT
+	BobTxMap[tx.SessionID] = tx
+	Log.Debugf("[%v]step4: finish send receipt to Alice...", tx.SessionID)
+
+	Log.Debugf("[%v]step5: start read and verify secret from contract...", tx.SessionID)
+	secret, err := readScrtForAtomicSwapVc(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_GOT_SECRET_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step5: failed to read secret from contract. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
+	}
+	Log.Debugf("[%v]step5: finish read secret from contract...", tx.SessionID)
+
+	err = BobSaveSecretForAtomicSwapVc(secret, secretFile, Log)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step5: failed to save secret for Bob. err=%v", tx.SessionID, err)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
+	}
+	tx.Status = TRANSACTION_STATUS_GOT_SECRET
+	BobTxMap[tx.SessionID] = tx
+	Log.Debugf("[%v]step5: finish save secret...", tx.SessionID)
+
+	rs = tx.TableAtomicSwapVc.BobVerifySecret(secretFile, Log)
+	Log.Debugf("[%v]step5: finish verify secret...result=%v", tx.SessionID, rs)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_VERIFY_FAILED
+		BobTxMap[tx.SessionID] = tx
+		Log.Warnf("[%v]step6: purchase failed.", tx.SessionID)
+		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step6: failed to purchase data.")
+	} else {
+		Log.Debugf("[%v]step6: start decrypt file...")
+		rs = tx.TableAtomicSwapVc.BobDecrypt(outputFile, Log)
 		if !rs {
 			tx.Status = TRANSACTION_STATUS_DECRYPT_FAILED
 			BobTxMap[tx.SessionID] = tx
@@ -1324,7 +1667,7 @@ func BobTxForTQ(node *pod_net.Node, key *keystore.Key, tx BobTransaction, keyNam
 	}
 	Log.Debugf("[%v]step4: finish read receipt to Alice...", tx.SessionID)
 
-	tx.Price = tx.UnitPrice
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForVRFQ(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
@@ -1541,7 +1884,7 @@ func BobTxForTOQ(node *pod_net.Node, key *keystore.Key, tx BobTransaction, keyNa
 		Log.Warnf("[%v]step5: failed to read receipt. err=%v", tx.SessionID, err)
 		return fmt.Sprintf(RESPONSE_TRANSACTION_FAILED, "step5: failed to purchase data.")
 	}
-	tx.Price = tx.UnitPrice
+	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
 	sign, err := signRecptForVRFQ(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
