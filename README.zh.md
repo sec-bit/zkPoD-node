@@ -232,7 +232,7 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 ## zkPoD 项目结构
 
-![](img/overview.png)
+![](img/overview.svg)
 
 - [zkPoD-node](https://github.com/sec-bit/zkPoD-node) 节点应用程序（Golang），供买卖双方使用，负责处理通信、合约查询与调用、数据传输以及其他 zkPoD 的协议交互。
 - [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD 底层核心库（C++），同时提供 Golang binding。

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="449 626 602 327" width="602" height="327">
+  <defs>
+    <filter id="Shadow" filterUnits="userSpaceOnUse" x="449" y="626">
+      <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="1.308"/>
+      <feOffset in="blur" result="offset" dx="0" dy="2"/>
+      <feFlood flood-color="black" flood-opacity=".5" result="flood"/>
+      <feComposite in="flood" in2="offset" operator="in"/>
+    </filter>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -3 6 6" markerWidth="6" markerHeight="6" color="#5e5e5e">
+      <g>
+        <path d="M 4 0 L 0 -1.5 L 0 1.5 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker_2" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-5 -3 6 6" markerWidth="6" markerHeight="6" color="#5e5e5e">
+      <g>
+        <path d="M -4 0 L 0 1.5 L 0 -1.5 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <font-face font-family="American Typewriter" font-size="18" panose-1="2 9 6 4 2 0 4 2 3 4" units-per-em="1000" underline-position="-166" underline-thickness="20" slope="0" x-height="501" cap-height="671" ascent="904.007" descent="-250" font-weight="400">
+      <font-face-src>
+        <font-face-name name="AmericanTypewriter"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Courier New" font-size="16" panose-1="2 7 3 9 2 2 5 2 4 4" units-per-em="1000" underline-position="-232.91016" underline-thickness="41.015625" slope="0" x-height="422.85156" cap-height="571.28906" ascent="832.5195" descent="-300.29297" font-weight="400">
+      <font-face-src>
+        <font-face-name name="CourierNewPSMT"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.10.2 
+    <dc:date>2019-07-06 06:58:15 +0000</dc:date>
+  </metadata>
+  <g id="Origin_2_-_7___" stroke-dasharray="none" stroke-opacity="1" fill="none" stroke="none" fill-opacity="1">
+    <title>Origin 2 - 7 ***</title>
+    <rect fill="white" x="449" y="626" width="602" height="327"/>
+    <g id="Origin_2_-_7___: Layer 1">
+      <title>Layer 1</title>
+      <g id="Graphic_70_shadow" filter="url(#Shadow)">
+        <path d="M 705.058 890.2465 C 709.6793 881.5838 788.3437 888.8572 792.9649 888.8572 C 797.5861 888.857 792.3436 934.1947 796.9649 942.8572 C 801.5859 951.5195 713.0861 944.8574 708.4649 944.8572 C 703.8438 944.8569 700.4366 898.9092 705.058 890.2465 Z" fill="#f9ecca"/>
+      </g>
+      <g id="Graphic_21_shadow" filter="url(#Shadow)">
+        <path d="M 673.208 845.7833 C 683.0922 839.5209 821.4679 845.7833 831.3519 845.7833 C 841.2359 845.7832 821.4677 889.6188 831.3519 895.881 C 841.2354 902.1432 683.092 895.8812 673.208 895.881 C 663.3242 895.8809 663.3237 852.0457 673.208 845.7833 Z" fill="#67d5b5"/>
+        <path d="M 673.208 845.7833 C 683.0922 839.5209 821.4679 845.7833 831.3519 845.7833 C 841.2359 845.7832 821.4677 889.6188 831.3519 895.881 C 841.2354 902.1432 683.092 895.8812 673.208 895.881 C 663.3242 895.8809 663.3237 852.0457 673.208 845.7833 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Graphic_72_shadow" filter="url(#Shadow)">
+        <path d="M 692.9466 679.1611 C 697.56786 670.4984 801.3254 676.1611 805.9466 676.1611 C 810.5678 676.1609 803.4752 706.5336 808.0965 715.1961 C 812.7174 723.85845 707.5678 718.1613 702.9466 718.1611 C 698.3255 718.1608 688.3252 687.8238 692.9466 679.1611 Z" fill="#f9ecca"/>
+      </g>
+      <g id="Graphic_75_shadow" filter="url(#Shadow)">
+        <path d="M 749.9999 630.093 C 719.075 638.7872 626.2987 647.4811 657.2241 656.17525 C 688.14955 664.8692 719.0746 690.9517 749.9999 682.2575 C 780.9254 673.5634 873.7011 664.8692 842.7759 656.17525 C 811.8506 647.4811 780.925 621.3987 749.9999 630.093 Z" fill="#84b1ee"/>
+        <path d="M 749.9999 630.093 C 719.075 638.7872 626.2987 647.4811 657.2241 656.17525 C 688.14955 664.8692 719.0746 690.9517 749.9999 682.2575 C 780.9254 673.5634 873.7011 664.8692 842.7759 656.17525 C 811.8506 647.4811 780.925 621.3987 749.9999 630.093 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_81_shadow" filter="url(#Shadow)">
+        <path d="M 948 720.9554 C 947.1542 700.7592 894.919 648.867 854.5867 659.3154" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_82_shadow" filter="url(#Shadow)">
+        <path d="M 552 720.9554 C 553.05457 701.011 605.0838 642.7889 645.39605 652.6462" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_83_shadow" filter="url(#Shadow)">
+        <path d="M 656.04996 752.9091 C 688.7071 767.57495 818.264 765.2468 844.4585 753.4216" marker-end="url(#FilledArrow_Marker)" marker-start="url(#FilledArrow_Marker_2)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_88_shadow" filter="url(#Shadow)">
+        <path d="M 552 781.9046 C 543.3977 799.5051 617.85624 880.4819 660.1756 872.5215" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_47_shadow" filter="url(#Shadow)">
+        <path d="M 507.058 772.2465 C 511.6793 763.5838 590.3437 770.8572 594.9649 770.8572 C 599.5861 770.857 594.3436 816.1947 598.9649 824.8572 C 603.58585 833.5195 515.0861 826.8574 510.4649 826.8572 C 505.8438 826.8569 502.43664 780.9092 507.058 772.2465 Z" fill="#f9ecca"/>
+      </g>
+      <g id="Graphic_20_shadow" filter="url(#Shadow)">
+        <path d="M 459.97257 722.9839 C 469.26887 716.27 599.42 722.9839 608.7167 722.9839 C 618.0132 722.98375 651 749.8397 651 749.8397 C 651 749.8397 631.2002 764.7595 608.7167 776.6955 C 586.2334 788.63065 469.26867 776.6955 459.97257 776.6955 C 450.6761 776.6951 450.6757 729.6982 459.97257 722.9839 Z" fill="#c89ec4"/>
+        <path d="M 459.97257 722.9839 C 469.26887 716.27 599.42 722.9839 608.7167 722.9839 C 618.0132 722.98375 651 749.8397 651 749.8397 C 651 749.8397 631.2002 764.7595 608.7167 776.6955 C 586.2334 788.63065 469.26867 776.6955 459.97257 776.6955 C 450.6761 776.6951 450.6757 729.6982 459.97257 722.9839 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Line_89_shadow" filter="url(#Shadow)">
+        <path d="M 948 781.9046 C 956.6036 799.5078 879.0952 880.5067 836.5127 872.5179" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_71_shadow" filter="url(#Shadow)">
+        <path d="M 903.058 772.2465 C 907.6793 763.5838 986.3437 770.8572 990.9649 770.8572 C 995.5861 770.857 990.3436 816.1947 994.9649 824.8572 C 999.5859 833.5195 911.0861 826.8574 906.4649 826.8572 C 901.8438 826.8569 898.4366 780.9092 903.058 772.2465 Z" fill="#f9ecca"/>
+      </g>
+      <g id="Graphic_48_shadow" filter="url(#Shadow)">
+        <path d="M 1040.0274 722.9839 C 1030.7311 716.27 900.58 722.9839 891.2833 722.9839 C 881.9868 722.98375 849 749.8397 849 749.8397 C 849 749.8397 868.7998 764.7595 891.2833 776.6955 C 913.7666 788.63065 1030.7313 776.6955 1040.0274 776.6955 C 1049.3239 776.6951 1049.3243 729.6982 1040.0274 722.9839 Z" fill="#c89ec4"/>
+        <path d="M 1040.0274 722.9839 C 1030.7311 716.27 900.58 722.9839 891.2833 722.9839 C 881.9868 722.98375 849 749.8397 849 749.8397 C 849 749.8397 868.7998 764.7595 891.2833 776.6955 C 913.7666 788.63065 1030.7313 776.6955 1040.0274 776.6955 C 1049.3239 776.6951 1049.3243 729.6982 1040.0274 722.9839 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+      </g>
+      <g id="Group_78">
+        <g id="Graphic_21">
+          <path d="M 673.208 845.7833 C 683.0922 839.5209 821.4679 845.7833 831.3519 845.7833 C 841.2359 845.7832 821.4677 889.6188 831.3519 895.881 C 841.2354 902.1432 683.092 895.8812 673.208 895.881 C 663.3242 895.8809 663.3237 852.0457 673.208 845.7833 Z" fill="#67d5b5"/>
+          <path d="M 673.208 845.7833 C 683.0922 839.5209 821.4679 845.7833 831.3519 845.7833 C 841.2359 845.7832 821.4677 889.6188 831.3519 895.881 C 841.2354 902.1432 683.092 895.8812 673.208 895.881 C 663.3242 895.8809 663.3237 852.0457 673.208 845.7833 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(673.7949 859.8321)" fill="#5e5e5e">
+            <tspan font-family="American Typewriter" font-size="18" font-weight="400" fill="#5e5e5e" x="35.39008" y="16">zkPoD-lib</tspan>
+          </text>
+        </g>
+        <g id="Graphic_70">
+          <path d="M 705.058 890.2465 C 709.6793 881.5838 788.3437 888.8572 792.9649 888.8572 C 797.5861 888.857 792.3436 934.1947 796.9649 942.8572 C 801.5859 951.5195 713.0861 944.8574 708.4649 944.8572 C 703.8438 944.8569 700.4366 898.9092 705.058 890.2465 Z" fill="#f9ecca"/>
+          <text transform="translate(710.8603 891)" fill="#5e5e5e">
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="15.13577" y="13">Setup</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="5.534207" y="31">Publish</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="19.93655" y="49">Core</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Group_77">
+        <g id="Graphic_75">
+          <path d="M 749.9999 630.093 C 719.075 638.7872 626.2987 647.4811 657.2241 656.17525 C 688.14955 664.8692 719.0746 690.9517 749.9999 682.2575 C 780.9254 673.5634 873.7011 664.8692 842.7759 656.17525 C 811.8506 647.4811 780.925 621.3987 749.9999 630.093 Z" fill="#84b1ee"/>
+          <path d="M 749.9999 630.093 C 719.075 638.7872 626.2987 647.4811 657.2241 656.17525 C 688.14955 664.8692 719.0746 690.9517 749.9999 682.2575 C 780.9254 673.5634 873.7011 664.8692 842.7759 656.17525 C 811.8506 647.4811 780.925 621.3987 749.9999 630.093 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(659 645.1752)" fill="#5e5e5e">
+            <tspan font-family="American Typewriter" font-size="18" font-weight="400" fill="#5e5e5e" x="24.31" y="16">zkPoD-contract</tspan>
+          </text>
+        </g>
+        <g id="Graphic_72">
+          <path d="M 692.9466 679.1611 C 697.56786 670.4984 801.3254 676.1611 805.9466 676.1611 C 810.5678 676.1609 803.4752 706.5336 808.0965 715.1961 C 812.7174 723.85845 707.5678 718.1613 702.9466 718.1611 C 698.3255 718.1608 688.3252 687.8238 692.9466 679.1611 Z" fill="#f9ecca"/>
+          <text transform="translate(699.7556 679.3431)" fill="#5e5e5e">
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="7.037347" y="13">Judgement</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="2.2365661" y="31">Settlement</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Line_81">
+        <path d="M 948 720.9554 C 947.1542 700.7592 894.919 648.867 854.5867 659.3154" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_82">
+        <path d="M 552 720.9554 C 553.05457 701.011 605.0838 642.7889 645.39605 652.6462" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Line_83">
+        <path d="M 656.04996 752.9091 C 688.7071 767.57495 818.264 765.2468 844.4585 753.4216" marker-end="url(#FilledArrow_Marker)" marker-start="url(#FilledArrow_Marker_2)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Graphic_85">
+        <text transform="translate(684.7949 772.8284)" fill="black">
+          <tspan font-family="Courier New" font-size="16" font-weight="400" fill="black" x="2.794922" y="13">Communication</tspan>
+        </text>
+      </g>
+      <g id="Line_88">
+        <path d="M 552 781.9046 C 543.3977 799.5051 617.85624 880.4819 660.1756 872.5215" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Group_76">
+        <g id="Graphic_20">
+          <path d="M 459.97257 722.9839 C 469.26887 716.27 599.42 722.9839 608.7167 722.9839 C 618.0132 722.98375 651 749.8397 651 749.8397 C 651 749.8397 631.2002 764.7595 608.7167 776.6955 C 586.2334 788.63065 469.26867 776.6955 459.97257 776.6955 C 450.6761 776.6951 450.6757 729.6982 459.97257 722.9839 Z" fill="#c89ec4"/>
+          <path d="M 459.97257 722.9839 C 469.26887 716.27 599.42 722.9839 608.7167 722.9839 C 618.0132 722.98375 651 749.8397 651 749.8397 C 651 749.8397 631.2002 764.7595 608.7167 776.6955 C 586.2334 788.63065 469.26867 776.6955 459.97257 776.6955 C 450.6761 776.6951 450.6757 729.6982 459.97257 722.9839 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(461 740)" fill="#5e5e5e">
+            <tspan font-family="American Typewriter" font-size="18" font-weight="400" fill="#5e5e5e" x="0" y="16">zkPoD-node (Alice)</tspan>
+          </text>
+        </g>
+        <g id="Graphic_47">
+          <path d="M 507.058 772.2465 C 511.6793 763.5838 590.3437 770.8572 594.9649 770.8572 C 599.5861 770.857 594.3436 816.1947 598.9649 824.8572 C 603.58585 833.5195 515.0861 826.8574 510.4649 826.8572 C 505.8438 826.8569 502.43664 780.9092 507.058 772.2465 Z" fill="#f9ecca"/>
+          <text transform="translate(512.8603 773)" fill="#5e5e5e">
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="5.534207" y="13">Publish</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="10.334989" y="31">Commit</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="10.334989" y="49">Reveal</tspan>
+          </text>
+        </g>
+      </g>
+      <g id="Line_89">
+        <path d="M 948 781.9046 C 956.6036 799.5078 879.0952 880.5067 836.5127 872.5179" marker-end="url(#FilledArrow_Marker)" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+      </g>
+      <g id="Group_79">
+        <g id="Graphic_48">
+          <path d="M 1040.0274 722.9839 C 1030.7311 716.27 900.58 722.9839 891.2833 722.9839 C 881.9868 722.98375 849 749.8397 849 749.8397 C 849 749.8397 868.7998 764.7595 891.2833 776.6955 C 913.7666 788.63065 1030.7313 776.6955 1040.0274 776.6955 C 1049.3239 776.6951 1049.3243 729.6982 1040.0274 722.9839 Z" fill="#c89ec4"/>
+          <path d="M 1040.0274 722.9839 C 1030.7311 716.27 900.58 722.9839 891.2833 722.9839 C 881.9868 722.98375 849 749.8397 849 749.8397 C 849 749.8397 868.7998 764.7595 891.2833 776.6955 C 913.7666 788.63065 1030.7313 776.6955 1040.0274 776.6955 C 1049.3239 776.6951 1049.3243 729.6982 1040.0274 722.9839 Z" stroke="#5e5e5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <text transform="translate(857 740)" fill="#5e5e5e">
+            <tspan font-family="American Typewriter" font-size="18" font-weight="400" fill="#5e5e5e" x="26.75" y="16">zkPoD-node (Bob)</tspan>
+          </text>
+        </g>
+        <g id="Graphic_71">
+          <path d="M 903.058 772.2465 C 907.6793 763.5838 986.3437 770.8572 990.9649 770.8572 C 995.5861 770.857 990.3436 816.1947 994.9649 824.8572 C 999.5859 833.5195 911.0861 826.8574 906.4649 826.8572 C 901.8438 826.8569 898.4366 780.9092 903.058 772.2465 Z" fill="#f9ecca"/>
+          <text transform="translate(908.8603 773)" fill="#5e5e5e">
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="5.534207" y="13">Request</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="10.334989" y="31">Verify</tspan>
+            <tspan font-family="Courier New" font-size="16" font-weight="400" fill="#5e5e5e" x="5.534207" y="49">Decrypt</tspan>
+          </text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
