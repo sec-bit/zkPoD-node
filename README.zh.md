@@ -88,7 +88,7 @@ zkPoD 支持三种交易模式的数据传输（交易）。
 我们使用「可验证随机函数」(Verifiable Random Function, VRF) 来支持关键词查询。目前，zkPoD 暂时只支持关键词精确匹配。zkPoD 还采用「不经意传输」(Oblivious Transfer, OT) 来支持隐私保护的查询。
 
 
-## Play With It
+## 编译与使用
 
 ### Build
 
@@ -138,11 +138,11 @@ cd zkPoD-node
 make run
 # A config file named basic.json is generated on local
 ```
-> Examples: [`basic.json`](examples/basic.json) - Some basic configs of zkPoD-node program.
+> Examples: [`basic.json`](examples/basic.json) - zkPoD-node 的基础配置文件
 
-Tips: 
+提示：
 
-You should specify `LD_LIBRARY_PATH` for `libpod_core` when excuting `zkPoD-node` on Linux. On macOS you should use `DYLD_LIBRARY_PATH` instead. Check `Makefile` for examples. For convenience, you could set `LD_LIBRARY_PATH` as an environment variable.
+在 Linux 上运行 `zkPoD-node` 时，应该为 `libpod_core` 指定 `LD_LIBRARY_PATH`。在 macOS 上则应该指定 `DYLD_LIBRARY_PATH`。可以参考 `Makefile` 中的例子，为了方便起见，可将 `LD_LIBRARY_PATH` 设置为环境变量。
 
 ```shell
 # On Linux
@@ -152,16 +152,16 @@ export LD_LIBRARY_PATH=<YOUR_PATH_TO_LIBPOD_CORE>
 export DYLD_LIBRARY_PATH=<YOUR_PATH_TO_LIBPOD_CORE>
 ```
 
-#### 3. Save keystore & get some ETH
+#### 3. 保存 keystore 文件，获取 ETH
 
 - https://faucet.ropsten.be/
 - https://faucet.metamask.io/
 
-Tips: A new Ethereum account is generated after first boot of zkPoD-node. You could read it from terminal screen or keystore file. Keep your keystore safe. You must have some ETH balance in your Ethereum address for smart contract interaction. Get some for test from a ropsten Ethereum faucet.
+提示：zkPoD-node 首次启动后会自动创建一个全新的 Ethereum 地址，从终端日志中或 keystore 文件中可以读取。用户应该安全保管自己的 keystore 文件。由于该地址需要与以太坊合约发生交互，因此地址中必须留有一定的余额。测试阶段（Ropsten 测试网），你可以从上列 Ethereum faucet 网站获得免费的测试网络 ETH。
 
-#### 4. As a seller: init data & publish 
+#### 4. 卖家: 数据初始化，发布数据
 
-Open a new terminal
+打开一个新的终端
 
 ```shell
 cd zkPoD-node
@@ -175,22 +175,22 @@ wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 ./zkPoD-node -o publish -mkl $sigma_mkl_root -eth 200
 # You should get the publish transaction hash
 ```
-> Examples: [init.json](examples/init.json) - Use this to describe your data for sell.
+> Examples: [init.json](examples/init.json) - 使用该配置文件来描述用于出售的数据
 
-Tips: For test, you could use same Ethereum account for selling and buying. You could also host a zkPoD-node and publish your data description to the [community](https://discord.gg/tfUH886) for trade testing.
+提示：你可以使用相同的地址进行测试，完成出售和购买。你还可以长期运行 zkPoD-node 节点程序，在[社区](https://discord.gg/tfUH886)频道内公布待出售数据的信息，与其他玩家一起完成公平交易测试。
 
-Here is everything that you need to let others know.
+如果你想出售数据，你应该让其他玩家知道以下信息：
 
 ```
-- Your IP address
-- Your ETH address
-- Data sigma_mkl_root for trade
-- Data description
-- Data bulletin file
-- Data public info 
+- 你节点程序的 IP 地址
+- 你的 ETH 地址
+- 用于出售的数据的 sigma_mkl_root
+- 数据的描述信息
+- 数据初始化后生成的 bulletin 文件
+- 数据初始化后生成的 public 信息
 ```
 
-You could get `bulletin` and `public info` of your data for publishing in path `zkPoD-node/seller/publish/$sigma_mkl_root/`.
+待售数据初始化完成后，卖家可以从该路径 `zkPoD-node/seller/publish/$sigma_mkl_root/` 获得数据的 `bulletin` 和 `public` 信息。
 
 ```
 ├── bulletin
@@ -204,18 +204,18 @@ You could get `bulletin` and `public info` of your data for publishing in path `
 └── test.txt
 ```
 
-#### 5. As a buyer: deposit to contract
+#### 5. 买家: 向合约抵押 ETH
 
-You want to buy some data you interested in from a seller. You could deposit some ETH to *zkPoD exchange contract* first. Your money is still yours before you get the data you want.
+作为买家，如果你在社区中发现了感兴趣的数据，想从卖家手上进行购买。你需要预先向 zkPoD 交易合约抵押 ETH 用于后续交易。请放心，在得到你想要的数据前，你的 ETH 仍然还是你的。
 
 ```shell
-./zkPoD-node -o deposit -eth 20000 -addr $SELLER_ETH_ADDR
+./zkPoD-node -o deposit -eth 20000 -addr $SELLER_ETH_ADDR #卖家地址
 # You should get the deposit transaction hash
 ```
 
-#### 6. As a buyer: purchase data
+#### 6. 买家: 进行购买
 
-You'll make a purchase request to a seller. For convenience, you could fill in some basic info of the seller in the config file.
+买家将向卖家发起购买请求。为了方便，你可以在配置文件中填入卖家和数据的一些基本信息。
 
 ```shell
 # For test, you could simply copy public info of data from seller folder to project root path.
@@ -224,14 +224,14 @@ You'll make a purchase request to a seller. For convenience, you could fill in s
 ./zkPoD-node -o purchase -c config.json
 # You should get the decrypted data in buyer/transaction/<session_id> folder
 ```
-> Examples: [config.json](examples/config.json) - Use this to describe data you are going to buy.
+> Examples: [config.json](examples/config.json) - 使用该文件描述你想要购买的数据。
 
-Tips:
-1. Atomic-swap mode only supports up to about 340 KiB on the Ethereum network for the moment.
+提示：
+1. Atomic-swap 模式目前在以太坊网络上仅支持最大 340 KiB 大小的数据交易。
 
-2. If complaint mode is selected, zkPoD-node complains to the contract automatically with proof proving that the seller is dishonest. As a result, a dishonest seller would never profit from misbehavior.
+2. 如果选择了 complaint 模式，zkPoD-node 节点程序会自动向合约发起申诉，并提供卖家的作弊证明。因此，不诚实的卖家无法通过作弊而获利。
 
-TODO: Add more examples about a query or private query of table data, and other operations.
+TODO: 还有更多好玩的功能，后续会添加更多的使用方法例子介绍，如对表格数据进行普通查询和私密查询。
 
 ## zkPoD 项目结构
 
@@ -241,23 +241,23 @@ TODO: Add more examples about a query or private query of table data, and other 
 - [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD 底层核心库（C++），同时提供 Golang binding。
 - [zkPoD-contract](https://github.com/sec-bit/zkPoD-contract) 智能合约（Solidity），实现 zkPoD 数据去中心化交易功能。
 
-## Performance
+## 性能评估
 
-#### Test Environment
+#### 测试环境
 
 - OS: Ubuntu 16.04.6 LTS x86_64
 - CPU Model: Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz
 - CPU Thread Count: 12
 - Memory: 32605840 kB
 
-#### Basic Info
+#### 基本信息
 
 |  Mode  | Average Speed (MiB/s) |   Communication Traffic   |   Gas Cost   | Upper Limit on Ethereum |
 | :----: | :----------------: | :---------------------: | :---------------------: | :---------------------: |
 | complaint |        3.39        |        $O(2n)$        | $O(\log{}n)$ |         > 1 TiB         |
 | atomic-swap |        3.91        |    $O(2n)$    |    $O(n)$    |        343.3 KiB        |
 
-#### Benchmark Results
+#### 测试结果
 
 - Data size: 1024 MiB
 - File type: plain
@@ -269,21 +269,21 @@ TODO: Add more examples about a query or private query of table data, and other 
 | complaint mode |    124     |     119      |     82      |            2215             | 159,072  |
 |  atomic-swap   |    130     |     131      |    4.187    |            2215             |   `*`    |
 
-`*` Atomic-swap mode does not support 1 GiB file at present.
+`*` Atomic-swap 模式暂时不支持交易 1 GiB 大小的文件.
 
-#### Gas Cost on Ethereum
+#### 以太坊网络上的 Gas 消耗
 
 Complaint Mode             |  Atomic-swap Mode
 :-------------------------:|:-------------------------:
 ![](img/Gas-Cost-vs-Data-Size-Batch1.svg)  |  ![](img/Gas-Cost-vs-Data-Size-Batch2.svg)
 
-## 想要了解更多?
+## 想要了解更多？
 
 + 白皮书：zkPoD 系统的整体介绍
 + 技术白皮书： zkPoD 的详细技术细节
-+ 社区: 欢迎加入我们的 [*Discord*](https://discord.gg/tfUH886) 参与讨论 ，关注 [*Twitter*](https://twitter.com/SECBIT_IO) 获取最新动态。
++ 社区: 欢迎加入我们的 [*Discord*](https://discord.gg/tfUH886) 参与讨论，关注 [*Twitter*](https://twitter.com/SECBIT_IO) 获取最新动态。
 
-## 相关项目
+## 其他相关项目
 
 + Fairswap:  https://github.com/lEthDev/FairSwap
 + ZKCP: https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment
