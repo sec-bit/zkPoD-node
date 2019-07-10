@@ -3,11 +3,11 @@
 
 ## Overview
 
-zkPoD is a decentralized platform for data exchanging between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*.  Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchanging. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
+zkPoD is a decentralized platform for data exchanging between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*. Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchanging. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
 
 - ***Data Downloading***: Buyers may pay-and-download a data file from a data seller. zkPoD supports data fragments downloading, i.e., buyers may download specific data chunks in one batched transaction. 
 
-- ***Data Query***:  zkPoD supports structured data; e.g., the seller organizes data as tables. Multiple columns can be selected as indexed-columns, such that users may pay-and-query records in the table with one or more keywords, and get the records matched. zkPoD ensures that the query results are trustworthy, i.e. (i) if data seller replies with $n$ records, it is impossible that more records are matching that keyword in the table; (ii) these n records are precisely in the table, and any forged records cannot be allowed. 
+- ***Data Query***:  zkPoD supports structured data; e.g., the seller organizes data as tables. Multiple columns can be selected as indexed-columns, such that users may pay-and-query records in the table with one or more keywords, and get the records matched. zkPoD ensures that the query results are trustworthy, i.e. (i) if data seller replies with n records, it is impossible that more records are matching that keyword in the table; (ii) these n records are precisely in the table, and any forged records cannot be allowed. 
 
 The three main issues being tackled by zkPoD are
 
@@ -40,9 +40,9 @@ TODO: re-draw this diagram.
 
 #### data initialization
 
-Data must be processed before being sold. Alice needs to compute the authenticators of data and the Merkle root of them. Authenticators are for data contents and origin verification (even if the data were encrypted). zkPoD supports two modes: binary mode and table mode. 
+Data must be processed before being sold. Alice needs to compute the authenticators of data and the Merkle root of them. Authenticators are for data contents and origin verification (even if the data were encrypted). zkPoD supports two modes: plain mode and table mode. 
 
-+ binary mode
++ plain mode
 + table mode (CSV files)
 
 For tabulated data, each row is a record with fixed columns. The buyer may send queries with keywords. Note that the columns must be specified before data initialization to supports keywords.
@@ -56,8 +56,8 @@ For data delivery, zkPoD supports two trading mode.
 1. Bob sends request w.r.t. a data tag
 2. Alice sends encrypted data to Bob (by a one-time random key)
 3. Bob verifies the *encrypted* data with tag by using ZKP.
-4. Bob accepts the data and submits a receipt to the contract(blockchain).
-5. Alice checks the receipt and then reveals the key (for encrypting  the data)
+4. Bob accepts the data and submits a receipt to the contract (blockchain).
+5. Alice checks the receipt and then reveals the key (for encrypting the data)
 6. Contract (blockchain) verifies if the key matches the receipt and output "accept"/"reject."
 
 + Complaint mode (inspired by Fairswap)
@@ -65,8 +65,8 @@ For data delivery, zkPoD supports two trading mode.
 1. Bob sends request w.r.t. a data tag
 2. Alice sends encrypted data to Bob (by a one-time random key)
 3. Bob verifies the *encrypted* data with tag by using ZKP.
-4. Bob the data and submits a receipt to the contract(blockchain).
-5. Alice checks the receipt and then reveals the key (for encrypting  the data)
+4. Bob accepts the data and submits a receipt to the contract(blockchain).
+5. Alice checks the receipt and then reveals the key (for encrypting the data)
 6. Bob decrypts the data by the key and submits proof of misbehavior to the contract(blockchain) if he finds that Alice was cheating.
 
 ### Theories behind
@@ -257,7 +257,7 @@ TODO: Add more examples about a query or private query of table data, and other 
 #### Benchmark Results
 
 - Data size: 1024 MiB
-- File type: binary
+- File type: plain
 - s: 64
 - omp_thread_num: 12
 
