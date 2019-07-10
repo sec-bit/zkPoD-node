@@ -1,9 +1,9 @@
 
-# zkPoD: A decentralized system for data exchanging
+# zkPoD: A decentralized system for data exchange
 
 ## Overview
 
-zkPoD is a decentralized platform for data exchanging between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*. Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchanging. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
+zkPoD is a decentralized platform for data exchange between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*. Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchange. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
 
 - ***Data Downloading***: Buyers may pay-and-download a data file from a data seller. zkPoD supports data fragments downloading, i.e., buyers may download specific data chunks in one batched transaction. 
 
@@ -23,11 +23,19 @@ zkPoD is practical and efficient. It supports data to size up to 10GB on an ordi
 
 ## Highlights 
 
-+ Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchanging is moderate, and the size of data can be up to TBs.
++ Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchange is moderate, and the size of data can be up to TBs.
 + Atomic-swap:  zkPoD supports atomic-swap (as in ZKCP[1]).
 + Large data file support.  zkPoD supports delivering large data file within one transaction in complaint mode. See performance evaluation
 + Data query by keywords:  zkPoD supports pay-and-query. Before locating the records interested, a buyer may query for one or more keywords 
 + Privacy protection: The request of a buyer may be sensitive under some circumstances, the buyer can obfuscate her real intention by adding a few unrelated requests. Then the seller has to respond to all requests without knowing which one is real from the buyer, but she does know that only one response can be visible to the buyer since the buyer only paid for one request. 
++ Inspection of goods:  zkPoD supports the inspection of goods for a buyer at
+  any scale natively. The buyer can randomly select any piece of data at any
+  location and takes it as a sample to check whether it is something she wants
+  or not. Then, the buyer can continue to buy a large amount of data after a
+  satisfied inspection. zkPoD does not set a limit for the number of times a
+  buyer could request for inspection. zkPoD also ensures that every piece of
+  data in every inspection coming from the same data set, including the final
+  batch purchase.
 
 ## Workflow and how it works
 
