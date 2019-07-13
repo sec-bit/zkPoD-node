@@ -1,13 +1,15 @@
 
-# zkPoD: A decentralized system for data exchanging
+# zkPoD: A decentralized system for data exchange
+
+*You can also read this in Chinese [here](README.zh.md).*
 
 ## Overview
 
-zkPoD is a decentralized platform for data exchanging between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*.  Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchanging. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
+zkPoD is a decentralized platform for data exchange between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*. Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchange. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
 
 - ***Data Downloading***: Buyers may pay-and-download a data file from a data seller. zkPoD supports data fragments downloading, i.e., buyers may download specific data chunks in one batched transaction. 
 
-- ***Data Query***:  zkPoD supports structured data; e.g., the seller organizes data as tables. Multiple columns can be selected as indexed-columns, such that users may pay-and-query records in the table with one or more keywords, and get the records matched. zkPoD ensures that the query results are trustworthy, i.e. (i) if data seller replies with $n$ records, it is impossible that more records are matching that keyword in the table; (ii) these n records are precisely in the table, and any forged records cannot be allowed. 
+- ***Data Query***:  zkPoD supports structured data; e.g., the seller organizes data as tables. Multiple columns can be selected as indexed-columns, such that users may pay-and-query records in the table with one or more keywords, and get the records matched. zkPoD ensures that the query results are trustworthy, i.e. (i) if data seller replies with n records, it is impossible that more records are matching that keyword in the table; (ii) these n records are precisely in the table, and any forged records cannot be allowed. 
 
 The three main issues being tackled by zkPoD are
 
@@ -23,11 +25,19 @@ zkPoD is practical and efficient. It supports data to size up to 10GB on an ordi
 
 ## Highlights 
 
-+ Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchanging is moderate, and the size of data can be up to TBs.
-+ Atomic-swap:  zkPoD supports atomic-swap (as in ZKCP[1]).
++ Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchange is moderate, and the size of data can be up to TBs.
++ Atomic-swap:  zkPoD supports atomic-swap (as in [ZKCP](https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment)).
 + Large data file support.  zkPoD supports delivering large data file within one transaction in complaint mode. See performance evaluation
 + Data query by keywords:  zkPoD supports pay-and-query. Before locating the records interested, a buyer may query for one or more keywords 
 + Privacy protection: The request of a buyer may be sensitive under some circumstances, the buyer can obfuscate her real intention by adding a few unrelated requests. Then the seller has to respond to all requests without knowing which one is real from the buyer, but she does know that only one response can be visible to the buyer since the buyer only paid for one request. 
++ Inspection of goods:  zkPoD supports the inspection of goods for a buyer at
+  any scale natively. The buyer can randomly select any piece of data at any
+  location and takes it as a sample to check whether it is something she wants
+  or not. Then, the buyer can continue to buy a large amount of data after a
+  satisfied inspection. zkPoD does not set a limit for the number of times a
+  buyer could request for inspection. zkPoD also ensures that every piece of
+  data in every inspection coming from the same data set, including the final
+  batch purchase.
 
 ## Workflow and how it works
 
@@ -40,14 +50,14 @@ TODO: re-draw this diagram.
 
 #### data initialization
 
-Data must be processed before being sold. Alice needs to compute the authenticators of data and the Merkle root of them. Authenticators are for data contents and origin verification (even if the data were encrypted). zkPoD supports two modes: binary mode and table mode. 
+Data must be processed before being sold. Alice needs to compute the authenticators of data and the Merkle root of them. Authenticators are for data contents and origin verification (even if the data were encrypted). zkPoD supports two modes: plain mode and table mode. 
 
-+ binary mode
++ plain mode
 + table mode (CSV files)
 
 For tabulated data, each row is a record with fixed columns. The buyer may send queries with keywords. Note that the columns must be specified before data initialization to supports keywords.
 
-#### data transaction
+#### Data transaction
 
 For data delivery, zkPoD supports two trading mode.
 
@@ -56,8 +66,8 @@ For data delivery, zkPoD supports two trading mode.
 1. Bob sends request w.r.t. a data tag
 2. Alice sends encrypted data to Bob (by a one-time random key)
 3. Bob verifies the *encrypted* data with tag by using ZKP.
-4. Bob accepts the data and submits a receipt to the contract(blockchain).
-5. Alice checks the receipt and then reveals the key (for encrypting  the data)
+4. Bob accepts the data and submits a receipt to the contract (blockchain).
+5. Alice checks the receipt and then reveals the key (for encrypting the data)
 6. Contract (blockchain) verifies if the key matches the receipt and output "accept"/"reject."
 
 + Complaint mode (inspired by Fairswap)
@@ -65,8 +75,8 @@ For data delivery, zkPoD supports two trading mode.
 1. Bob sends request w.r.t. a data tag
 2. Alice sends encrypted data to Bob (by a one-time random key)
 3. Bob verifies the *encrypted* data with tag by using ZKP.
-4. Bob the data and submits a receipt to the contract(blockchain).
-5. Alice checks the receipt and then reveals the key (for encrypting  the data)
+4. Bob accepts the data and submits a receipt to the contract(blockchain).
+5. Alice checks the receipt and then reveals the key (for encrypting the data)
 6. Bob decrypts the data by the key and submits proof of misbehavior to the contract(blockchain) if he finds that Alice was cheating.
 
 ### Theories behind
@@ -87,12 +97,33 @@ We use *verifiable random function*, VRF, to support queries with keywords. Curr
 
 ### Build
 
+*WIP: A building script for all of these steps*
+
 #### 1. Build zkPoD-lib
 
+Dependencies of zkPoD-lib could be found [here](https://github.com/sec-bit/zkPoD-lib#dependencies). Make sure you install them first.
+
 ```shell
+# Download zkPoD-lib code
 mkdir zkPoD && cd zkPoD
 git clone https://github.com/sec-bit/zkPoD-lib.git
+
+# Pull libsnark submodule
 cd zkPoD-lib
+git submodule init && git submodule update
+cd depends/libsnark
+git submodule init && git submodule update
+
+# Build libsnark
+mkdir build && cd build
+# - On Ubuntu
+cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=ON -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..
+# - Or for macOS (see https://github.com/scipr-lab/libsnark/issues/99#issuecomment-367677834)
+CPPFLAGS=-I/usr/local/opt/openssl/include LDFLAGS=-L/usr/local/opt/openssl/lib PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=OFF -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..
+make && make install
+
+# Build zkPoD-lib
+cd ../../..
 make
 
 # These files should be generated after successful build.
@@ -120,10 +151,17 @@ make
 
 #### 1. Setup
 
+We need a [trusted setup](https://z.cash/technology/paramgen/) to generate zkPoD zkSNARK parameters.
+
+For convenience and testing purpose, we could download it from [zkPoD-params](https://github.com/sec-bit/zkPoD-params) repo.
+
 ```shell
-cd zkPoD
-zkPoD-lib/pod_setup/pod_setupd -o ecc_pub.bin
-mv ecc_pub.bin zkPoD-node/
+cd zkPoD-node
+mkdir -p key/zksnark_key
+cd key/zksnark_key
+# Download zkSNARK pub params, see https://github.com/sec-bit/zkPoD-params
+wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.pk
+wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.vk
 ```
 
 #### 2. Run node
@@ -232,7 +270,7 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 ### Overview
 
-![](img/overview.png)
+![](img/overview.svg)
 
 - [zkPoD-node](https://github.com/sec-bit/zkPoD-node) Node application written in Golang for sellers (Alice) and buyers (Bob). It deals with communication, smart contract calling, data transferring, and other zkPoD protocol interactions.
 - [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD core library written in C++ shipping with Golang bindings.
@@ -249,30 +287,41 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 #### Basic Info
 
-|  Mode  | Average Speed (MiB/s) |   Communication Traffic   |   Gas Cost   | Upper Limit on Ethereum |
+We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes.
+
+|  Protocol  | Throughput |   Communication   |   Gas Cost (Ethereum)   | Data/Tx (Ethereum) |
 | :----: | :----------------: | :---------------------: | :---------------------: | :---------------------: |
-| complaint |        3.39        |        $O(2n)$        | $O(\log{}n)$ |         > 1 TiB         |
-| atomic-swap |        3.91        |    $O(2n)$    |    $O(n)$    |        343.3 KiB        |
+| PoD-CR |        3.39 MiB/s       |        $O(2n)$        | $O(\log{}n)$ |         < 100 TiB         |
+| PoD-AS |        3.91 MiB/s       |    $O(2n)$    |    $O(n)$    |        < 350 KiB        |
+| PoD-AS* |    35 KiB/s    |    $O(2n)$    |    $O(1)$    |        Unlimited        |
+
+PoD-AS supports fastest data delivery with O(n) on-chain computation. The variant is suitable for permissioned blockchain, where the performance (TPS) is high and computation cost of smart contract is pretty low.
+
+PoD-AS* is using zkSNARKs to reduce on-chain computation to O(1), but with slower off-chain delivery.
+
+PoD-CR supports fast data delivery and small on-chain computation O(log(n)).
 
 #### Benchmark Results
 
 - Data size: 1024 MiB
-- File type: binary
+- File type: plain
 - s: 64
 - omp_thread_num: 12
 
-|      Mode      | Prover (s) | Verifier (s) | Decrypt (s) | Communication Traffic (MiB) | Gas Cost |
+|      Protocol      | Prover (s) | Verifier (s) | Decrypt (s) | Communication Traffic (MiB) | Gas Cost |
 | :------------: | :--------: | :----------: | :---------: | :-------------------------: | :------: |
-| complaint mode |    124     |     119      |     82      |            2215             | 159,072  |
-|  atomic-swap   |    130     |     131      |    4.187    |            2215             |   `*`    |
+| PoD-CR |    124     |     119      |     82      |            2215             | 159,072  |
+|  PoD-AS   |    130     |     131      |    4.187    |            2215             |   `*`    |
+|  PoD-AS*   |    34540     |     344      |    498    |            2226             |   183,485   |
 
-`*` Atomic-swap mode does not support 1 GiB file at present.
+
+`*` PoD-AS protocol does not support 1 GiB file on Ethereum network at present.
 
 #### Gas Cost on Ethereum
 
-Complaint Mode             |  Atomic-swap Mode
-:-------------------------:|:-------------------------:
-![](img/Gas-Cost-vs-Data-Size-Batch1.svg)  |  ![](img/Gas-Cost-vs-Data-Size-Batch2.svg)
+PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
+:-------------------------:|:-------------------------:|:-------------------------:
+![](img/Gas-Cost-vs-Data-Size-Batch1.svg)  | ![](img/Gas-Cost-vs-Data-Size-Batch2.svg) | ![](img/Gas-Cost-vs-Data-Size-Batch3.svg) 
 
 ## Learn more?
 
