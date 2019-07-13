@@ -57,7 +57,7 @@ Data must be processed before being sold. Alice needs to compute the authenticat
 
 For tabulated data, each row is a record with fixed columns. The buyer may send queries with keywords. Note that the columns must be specified before data initialization to supports keywords.
 
-#### data transaction
+#### Data transaction
 
 For data delivery, zkPoD supports two trading mode.
 
@@ -287,10 +287,19 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 #### Basic Info
 
-|  Mode  | Average Speed (MiB/s) |   Communication Traffic   |   Gas Cost   | Upper Limit on Ethereum |
+We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes.
+
+|  Protocol  | Throughput |   Communication   |   Gas Cost (Ethereum)   | Data/Tx (Ethereum) |
 | :----: | :----------------: | :---------------------: | :---------------------: | :---------------------: |
-| complaint |        3.39        |        $O(2n)$        | $O(\log{}n)$ |         > 1 TiB         |
-| atomic-swap |        3.91        |    $O(2n)$    |    $O(n)$    |        343.3 KiB        |
+| PoD-CR |        3.39 MiB/s       |        $O(2n)$        | $O(\log{}n)$ |         < 100 TiB         |
+| PoD-AS |        3.91 MiB/s       |    $O(2n)$    |    $O(n)$    |        < 350 KiB        |
+| PoD-AS* |    35 KiB/s    |    $O(2n)$    |    $O(1)$    |        Unlimited        |
+
+PoD-AS supports fastest data delivery with O(n) on-chain computation. The variant is suitable for permissioned blockchain, where the performance (TPS) is high and computation cost of smart contract is pretty low.
+
+PoD-AS* is using zkSNARKs to reduce on-chain computation to O(1), but with slower off-chain delivery.
+
+PoD-CR supports fast data delivery and small on-chain computation O(log(n)).
 
 #### Benchmark Results
 
@@ -299,18 +308,20 @@ TODO: Add more examples about a query or private query of table data, and other 
 - s: 64
 - omp_thread_num: 12
 
-|      Mode      | Prover (s) | Verifier (s) | Decrypt (s) | Communication Traffic (MiB) | Gas Cost |
+|      Protocol      | Prover (s) | Verifier (s) | Decrypt (s) | Communication Traffic (MiB) | Gas Cost |
 | :------------: | :--------: | :----------: | :---------: | :-------------------------: | :------: |
-| complaint mode |    124     |     119      |     82      |            2215             | 159,072  |
-|  atomic-swap   |    130     |     131      |    4.187    |            2215             |   `*`    |
+| PoD-CR |    124     |     119      |     82      |            2215             | 159,072  |
+|  PoD-AS   |    130     |     131      |    4.187    |            2215             |   `*`    |
+|  PoD-AS*   |    34540     |     344      |    498    |            2226             |   183,485   |
 
-`*` Atomic-swap mode does not support 1 GiB file at present.
+
+`*` PoD-AS protocol does not support 1 GiB file on Ethereum network at present.
 
 #### Gas Cost on Ethereum
 
-Complaint Mode             |  Atomic-swap Mode
-:-------------------------:|:-------------------------:
-![](img/Gas-Cost-vs-Data-Size-Batch1.svg)  |  ![](img/Gas-Cost-vs-Data-Size-Batch2.svg)
+PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
+:-------------------------:|:-------------------------:|:-------------------------:
+![](img/Gas-Cost-vs-Data-Size-Batch1.svg)  | ![](img/Gas-Cost-vs-Data-Size-Batch2.svg) | ![](img/Gas-Cost-vs-Data-Size-Batch3.svg) 
 
 ## Learn more?
 
