@@ -1,6 +1,8 @@
 
 # zkPoD: A decentralized system for data exchange
 
+*You can also read this in English [here](README.md).*
+
 ## 概览
 
 zkPoD 是一个用于「不可信双方」之间进行数字商品（数据）交易的去中心化平台。无需依赖任何可信第三方（中间商），即可实现「一手交钱一手交货」。zkPoD 使用区块链（例如以太坊）作为「无需信任」的第三方来确保公平性，任何一方都无法在交易中作弊获利。而且，zkPoD 注重用户隐私，向区块链矿工和其他各方保护用户意图。
@@ -25,7 +27,7 @@ zkPoD 实用且高效，在普通 PC 上即能支持大小为 10 GB 的文件，
 ## 亮点
 
 - 完全去中心化：zkPoD 利用以太坊上的智能合约作为去信任的第三方，并且理论上可部署至任意支持基本智能合约功能的区块链。数据交易链上消耗（Gas）适中，数据交易容量上限可达数 TB。
-- 支持原子交换：zkPoD 支持原子交换（效果如 ZKCP）。
+- 支持原子交换：zkPoD 支持原子交换（效果如 [ZKCP](https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment)）。
 - 支持大容量数据交易：zkPoD 支持在一笔交易中完成大容量数据的验证。参见性能评估小节。
 - 支持关键词数据查询：zkPoD 支持付费查询。买家可发起包含一个或多个关键词的付费查询请求，来定位感兴趣的数据记录。
 - 隐私保护：买家的购买请求在某些场景下是十分敏感的隐私信息，zkPoD 允许买家通过添加一些无关的请求，来混淆自己的真实意图。与此同时，卖家收到请求后并不清楚对方的真正目标，必须对所有请求逐一作出回应，但卖家知道所有回应中只有一个是对买家可见的，因为买家毕竟只为其中一个购买请求进行了付费。
@@ -92,12 +94,33 @@ zkPoD 支持三种交易模式的数据传输（交易）。
 
 ### Build
 
+*WIP: A building script for all of these steps*
+
 #### 1. Build zkPoD-lib
 
+请先[参考此处](https://github.com/sec-bit/zkPoD-lib#dependencies)安装 zkPoD-lib 的相关依赖。
+
 ```shell
+# Download zkPoD-lib code
 mkdir zkPoD && cd zkPoD
 git clone https://github.com/sec-bit/zkPoD-lib.git
+
+# Pull libsnark submodule
 cd zkPoD-lib
+git submodule init && git submodule update
+cd depends/libsnark
+git submodule init && git submodule update
+
+# Build libsnark
+mkdir build && cd build
+# - For Ubuntu
+cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=ON -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..
+# - Or for macOS (see https://github.com/scipr-lab/libsnark/issues/99#issuecomment-367677834)
+CPPFLAGS=-I/usr/local/opt/openssl/include LDFLAGS=-L/usr/local/opt/openssl/lib PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=OFF -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..
+make && make install
+
+# Build zkPoD-lib
+cd ../../..
 make
 
 # These files should be generated after successful build.
@@ -125,10 +148,17 @@ make
 
 #### 1. Setup
 
+我们需要 [trusted setup](https://z.cash/technology/paramgen/) 来生成 zkPoD zkSNARK 的公共参数。
+
+为了方便且仅处于测试目的，我们可以直接从 [zkPoD-params](https://github.com/sec-bit/zkPoD-params) 仓库进行下载。
+
 ```shell
-cd zkPoD
-zkPoD-lib/pod_setup/pod_setupd -o ecc_pub.bin
-mv ecc_pub.bin zkPoD-node/
+cd zkPoD-node
+mkdir -p key/zksnark_key
+cd key/zksnark_key
+# Download zkSNARK pub params, see https://github.com/sec-bit/zkPoD-params
+wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.pk
+wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.vk
 ```
 
 #### 2. Run node

@@ -1,6 +1,8 @@
 
 # zkPoD: A decentralized system for data exchange
 
+*You can also read this in Chinese [here](README.zh.md).*
+
 ## Overview
 
 zkPoD is a decentralized platform for data exchange between *untrusted parties* realizing "Payment on Delivery" without any *trusted third party*. Instead, zkPoD uses blockchain (e.g., Ethereum) as a *trustless third party* to ensure fairness that no party can cheat during data exchange. Moreover, zkPoD is concerned with users' privacy, hiding the intention of users to either blockchain miners or other parties. Any seller can publish data for:
@@ -24,7 +26,7 @@ zkPoD is practical and efficient. It supports data to size up to 10GB on an ordi
 ## Highlights 
 
 + Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchange is moderate, and the size of data can be up to TBs.
-+ Atomic-swap:  zkPoD supports atomic-swap (as in ZKCP[1]).
++ Atomic-swap:  zkPoD supports atomic-swap (as in [ZKCP](https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment)).
 + Large data file support.  zkPoD supports delivering large data file within one transaction in complaint mode. See performance evaluation
 + Data query by keywords:  zkPoD supports pay-and-query. Before locating the records interested, a buyer may query for one or more keywords 
 + Privacy protection: The request of a buyer may be sensitive under some circumstances, the buyer can obfuscate her real intention by adding a few unrelated requests. Then the seller has to respond to all requests without knowing which one is real from the buyer, but she does know that only one response can be visible to the buyer since the buyer only paid for one request. 
@@ -95,12 +97,33 @@ We use *verifiable random function*, VRF, to support queries with keywords. Curr
 
 ### Build
 
+*WIP: A building script for all of these steps*
+
 #### 1. Build zkPoD-lib
 
+Dependencies of zkPoD-lib could be found [here](https://github.com/sec-bit/zkPoD-lib#dependencies). Make sure you install them first.
+
 ```shell
+# Download zkPoD-lib code
 mkdir zkPoD && cd zkPoD
 git clone https://github.com/sec-bit/zkPoD-lib.git
+
+# Pull libsnark submodule
 cd zkPoD-lib
+git submodule init && git submodule update
+cd depends/libsnark
+git submodule init && git submodule update
+
+# Build libsnark
+mkdir build && cd build
+# - On Ubuntu
+cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=ON -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..
+# - Or for macOS (see https://github.com/scipr-lab/libsnark/issues/99#issuecomment-367677834)
+CPPFLAGS=-I/usr/local/opt/openssl/include LDFLAGS=-L/usr/local/opt/openssl/lib PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=OFF -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..
+make && make install
+
+# Build zkPoD-lib
+cd ../../..
 make
 
 # These files should be generated after successful build.
@@ -128,10 +151,17 @@ make
 
 #### 1. Setup
 
+We need a [trusted setup](https://z.cash/technology/paramgen/) to generate zkPoD zkSNARK parameters.
+
+For convenience and testing purpose, we could download it from [zkPoD-params](https://github.com/sec-bit/zkPoD-params) repo.
+
 ```shell
-cd zkPoD
-zkPoD-lib/pod_setup/pod_setupd -o ecc_pub.bin
-mv ecc_pub.bin zkPoD-node/
+cd zkPoD-node
+mkdir -p key/zksnark_key
+cd key/zksnark_key
+# Download zkSNARK pub params, see https://github.com/sec-bit/zkPoD-params
+wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.pk
+wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.vk
 ```
 
 #### 2. Run node
