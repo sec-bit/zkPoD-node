@@ -1,7 +1,7 @@
 
 # zkPoD: A decentralized system for data exchange
 
-*You can also read this in English [here](README.md).*
+**Available in [ [English](README.md) | [中文](README.zh.md) ]**
 
 ## 概览
 
@@ -18,7 +18,7 @@ zkPoD 重点解决以下三个主要问题：
 - 数据必须在卖家完成支付的同时完成交付
 - 数据在完成交易前不会发生任何泄露
 
-我们设计了名为 PoD (Proof of Delivery) 的密码学协议来尝试解决以上问题，确保数据买卖双方间的交易公平性。PoD 协议是零知识和可证明安全的（证明工作正在进行）。想要了解更多信息请查看技术白皮书。
+我们设计了名为 PoD (Proof of Delivery) 的密码学协议来尝试解决以上问题，确保数据买卖双方间的交易公平性。PoD 协议是零知识和可证明安全的（证明工作正在进行）。想要了解更多信息请查看[技术白皮书](https://sec-bit.github.io/zkPoD-node/paper.pdf)。
 
 zkPoD 实用且高效，在普通 PC 上即能支持大小为 10 GB 的文件，并且理论上支持数 TB 级别的数据交易。详情可查看性能评估小节。
 
@@ -322,7 +322,7 @@ PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
 ## 想要了解更多？
 
 + 白皮书：zkPoD 系统的整体介绍
-+ 技术白皮书： zkPoD 的详细技术细节
++ [技术白皮书](https://sec-bit.github.io/zkPoD-node/paper.pdf)：zkPoD 的详细技术细节
 + 社区: 欢迎加入我们的 [*Discord*](https://discord.gg/tfUH886) 参与讨论，关注 [*Twitter*](https://twitter.com/SECBIT_IO) 获取最新动态。
 
 ## 其他相关项目

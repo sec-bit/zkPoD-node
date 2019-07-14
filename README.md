@@ -1,7 +1,7 @@
 
 # zkPoD: A decentralized system for data exchange
 
-*You can also read this in Chinese [here](README.zh.md).*
+**Available in [ [English](README.md) | [中文](README.zh.md) ]**
 
 ## Overview
 
@@ -17,7 +17,7 @@ The three main issues being tackled by zkPoD are
 + The data must be delivered when the buyer pays,
 + The data won't be leaked before being paid.
 
-A cryptographic protocol, PoD (proof of delivery), is developed to try to solve the issues, ensuring **fairness** between data buyers and sellers. The protocol is zero-knowledge and provable secure (*ongoing work*). See our technical paper for more information. 
+A cryptographic protocol, PoD (proof of delivery), is developed to try to solve the issues, ensuring **fairness** between data buyers and sellers. The protocol is zero-knowledge and provable secure (*ongoing work*). See our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for more information. 
 
 zkPoD is practical and efficient. It supports data to size up to 10GB on an ordinary PC (in complaint mode), and it could deliver data with TBs (ongoing work) in theory. See the performance evaluation below.
 
@@ -326,7 +326,7 @@ PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
 ## Learn more?
 
 + White paper: an overview introduction of the zkPoD system.
-+ Technical paper: a document with theoretic details to those who are interested in the theory we are developing.
++ [Technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf): a document with theoretic details to those who are interested in the theory we are developing.
 + Community: join us on [*Discord*](https://discord.gg/tfUH886) and follow us on [*Twitter*](https://twitter.com/SECBIT_IO) please!
 
 ## Related projects
