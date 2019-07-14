@@ -183,6 +183,27 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate transaction response for Alice")
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -196,7 +217,8 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	Log.Debugf("success to send transaction response for Alice")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -207,6 +229,14 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive transaction receipt.")
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.PlainComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -219,26 +249,6 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
-
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
 
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
@@ -388,6 +398,27 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	}
 	AliceTxMap[tx.SessionID] = tx
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -401,7 +432,8 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -412,6 +444,14 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	Log.Debugf("success to receive transaction receipt for Alice.")
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.PlainOTComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -425,32 +465,21 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
 	AliceTxMap[tx.SessionID] = tx
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -526,6 +555,27 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	}
 	AliceTxMap[tx.SessionID] = tx
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -539,7 +589,8 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -550,6 +601,14 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	Log.Debugf("success to receive transaction receipt from Bob.")
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.PlainAtomicSwap.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -563,31 +622,21 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
 	AliceTxMap[tx.SessionID] = tx
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth.")
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -600,6 +649,7 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 		return fmt.Errorf(
 			"failed to send secret")
 	}
+
 	Log.Debugf("success to submit secret to contract...txid=%v, time cost=%v", txid, time.Since(t))
 
 	_, err = readScrtForAtomicSwap(tx.SessionID, tx.AliceAddr, tx.BobAddr, Log)
@@ -663,6 +713,27 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	}
 	AliceTxMap[tx.SessionID] = tx
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -676,7 +747,8 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	AliceTxMap[tx.SessionID] = tx
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -687,6 +759,14 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	Log.Debugf("success to receive transaction receipt from Bob.")
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.PlainAtomicSwapVc.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -700,31 +780,20 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	tx.Status = TRANSACTION_STATUS_GENERATE_SECRET
 	AliceTxMap[tx.SessionID] = tx
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth.")
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -801,6 +870,27 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate transaction response.")
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -814,7 +904,8 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	Log.Debugf("success to send transaction response to Bob.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -825,6 +916,14 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt from Bob.")
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.TableComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -838,32 +937,20 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -1006,6 +1093,27 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("verify transaction request file and GENERATE response file...")
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -1019,7 +1127,8 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	Log.Debugf("send transaction response...")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1030,6 +1139,14 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("receive transaction receipt...")
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.TableOTComplaint.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -1043,32 +1160,20 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("verify receipt file and GENERATE secret file...")
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -1145,6 +1250,27 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate response.")
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -1158,7 +1284,8 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	Log.Debugf("success to send transaction response to Bob.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1169,6 +1296,14 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt from Bob.")
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.TableAtomicSwap.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -1182,32 +1317,20 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -1284,6 +1407,27 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify transaction request and generate response.")
 
+	tx.Price = tx.Count * tx.UnitPrice
+	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_SEND_RESPONSE_FAILED
@@ -1297,7 +1441,8 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	Log.Debugf("success to send transaction response to Bob.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1308,6 +1453,14 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt from Bob.")
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.TableAtomicSwapVc.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -1321,32 +1474,20 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret.")
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -1392,7 +1533,28 @@ func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := AliceRcvPODReq(node, requestFile)
+	tx.Price = tx.UnitPrice
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
+	err = AliceRcvPODReq(node, requestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1404,7 +1566,7 @@ func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive transaction request for Alice.")
 
-	rs := tx.TableVRF.AliceVerifyReq(requestFile, responseFile, Log)
+	rs = tx.TableVRF.AliceVerifyReq(requestFile, responseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
 		AliceTxMap[tx.SessionID] = tx
@@ -1429,7 +1591,8 @@ func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	Log.Debugf("success to send transaction response for Alice.")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1440,6 +1603,14 @@ func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	tx.Status = TRANSACTION_STATUS_RECEIPT
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt from Bob.")
+
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
 
 	rs = tx.TableVRF.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
@@ -1453,32 +1624,20 @@ func AliceTxForTQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt.")
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")
@@ -1529,7 +1688,28 @@ func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 		delete(AliceTxMap, tx.SessionID)
 	}()
 
-	err := AliceReceiveNegoReq(node, BobNegoRequestFile)
+	tx.Price = tx.UnitPrice
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("failed to verify deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"failed to verify deposit eth")
+	}
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("no enough deposit eth. err=%v", err)
+		return fmt.Errorf(
+			"no enough deposit eth")
+	}
+
+	defer func() {
+		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
+	}()
+
+	err = AliceReceiveNegoReq(node, BobNegoRequestFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1539,7 +1719,7 @@ func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	}
 	Log.Debugf("success to receive transaction nego request.")
 
-	rs := tx.TableOTVRF.AliceGeneNegoResp(BobNegoRequestFile, AliceNegoResponseFile, Log)
+	rs = tx.TableOTVRF.AliceGeneNegoResp(BobNegoRequestFile, AliceNegoResponseFile, Log)
 	if !rs {
 		tx.Status = TRANSACTION_STATUS_NEGO_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1628,7 +1808,8 @@ func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	Log.Debugf("success to send transaction response to Bob")
 
 	var sign []byte
-	sign, tx.Price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
+	var price int64
+	sign, price, tx.ExpireAt, err = AliceRcvPODRecpt(node, receiptFile)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
@@ -1640,9 +1821,17 @@ func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive receipt for Alice")
 
+	if price != tx.Price {
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid price in signature. price=%v, real price=%v", price, tx.Price)
+		return fmt.Errorf(
+			"invalid price in signature")
+	}
+
 	rs = tx.TableOTVRF.AliceVerifyReceipt(receiptFile, secretFile, Log)
 	if !rs {
-		tx.Status = TRANSACTION_STATUS_GENERATE_SECRET_FAILED
+		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("invalid receipt file or secret file. err=%v", err)
 		return fmt.Errorf(
@@ -1652,32 +1841,21 @@ func AliceTxForTOQ(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to verify receipt and generate secret")
 
-	rs, err = verifyDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
-	if err != nil {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("failed to verify deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"failed to verify deposit eth")
-	}
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("no enough deposit eth. err=%v", err)
-		return fmt.Errorf(
-			"no enough deposit eth")
-	}
-
-	defer func() {
-		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
-	}()
-
 	if time.Now().Unix()+600 > tx.ExpireAt {
 		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
 		AliceTxMap[tx.SessionID] = tx
 		Log.Warnf("the receipt signature will timeout soon.")
 		return fmt.Errorf(
 			"the receipt signature timeout")
+	}
+
+	rs, err = checkDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	if err != nil {
+		tx.Status = TRANSACTION_STATUS_SEND_SECRET_TERMINATED
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("check deposit...unpass")
+		return fmt.Errorf(
+			"deposit is not enough or expired")
 	}
 
 	Log.Debugf("start send transaction to submit contract from contract...")

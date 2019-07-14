@@ -456,7 +456,7 @@ func CloseDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Log.Debugf("start send transaction to contract for publishing data...merkle root=%v, mode=%v, size=%v, n=%v, s=%v", b.SigmaMKLRoot, b.Mode, b.Size, b.N, b.S)
+	Log.Debugf("start send transaction to contract for closing data...merkle root=%v, mode=%v, size=%v, n=%v, s=%v", b.SigmaMKLRoot, b.Mode, b.Size, b.N, b.S)
 	t := time.Now()
 	txid, rs, err := closeDataAtContract(bltByte)
 	if err != nil {
