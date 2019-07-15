@@ -26,6 +26,17 @@
         "ideas",
         "doc"
       ]
+    },
+    {
+      "login": "10to4",
+      "name": "even",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/35983442?v=4",
+      "profile": "https://github.com/10to4",
+      "contributions": [
+        "code",
+        "ideas",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

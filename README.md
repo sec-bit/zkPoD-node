@@ -1,5 +1,5 @@
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors)
 # zkPoD: A decentralized system for data exchange
 
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
@@ -346,6 +346,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/huyuguang"><img src="https://avatars1.githubusercontent.com/u/2227368?v=4" width="100px;" alt="Hu Yuguang"/><br /><sub><b>Hu Yuguang</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=huyuguang" title="Code">💻</a> <a href="#ideas-huyuguang" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=huyuguang" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/x0y1"><img src="https://avatars1.githubusercontent.com/u/33647147?v=4" width="100px;" alt="polymorphism"/><br /><sub><b>polymorphism</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=x0y1" title="Code">💻</a> <a href="#ideas-x0y1" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=x0y1" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/10to4"><img src="https://avatars2.githubusercontent.com/u/35983442?v=4" width="100px;" alt="even"/><br /><sub><b>even</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=10to4" title="Code">💻</a> <a href="#ideas-10to4" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=10to4" title="Documentation">📖</a></td>
   </tr>
 </table>
 
