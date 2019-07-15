@@ -4,7 +4,7 @@
 
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Discord](https://img.shields.io/discord/586796918248570890.svg)](https://discord.gg/tfUH886)
 
@@ -354,6 +354,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/hzzhang"><img src="https://avatars3.githubusercontent.com/u/1537758?v=4" width="100px;" alt="Haozhong Zhang"/><br /><sub><b>Haozhong Zhang</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Code">💻</a> <a href="#ideas-hzzhang" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/pkuzhangchao"><img src="https://avatars2.githubusercontent.com/u/2003972?v=4" width="100px;" alt="Chao Zhang"/><br /><sub><b>Chao Zhang</b></sub></a><br /><a href="#ideas-pkuzhangchao" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=pkuzhangchao" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/gy001"><img src="https://avatars0.githubusercontent.com/u/9260429?v=4" width="100px;" alt="Yu Guo"/><br /><sub><b>Yu Guo</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=gy001" title="Code">💻</a> <a href="#ideas-gy001" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=gy001" title="Documentation">📖</a></td>
   </tr>
 </table>
 
