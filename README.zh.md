@@ -1,4 +1,5 @@
 
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
 # zkPoD: A decentralized system for data exchange
 
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
@@ -20,7 +21,7 @@ zkPoD 重点解决以下三个主要问题：
 
 我们设计了名为 PoD (Proof of Delivery) 的密码学协议来尝试解决以上问题，确保数据买卖双方间的交易公平性。PoD 协议是零知识和可证明安全的（证明工作正在进行）。想要了解更多信息请查看[技术白皮书](https://sec-bit.github.io/zkPoD-node/paper.pdf)。
 
-zkPoD 实用且高效，在普通 PC 上即能支持大小为 10 GB 的文件，并且理论上支持数 TB 级别的数据交易。详情可查看性能评估小节。
+zkPoD 实用且高效，理论上支持数 TB 级别的数据交易。详情可查看[性能评估小节](##性能评估)。
 
 [![asciicast-gif](img/demo.min.gif)](https://asciinema.org/a/251240?autoplay=1&speed=2.71828182846)
 
@@ -28,16 +29,24 @@ zkPoD 实用且高效，在普通 PC 上即能支持大小为 10 GB 的文件，
 
 - 完全去中心化：zkPoD 利用以太坊上的智能合约作为去信任的第三方，并且理论上可部署至任意支持基本智能合约功能的区块链。数据交易链上消耗（Gas）适中，数据交易容量上限可达数 TB。
 - 支持原子交换：zkPoD 支持原子交换（效果如 [ZKCP](https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment)）。
-- 支持大容量数据交易：zkPoD 支持在一笔交易中完成大容量数据的验证。参见性能评估小节。
+- 支持大容量数据交易：zkPoD 支持在一笔交易中完成大容量数据的验证。参见[性能评估小节](##性能评估)。
 - 支持关键词数据查询：zkPoD 支持付费查询。买家可发起包含一个或多个关键词的付费查询请求，来定位感兴趣的数据记录。
 - 隐私保护：买家的购买请求在某些场景下是十分敏感的隐私信息，zkPoD 允许买家通过添加一些无关的请求，来混淆自己的真实意图。与此同时，卖家收到请求后并不清楚对方的真正目标，必须对所有请求逐一作出回应，但卖家知道所有回应中只有一个是对买家可见的，因为买家毕竟只为其中一个购买请求进行了付费。
-- 支持验货：zkPoD 原生支持任意颗粒度的验货。买家可先随机抽样购买任意位置、任意数
-  量的数据，进行验货，确认数据无误后再进行大批量购买。zkPoD 对验货次数不做任何限
-  制，并且可保证每次验货数据（包括最后大批量购买）都来自同一数据集。
+- 支持验货：zkPoD 原生支持任意颗粒度的验货。买家可先随机抽样购买任意位置、任意数量的数据，进行验货，确认数据无误后再进行大批量购买。zkPoD 对验货次数不做任何限制，并且可保证每次验货数据（包括最后大批量购买）都来自同一数据集。
+
+## zkPoD 项目结构
+
+![](img/overview.svg)
+
+- [zkPoD-node](https://github.com/sec-bit/zkPoD-node) 节点应用程序（Golang），供买卖双方使用，负责处理通信、合约查询与调用、数据传输以及其他 zkPoD 的协议交互。
+- [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD 底层核心库（C++），同时提供 Golang binding。
+- [zkPoD-contract](https://github.com/sec-bit/zkPoD-contract) 智能合约（Solidity），实现 zkPoD 数据去中心化交易功能。
 
 ## 工作流程和原理
 
 我们通过一个简化版的 PoD 协议来简述 zkPoD 的交易流程。
+
+![](img/regular.png)
 
 #### 数据初始化
 
@@ -54,7 +63,9 @@ zkPoD 支持两种模式：plain 模式和 table 模式。
 
 #### 数据交易
 
-zkPoD 支持两种交易模式的数据传输（交易）。
+为了满足不同应用场景，我们设计了三个变种协议 PoD-AS、PoD-AS* 和 PoD-CR。请查看[性能评估小节](##性能评估)和[技术白皮书](https://sec-bit.github.io/zkPoD-node/paper.pdf)获取详细描述和对比。
+
+为了简洁，我们这里介绍 zkPoD 用于数据交易的两大类交易模式。
 
 - Atomic-swap mode
 
@@ -78,12 +89,12 @@ zkPoD 支持两种交易模式的数据传输（交易）。
 
 为了交易双方的公平性和安全性，zkPoD 协议确保了以下要点：
 
-{1}. 合约（区块链）无法获知交易数据和加密数据的任何内容
-{2}. Bob 必须提交正确的 receipt 来获得 key
-{3}. Bob 必须在获得 key 前进行支付
-{4}. Bob 无法从加密的数据中获得任何信息
-{5}. Alice 不能披露假的 key，这种情况会被合约中的校验算法排除
-{6}. Alice 不能将数据替换成无关的垃圾数据给 Bob，这种情况无法通过加密数据与数据标签的验证步骤
+- {1} 合约（区块链）无法获知交易数据和加密数据的任何内容
+- {2} Bob 必须提交正确的 receipt 来获得 key
+- {3} Bob 必须在获得 key 前进行支付
+- {4} Bob 无法从加密的数据中获得任何信息
+- {5} Alice 不能披露假的 key，这种情况会被合约中的校验算法排除
+- {6} Alice 不能将数据替换成无关的垃圾数据给 Bob，这种情况无法通过加密数据与数据标签的验证步骤
 
 为了确保第 **{1, 4, 6}** 点，我们使用了基于 Pedersen commitments（具备加法同态性质）的零知识证明，结合一次性密码本加密，从而允许买家无需借助他人帮助来完成数据的验证。zkPoD 系统中智能合约被用于以一种透明、可预测、可形式化验证的方式完成加密货币与解密密钥的互换交易。
 
@@ -257,19 +268,11 @@ wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 > Examples: [config.json](examples/config.json) - 使用该文件描述你想要购买的数据。
 
 提示：
-1. Atomic-swap 模式目前在以太坊网络上仅支持最大 340 KiB 大小的数据交易。
-
-2. 如果选择了 complaint 模式，zkPoD-node 节点程序会自动向合约发起申诉，并提供卖家的作弊证明。因此，不诚实的卖家无法通过作弊而获利。
+1. PoD-AS 协议更适合许可链，由于区块 Gas 上限限制，目前在以太坊网络上仅支持最大 350 KiB 大小的数据交易。
+2. 对于 PoD-AS* 协议，链上计算没有任何瓶颈，因此合约可以验证无限大小的数据。但该模式链下计算速度更慢。
+3. 如果选择了 PoD-CR 模式，zkPoD-node 节点程序会自动向合约发起申诉，并提供卖家的作弊证明。因此，不诚实的卖家无法通过作弊而获利。
 
 TODO: 还有更多好玩的功能，后续会添加更多的使用方法例子介绍，如对表格数据进行普通查询和私密查询。
-
-## zkPoD 项目结构
-
-![](img/overview.svg)
-
-- [zkPoD-node](https://github.com/sec-bit/zkPoD-node) 节点应用程序（Golang），供买卖双方使用，负责处理通信、合约查询与调用、数据传输以及其他 zkPoD 的协议交互。
-- [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD 底层核心库（C++），同时提供 Golang binding。
-- [zkPoD-contract](https://github.com/sec-bit/zkPoD-contract) 智能合约（Solidity），实现 zkPoD 数据去中心化交易功能。
 
 ## 性能评估
 
@@ -281,10 +284,6 @@ TODO: 还有更多好玩的功能，后续会添加更多的使用方法例子�
 - Memory: 32605840 kB
 
 #### 基本信息
-
-We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes.
-
-为了满足不同应用场景，我们设计了三个变种协议 PoD-AS、PoD-AS* 和 PoD-CR。
 
 |  Protocol  | Throughput |   Communication   |   Gas Cost (Ethereum)   | Data/Tx (Ethereum) |
 | :----: | :----------------: | :---------------------: | :---------------------: | :---------------------: |
@@ -330,3 +329,29 @@ PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
 + Fairswap:  https://github.com/lEthDev/FairSwap
 + ZKCP: https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment
 + Paypub: https://github.com/unsystem/paypub
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/huyuguang"><img src="https://avatars1.githubusercontent.com/u/2227368?v=4" width="100px;" alt="Hu Yuguang"/><br /><sub><b>Hu Yuguang</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=huyuguang" title="Code">💻</a> <a href="#ideas-huyuguang" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=huyuguang" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/x0y1"><img src="https://avatars1.githubusercontent.com/u/33647147?v=4" width="100px;" alt="polymorphism"/><br /><sub><b>polymorphism</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=x0y1" title="Code">💻</a> <a href="#ideas-x0y1" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=x0y1" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/10to4"><img src="https://avatars2.githubusercontent.com/u/35983442?v=4" width="100px;" alt="even"/><br /><sub><b>even</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=10to4" title="Code">💻</a> <a href="#ideas-10to4" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=10to4" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/zer0to0ne"><img src="https://avatars3.githubusercontent.com/u/36526113?v=4" width="100px;" alt="zer0to0ne"/><br /><sub><b>zer0to0ne</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=zer0to0ne" title="Code">💻</a> <a href="#ideas-zer0to0ne" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=zer0to0ne" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://twitter.com/ErrNil"><img src="https://avatars0.githubusercontent.com/u/36690236?v=4" width="100px;" alt="p0n1"/><br /><sub><b>p0n1</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=p0n1" title="Code">💻</a> <a href="#ideas-p0n1" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=p0n1" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/aphasiayc"><img src="https://avatars3.githubusercontent.com/u/24490151?v=4" width="100px;" alt="aphasiayc"/><br /><sub><b>aphasiayc</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=aphasiayc" title="Code">💻</a> <a href="#ideas-aphasiayc" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=aphasiayc" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Vawheter"><img src="https://avatars1.githubusercontent.com/u/24186846?v=4" width="100px;" alt="Vawheter"/><br /><sub><b>Vawheter</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=Vawheter" title="Code">💻</a> <a href="#ideas-Vawheter" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=Vawheter" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/hzzhang"><img src="https://avatars3.githubusercontent.com/u/1537758?v=4" width="100px;" alt="Haozhong Zhang"/><br /><sub><b>Haozhong Zhang</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Code">💻</a> <a href="#ideas-hzzhang" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/pkuzhangchao"><img src="https://avatars2.githubusercontent.com/u/2003972?v=4" width="100px;" alt="Chao Zhang"/><br /><sub><b>Chao Zhang</b></sub></a><br /><a href="#ideas-pkuzhangchao" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=pkuzhangchao" title="Documentation">📖</a></td>
+  </tr>
+</table>
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!

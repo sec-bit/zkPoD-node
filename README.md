@@ -20,7 +20,7 @@ The three main issues being tackled by zkPoD are
 
 A cryptographic protocol, PoD (proof of delivery), is developed to try to solve the issues, ensuring **fairness** between data buyers and sellers. The protocol is zero-knowledge and provable secure (*ongoing work*). See our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for more information. 
 
-zkPoD is practical and efficient. It supports data to size up to 10GB on an ordinary PC (in complaint mode), and it could deliver data with TBs (ongoing work) in theory. See the performance evaluation below.
+zkPoD is practical and efficient. It could deliver data with TBs in theory. See [performance evaluation section](##Performance) below.
 
 [![asciicast-gif](img/demo.min.gif)](https://asciinema.org/a/251240?autoplay=1&speed=2.71828182846)
 
@@ -28,17 +28,18 @@ zkPoD is practical and efficient. It supports data to size up to 10GB on an ordi
 
 + Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchange is moderate, and the size of data can be up to TBs.
 + Atomic-swap:  zkPoD supports atomic-swap (as in [ZKCP](https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment)).
-+ Large data file support.  zkPoD supports delivering large data file within one transaction in complaint mode. See performance evaluation
-+ Data query by keywords:  zkPoD supports pay-and-query. Before locating the records interested, a buyer may query for one or more keywords 
++ Large data file support.  zkPoD supports delivering large data file within one transaction. See [performance evaluation section](##Performance).
++ Data query by keywords:  zkPoD supports pay-and-query. Before locating the records interested, a buyer may query for one or more keywords.
 + Privacy protection: The request of a buyer may be sensitive under some circumstances, the buyer can obfuscate her real intention by adding a few unrelated requests. Then the seller has to respond to all requests without knowing which one is real from the buyer, but she does know that only one response can be visible to the buyer since the buyer only paid for one request. 
-+ Inspection of goods:  zkPoD supports the inspection of goods for a buyer at
-  any scale natively. The buyer can randomly select any piece of data at any
-  location and takes it as a sample to check whether it is something she wants
-  or not. Then, the buyer can continue to buy a large amount of data after a
-  satisfied inspection. zkPoD does not set a limit for the number of times a
-  buyer could request for inspection. zkPoD also ensures that every piece of
-  data in every inspection coming from the same data set, including the final
-  batch purchase.
++ Inspection of goods:  zkPoD supports the inspection of goods for a buyer at any scale natively. The buyer can randomly select any piece of data at any location and takes it as a sample to check whether it is something she wants or not. Then, the buyer can continue to buy a large amount of data after a satisfied inspection. zkPoD does not set a limit for the number of times a buyer could request for inspection. zkPoD also ensures that every piece of data in every inspection coming from the same data set, including the final batch purchase.
+
+## Project Structure
+
+![](img/overview.svg)
+
+- [zkPoD-node](https://github.com/sec-bit/zkPoD-node) Node application written in Golang for sellers (Alice) and buyers (Bob). It deals with communication, smart contract calling, data transferring, and other zkPoD protocol interactions.
+- [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD core library written in C++ shipping with Golang bindings.
+- [zkPoD-contract](https://github.com/sec-bit/zkPoD-contract) Smart contracts for zkPoD *Decentralized Exchange*.
 
 ## Workflow and how it works
 
@@ -48,8 +49,7 @@ TODO: re-draw this diagram.
 
 ![](img/regular.png)
 
-
-#### data initialization
+#### Data initialization
 
 Data must be processed before being sold. Alice needs to compute the authenticators of data and the Merkle root of them. Authenticators are for data contents and origin verification (even if the data were encrypted). zkPoD supports two modes: plain mode and table mode. 
 
@@ -60,7 +60,9 @@ For tabulated data, each row is a record with fixed columns. The buyer may send 
 
 #### Data transaction
 
-For data delivery, zkPoD supports two trading mode.
+We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes. See the [performance evaluation section](##Performance) and our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for detailed specification and comparison.
+
+For simplicity, we introduce two main types of trading mode for data delivery.
 
 + Atomic-swap mode
 
@@ -83,12 +85,13 @@ For data delivery, zkPoD supports two trading mode.
 ### Theories behind
 
 For fairness and security, the protocol ensures the following requirements:
-{1}. Contract (blockchain) cannot learn anything about the data, or encrypted data
-{2}. Bob must submit a correct receipt to get the real key
-{3}. Bob must pay before obtaining the key
-{4}. Bob cannot learn anything from the encrypted data 
-{5}. Alice cannot reveal a fake key, which would be ruled out by the verification algorithm of contract(blockchain)
-{6}. Alice cannot send junk data to Bob, who cannot cheat when verifying data tag.
+
+- {1} Contract (blockchain) cannot learn anything about the data, or encrypted data
+- {2} Bob must submit a correct receipt to get the real key
+- {3} Bob must pay before obtaining the key
+- {4} Bob cannot learn anything from the encrypted data
+- {5} Alice cannot reveal a fake key, which would be ruled out by the verification algorithm of contract(blockchain)
+- {6} Alice cannot send junk data to Bob, who cannot cheat when verifying data tag.
 
 To ensure **{1, 4, 6}**, we use ZKP based on Pedersen commitments (which is additively homomorphic) with one-time-pad encryption, allowing buyers to verify the data without the help of others. A smart contract is used to exchange crypto coins with keys to ensure **{2, 3, 5}** in the way of transparent, predictable and formally verified (*ongoing work*).
 
@@ -154,7 +157,7 @@ make
 
 We need a [trusted setup](https://z.cash/technology/paramgen/) to generate zkPoD zkSNARK parameters.
 
-For convenience and testing purpose, we could download it from [zkPoD-params](https://github.com/sec-bit/zkPoD-params) repo.
+For convenience and testing purposes, we could download it from [zkPoD-params](https://github.com/sec-bit/zkPoD-params) repo.
 
 ```shell
 cd zkPoD-node
@@ -176,7 +179,7 @@ make run
 
 Tips: 
 
-You should specify `LD_LIBRARY_PATH` for `libpod_core` when excuting `zkPoD-node` on Linux. On macOS you should use `DYLD_LIBRARY_PATH` instead. Check `Makefile` for examples. For convenience, you could set `LD_LIBRARY_PATH` as an environment variable.
+You should specify `LD_LIBRARY_PATH` for `libpod_core` when executing `zkPoD-node` on Linux. On macOS, you should use `DYLD_LIBRARY_PATH` instead. Check `Makefile` for examples. For convenience, you could set `LD_LIBRARY_PATH` as an environment variable.
 
 ```shell
 # On Linux
@@ -191,7 +194,7 @@ export DYLD_LIBRARY_PATH=<YOUR_PATH_TO_LIBPOD_CORE>
 - https://faucet.ropsten.be/
 - https://faucet.metamask.io/
 
-Tips: A new Ethereum account is generated after first boot of zkPoD-node. You could read it from terminal screen or keystore file. Keep your keystore safe. You must have some ETH balance in your Ethereum address for smart contract interaction. Get some for test from a ropsten Ethereum faucet.
+Tips: A new Ethereum account is generated after the first boot of zkPoD-node. You could read it from the terminal screen or keystore file. Keep your keystore safe. You must have some ETH balance in your Ethereum address for smart contract interaction. Get some for the test from a ropsten Ethereum faucet.
 
 #### 4. As a seller: init data & publish 
 
@@ -211,7 +214,7 @@ wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 ```
 > Examples: [init.json](examples/init.json) - Use this to describe your data for sell.
 
-Tips: For test, you could use same Ethereum account for selling and buying. You could also host a zkPoD-node and publish your data description to the [community](https://discord.gg/tfUH886) for trade testing.
+Tips: For a test, you could use the same Ethereum account for selling and buying. You could also host a zkPoD-node and publish your data description to the [community](https://discord.gg/tfUH886) for trade testing.
 
 Here is everything that you need to let others know.
 
@@ -261,21 +264,11 @@ You'll make a purchase request to a seller. For convenience, you could fill in s
 > Examples: [config.json](examples/config.json) - Use this to describe data you are going to buy.
 
 Tips:
-1. Atomic-swap mode only supports up to about 340 KiB on the Ethereum network for the moment.
-
-2. If complaint mode is selected, zkPoD-node complains to the contract automatically with proof proving that the seller is dishonest. As a result, a dishonest seller would never profit from misbehavior.
+1. PoD-AS protocol is much more suitable for permissioned blockchain and only supports up to about 350 KiB on the Ethereum network for the moment due to the block gas limit.
+2. For PoD-AS* protocol, there is no bottleneck in on-chain computation and smart contracts could verify data of unlimited size. But it will have slower off-chain computation.
+3. If the PoD-CR protocol is selected, zkPoD-node complains to the contract automatically with proof proving that the seller is dishonest. As a result, a dishonest seller would never profit from misbehavior.
 
 TODO: Add more examples about a query or private query of table data, and other operations.
-
-## Project Structure
-
-### Overview
-
-![](img/overview.svg)
-
-- [zkPoD-node](https://github.com/sec-bit/zkPoD-node) Node application written in Golang for sellers (Alice) and buyers (Bob). It deals with communication, smart contract calling, data transferring, and other zkPoD protocol interactions.
-- [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD core library written in C++ shipping with Golang bindings.
-- [zkPoD-contract](https://github.com/sec-bit/zkPoD-contract) Smart contracts for zkPoD *Decentralized Exchange*.
 
 ## Performance
 
@@ -288,15 +281,13 @@ TODO: Add more examples about a query or private query of table data, and other 
 
 #### Basic Info
 
-We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes.
-
 |  Protocol  | Throughput |   Communication   |   Gas Cost (Ethereum)   | Data/Tx (Ethereum) |
 | :----: | :----------------: | :---------------------: | :---------------------: | :---------------------: |
 | PoD-CR |        3.39 MiB/s       |        $O(2n)$        | $O(\log{}n)$ |         < 100 TiB         |
 | PoD-AS |        3.91 MiB/s       |    $O(2n)$    |    $O(n)$    |        < 350 KiB        |
 | PoD-AS* |    35 KiB/s    |    $O(2n)$    |    $O(1)$    |        Unlimited        |
 
-PoD-AS supports fastest data delivery with O(n) on-chain computation. The variant is suitable for permissioned blockchain, where the performance (TPS) is high and computation cost of smart contract is pretty low.
+PoD-AS supports the fastest data delivery with O(n) on-chain computation. The variant is suitable for permissioned blockchain, where the performance (TPS) is high and the computation cost of the smart contract is pretty low.
 
 PoD-AS* is using zkSNARKs to reduce on-chain computation to O(1), but with slower off-chain delivery.
 
@@ -316,7 +307,7 @@ PoD-CR supports fast data delivery and small on-chain computation O(log(n)).
 |  PoD-AS*   |    34540     |     344      |    498    |            2226             |   183,485   |
 
 
-`*` PoD-AS protocol does not support 1 GiB file on Ethereum network at present.
+`*` PoD-AS protocol does not support 1 GiB file on the Ethereum network at present.
 
 #### Gas Cost on Ethereum
 
