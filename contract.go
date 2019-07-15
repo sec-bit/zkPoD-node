@@ -769,7 +769,7 @@ func calcuDeposit(AliceAddr string, BobAddr string, value int64) (bool, error) {
 	return true, nil
 }
 
-func checkDeposit(AliceAddr string, BobAddr string, value int64) (bool, err) {
+func checkDeposit(AliceAddr string, BobAddr string, value int64) (bool, error) {
 	dpst, err := ZkPoDExchangeClient.ZkPoDExchangeCaller.BobDeposits(&bind.CallOpts{}, common.HexToAddress(BobAddr), common.HexToAddress(AliceAddr))
 	if err != nil {
 		return false, fmt.Errorf("failed to read deposit. err=%v", err)
@@ -777,7 +777,7 @@ func checkDeposit(AliceAddr string, BobAddr string, value int64) (bool, err) {
 	if dpst.Value.Int64() < value {
 		return false, nil
 	}
-	if dpst.UnDepositAt != 0 && dpst.UnDepositAt+28800 < time.Now().Unix()+600 && dpst.Stat == 1 {
+	if dpst.UnDepositAt.Int64() != 0 && dpst.UnDepositAt.Int64()+28800 < time.Now().Unix()+600 && dpst.Stat == 1 {
 		return false, nil
 	}
 	return true, nil
