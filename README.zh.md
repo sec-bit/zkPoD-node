@@ -168,8 +168,8 @@ make
 
 ```shell
 cd zkPoD-node
-mkdir -p key/zksnark_key
-cd key/zksnark_key
+mkdir -p zkPodParam/zksnark_key
+cd zkPodParam/zksnark_key
 # Download zkSNARK pub params, see https://github.com/sec-bit/zkPoD-params
 wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.pk
 wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.vk
