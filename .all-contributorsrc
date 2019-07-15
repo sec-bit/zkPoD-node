@@ -102,6 +102,17 @@
         "ideas",
         "doc"
       ]
+    },
+    {
+      "login": "gy001",
+      "name": "Yu Guo",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/9260429?v=4",
+      "profile": "https://github.com/gy001",
+      "contributions": [
+        "code",
+        "ideas",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
