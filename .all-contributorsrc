@@ -15,6 +15,17 @@
         "ideas",
         "doc"
       ]
+    },
+    {
+      "login": "x0y1",
+      "name": "polymorphism",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/33647147?v=4",
+      "profile": "https://github.com/x0y1",
+      "contributions": [
+        "code",
+        "ideas",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
