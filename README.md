@@ -1,5 +1,5 @@
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
 # zkPoD: A decentralized system for data exchange
 
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
@@ -354,6 +354,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/hzzhang"><img src="https://avatars3.githubusercontent.com/u/1537758?v=4" width="100px;" alt="Haozhong Zhang"/><br /><sub><b>Haozhong Zhang</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Code">💻</a> <a href="#ideas-hzzhang" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/pkuzhangchao"><img src="https://avatars2.githubusercontent.com/u/2003972?v=4" width="100px;" alt="Chao Zhang"/><br /><sub><b>Chao Zhang</b></sub></a><br /><a href="#ideas-pkuzhangchao" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=pkuzhangchao" title="Documentation">📖</a></td>
   </tr>
 </table>
 
