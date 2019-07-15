@@ -1,8 +1,12 @@
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
 # zkPoD: A decentralized system for data exchange
 
+
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Discord](https://img.shields.io/discord/586796918248570890.svg)](https://discord.gg/tfUH886)
 
 ## Overview
 
@@ -35,7 +39,7 @@ zkPoD is practical and efficient. It could deliver data with TBs in theory. See 
 
 ## Project Structure
 
-![](img/overview.svg)
+<p align="center"> <img src="img/overview.svg"> </p>
 
 - [zkPoD-node](https://github.com/sec-bit/zkPoD-node) Node application written in Golang for sellers (Alice) and buyers (Bob). It deals with communication, smart contract calling, data transferring, and other zkPoD protocol interactions.
 - [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD core library written in C++ shipping with Golang bindings.
@@ -326,6 +330,10 @@ PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
 + Fairswap:  https://github.com/lEthDev/FairSwap
 + ZKCP: https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment
 + Paypub: https://github.com/unsystem/paypub
+
+## License
+
+[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Contributors ✨
 

@@ -1,8 +1,11 @@
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
 # zkPoD: A decentralized system for data exchange
 
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Discord](https://img.shields.io/discord/586796918248570890.svg)](https://discord.gg/tfUH886)
 
 ## 概览
 
@@ -36,7 +39,7 @@ zkPoD 实用且高效，理论上支持数 TB 级别的数据交易。详情可�
 
 ## zkPoD 项目结构
 
-![](img/overview.svg)
+<p align="center"> <img src="img/overview.svg"> </p>
 
 - [zkPoD-node](https://github.com/sec-bit/zkPoD-node) 节点应用程序（Golang），供买卖双方使用，负责处理通信、合约查询与调用、数据传输以及其他 zkPoD 的协议交互。
 - [zkPoD-lib](https://github.com/sec-bit/zkPoD-lib) zkPoD 底层核心库（C++），同时提供 Golang binding。
@@ -329,6 +332,10 @@ PoD-CR Protocol            |  PoD-AS Protocol      |  PoD-AS* Protocol
 + Fairswap:  https://github.com/lEthDev/FairSwap
 + ZKCP: https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment
 + Paypub: https://github.com/unsystem/paypub
+
+## License
+
+[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Contributors ✨
 
