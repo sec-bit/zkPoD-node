@@ -1,5 +1,5 @@
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors)
 # zkPoD: A decentralized system for data exchange
 
 **Available in [ [English](README.md) | [中文](README.zh.md) ]**
@@ -351,6 +351,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://twitter.com/ErrNil"><img src="https://avatars0.githubusercontent.com/u/36690236?v=4" width="100px;" alt="p0n1"/><br /><sub><b>p0n1</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=p0n1" title="Code">💻</a> <a href="#ideas-p0n1" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=p0n1" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/aphasiayc"><img src="https://avatars3.githubusercontent.com/u/24490151?v=4" width="100px;" alt="aphasiayc"/><br /><sub><b>aphasiayc</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=aphasiayc" title="Code">💻</a> <a href="#ideas-aphasiayc" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=aphasiayc" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/Vawheter"><img src="https://avatars1.githubusercontent.com/u/24186846?v=4" width="100px;" alt="Vawheter"/><br /><sub><b>Vawheter</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=Vawheter" title="Code">💻</a> <a href="#ideas-Vawheter" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=Vawheter" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/hzzhang"><img src="https://avatars3.githubusercontent.com/u/1537758?v=4" width="100px;" alt="Haozhong Zhang"/><br /><sub><b>Haozhong Zhang</b></sub></a><br /><a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Code">💻</a> <a href="#ideas-hzzhang" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/sec-bit/zkPoD-node/commits?author=hzzhang" title="Documentation">📖</a></td>
   </tr>
 </table>
 
