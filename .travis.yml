@@ -14,7 +14,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libomp-dev libcrypto++-dev libboost-all-dev libgmp-dev; fi
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install libcryptopp boost gmp openssl; fi
   - cd $HOME && mkdir zkPoD && cd zkPoD
-  - mv $GOPATH/src/github.com/p0n1/zkPoD-node .
+  - mv $GOPATH/src/github.com/sec-bit/zkPoD-node .
   - git clone https://github.com/sec-bit/zkPoD-lib.git
   - cd zkPoD-lib
   - git submodule init && git submodule update
