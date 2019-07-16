@@ -1,0 +1,46 @@
+
+language: go
+matrix:
+    include:
+        - os: linux
+          dist: bionic
+        - os: osx
+          osx_image: xcode11
+go: 
+ - "1.12.x"
+git:
+  depth: 1
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libomp-dev libcrypto++-dev libboost-all-dev libgmp-dev; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install libcryptopp boost gmp openssl; fi
+  - cd $HOME && mkdir zkPoD && cd zkPoD
+  - mv $GOPATH/src/github.com/p0n1/zkPoD-node .
+  - git clone https://github.com/sec-bit/zkPoD-lib.git
+  - cd zkPoD-lib
+  - git submodule init && git submodule update
+  - cd depends/libsnark
+  - git submodule init && git submodule update
+  - mkdir build && cd build
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=ON -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then CPPFLAGS=-I/usr/local/opt/openssl/include LDFLAGS=-L/usr/local/opt/openssl/lib PKG_CONFIG_PATH=/usr/local/opt/openssl/lib/pkgconfig cmake -DCMAKE_INSTALL_PREFIX=../../install -DMULTICORE=OFF -DWITH_PROCPS=OFF -DWITH_SUPERCOP=OFF -DCURVE=MCL_BN128 ..; fi
+  - make -j 2 && make install
+  - cd ../../..
+  - make -j 2
+  - cd pod_go
+  # disable make test on osx due to -> pod_setup(12654,0x1184825c0) malloc: can't allocate region
+  # - if [ "$TRAVIS_OS_NAME" = "osx" ]; then make test; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make test -j 2; fi
+  - cd ../../zkPoD-node
+  - make -j 2
+  - mkdir -p zkPodParam/zksnark_key
+  - cd zkPodParam/zksnark_key
+  - wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.pk
+  - wget https://raw.githubusercontent.com/sec-bit/zkPoD-params/master/zksnark_key/atomic_swap_vc.vk
+
+script:
+  - cd $HOME/zkPoD/zkPoD-node
+  - make run &
+  - sleep 30
+
+env:
+  - GO111MODULE=on
