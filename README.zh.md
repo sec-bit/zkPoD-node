@@ -210,11 +210,19 @@ export DYLD_LIBRARY_PATH=<YOUR_PATH_TO_LIBPOD_CORE>
 打开一个新的终端
 
 ```shell
+# On Linux
+export LD_LIBRARY_PATH=`pwd`/../zkPoD-lib/pod_core/
+
+# Or on macOS
+export DYLD_LIBRARY_PATH=`pwd`/../zkPoD-lib/pod_core/
+
 cd zkPoD-node
-cp ../zkPoD-lib/pod_publish/pod_publish .
+mkdir bin
+cp ../zkPoD-lib/pod_publish/pod_publish ./bin
 
 wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 
+# cp examples/init.json .
 ./zkPoD-node -o initdata -init init.json
 # You should get the sigma_mkl_root from logs
 # export sigma_mkl_root=<YOUR_SIGMA_MKL_ROOT>
@@ -236,7 +244,7 @@ wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 - 数据初始化后生成的 public 信息
 ```
 
-待售数据初始化完成后，卖家可以从该路径 `zkPoD-node/seller/publish/$sigma_mkl_root/` 获得数据的 `bulletin` 和 `public` 信息。
+待售数据初始化完成后，卖家可以从该路径 `zkPoD-node/A/publish/$sigma_mkl_root/` 获得数据的 `bulletin` 和 `public` 信息。
 
 ```
 ├── bulletin
@@ -265,10 +273,10 @@ wget -O test.txt https://www.gutenberg.org/files/11/11-0.txt
 
 ```shell
 # For test, you could simply copy public info of data from seller folder to project root path.
-# cp seller/publish/$sigma_mkl_root/bulletin .
-# cp -r seller/publish/$sigma_mkl_root/public .
+# cp A/publish/$sigma_mkl_root/bulletin .
+# cp -r A/publish/$sigma_mkl_root/public .
 ./zkPoD-node -o purchase -c config.json
-# You should get the decrypted data in buyer/transaction/<session_id> folder
+# You should get the decrypted data in B/transaction/<session_id> folder
 ```
 > Examples: [config.json](examples/config.json) - 使用该文件描述你想要购买的数据。
 
