@@ -53,7 +53,7 @@ func ConnectToProvider(key *keystore.Key, zkPODEXAddr string, Log ILogger) error
 	return nil
 }
 
-func publishDataToContract(b Bulletin, value int64) (string, error) {
+func publishPlainDataToContract(b Bulletin, value int64) (string, error) {
 
 	size, _ := strconv.ParseUint(b.Size, 10, 64)
 	s, _ := strconv.ParseUint(b.S, 10, 64)
@@ -70,6 +70,34 @@ func publishDataToContract(b Bulletin, value int64) (string, error) {
 	}()
 
 	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.Publish(GAdminAuth, size, s, n, mklroot, big.NewInt(0), big.NewInt(0))
+	if err != nil {
+		return "", fmt.Errorf("failed to Publish: %v", err)
+	}
+	return ctx.Hash().Hex(), nil
+}
+
+func publishTableDataToContract(b Bulletin, value int64) (string, error) {
+
+	s, _ := strconv.ParseUint(b.S, 10, 64)
+	n, _ := strconv.ParseUint(b.N, 10, 64)
+	mklrootInt := new(big.Int)
+	mklroot, rs := mklrootInt.SetString(b.SigmaMKLRoot, 16)
+	if !rs {
+		return "", errors.New("failed to convert sessionId")
+	}
+
+	digestInt := new(big.Int)
+	digest, rs := digestInt.SetString(b.VRFMetaDigest, 16)
+	if !rs {
+		return "", errors.New("failed to convert VRFMetaDigest")
+	}
+
+	GAdminAuth.Value = big.NewInt(value)
+	defer func() {
+		GAdminAuth.Value = big.NewInt(0)
+	}()
+
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.Publish(GAdminAuth, 0, s, n, mklroot, digest, big.NewInt(1))
 	if err != nil {
 		return "", fmt.Errorf("failed to Publish: %v", err)
 	}
@@ -799,29 +827,46 @@ func checkDeposit(AliceAddr string, BobAddr string, value int64) (bool, error) {
 }
 
 func calcuBltKey(b Bulletin) ([32]byte, error) {
-	size, _ := strconv.ParseUint(b.Size, 10, 64)
-	s, _ := strconv.ParseUint(b.S, 10, 64)
-	n, _ := strconv.ParseUint(b.N, 10, 64)
-	mklrootInt := new(big.Int)
-	mklroot, rs := mklrootInt.SetString(fmt.Sprintf("%x", b.SigmaMKLRoot), 10)
-	if !rs {
-		return *byte32(nil), fmt.Errorf("failed to convert sessionId. b.SigmaMKLRoot=%v", b.SigmaMKLRoot)
+
+	if b.Mode == TRANSACTION_MODE_PLAIN_POD {
+		size, _ := strconv.ParseUint(b.Size, 10, 64)
+		s, _ := strconv.ParseUint(b.S, 10, 64)
+		n, _ := strconv.ParseUint(b.N, 10, 64)
+
+		bltByte := solsha3.SoliditySHA3(
+			// types
+			[]string{"uint64", "uint64", "uint64", "bytes32"},
+
+			// values
+			[]interface{}{
+				size,
+				s,
+				n,
+				"0x" + b.SigmaMKLRoot,
+			},
+		)
+		return *byte32(bltByte), nil
+
+	} else if b.Mode == TRANSACTION_MODE_TABLE_POD {
+		s, _ := strconv.ParseUint(b.S, 10, 64)
+		n, _ := strconv.ParseUint(b.N, 10, 64)
+
+		bltByte := solsha3.SoliditySHA3(
+			// types
+			[]string{"uint64", "uint64", "bytes32", "bytes32"},
+
+			// values
+			[]interface{}{
+				s,
+				n,
+				"0x" + b.SigmaMKLRoot,
+				"0x" + b.VRFMetaDigest,
+			},
+		)
+		return *byte32(bltByte), nil
+
 	}
-
-	bltByte := solsha3.SoliditySHA3(
-		// types
-		[]string{"uint64", "uint64", "uint64", "bytes32"},
-
-		// values
-		[]interface{}{
-			size,
-			s,
-			n,
-			mklroot,
-		},
-	)
-
-	return *byte32(bltByte), nil
+	return *byte32(nil), fmt.Errorf("invalid mode=%v", b.Mode)
 }
 
 func byte32(s []byte) (a *[32]byte) {

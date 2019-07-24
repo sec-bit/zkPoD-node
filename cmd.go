@@ -90,7 +90,7 @@ func AliceInitDataNode(filepath string, Log ILogger) {
 		Log.Warnf("read config file error! filepath=%s, err=%v", filepath, err)
 		panic(err.Error())
 	}
-	Log.Debugf("data=%v", string(data))
+	// Log.Debugf("data=%v", string(data))
 
 	urlStr := REQUEST_URL_LOCAL_HOST + ":" + BConf.Port + "/s/publish/init"
 	body := make(url.Values)

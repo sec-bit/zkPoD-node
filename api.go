@@ -379,13 +379,29 @@ func PublishDataAPIHandler(w http.ResponseWriter, r *http.Request) {
 
 	Log.Debugf("start send transaction to contract for publishing data...merkle root=%v, mode=%v, size=%v, n=%v, s=%v", b.SigmaMKLRoot, b.Mode, b.Size, b.N, b.S)
 	t := time.Now()
-	txid, err := publishDataToContract(b, valueInt)
-	if err != nil {
-		Log.Errorf("publish data to contract error! err=%v", err)
+	if b.Mode == TRANSACTION_MODE_PLAIN_POD {
+		txid, err := publishPlainDataToContract(b, valueInt)
+		if err != nil {
+			Log.Errorf("publish data to contract error! err=%v", err)
+			fmt.Fprintf(w, RESPONSE_PUBLISH_TO_CONTRACT_FAILED)
+			return
+		}
+		Log.Debugf("send publish data to contract successfully. txid=%v, merkle root=%v, time cost=%v", txid, b.SigmaMKLRoot, time.Since(t))
+
+	} else if b.Mode == TRANSACTION_MODE_TABLE_POD {
+		txid, err := publishTableDataToContract(b, valueInt)
+		if err != nil {
+			Log.Errorf("publish data to contract error! err=%v", err)
+			fmt.Fprintf(w, RESPONSE_PUBLISH_TO_CONTRACT_FAILED)
+			return
+		}
+		Log.Debugf("send publish data to contract successfully. txid=%v, merkle root=%v, time cost=%v", txid, b.SigmaMKLRoot, time.Since(t))
+
+	} else {
+		Log.Warnf("invalid mode = %v", b.Mode)
 		fmt.Fprintf(w, RESPONSE_PUBLISH_TO_CONTRACT_FAILED)
 		return
 	}
-	Log.Debugf("send publish data to contract successfully. txid=%v, merkle root=%v, time cost=%v", txid, b.SigmaMKLRoot, time.Since(t))
 
 	extra.ContractAddr = BConf.ContractAddr
 	err = savePublishExtraInfo(extra, dataFile+"/extra.json")

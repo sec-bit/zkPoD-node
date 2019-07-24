@@ -98,11 +98,12 @@ type VRFReceipt struct {
 
 //Bulletin is the struct of bulletin.
 type Bulletin struct {
-	Mode         string `json:"mode"`
-	Size         string `json:"size"`
-	S            string `json:"s"`
-	N            string `json:"n"`
-	SigmaMKLRoot string `json:"sigma_mkl_root"`
+	Mode          string `json:"mode"`
+	Size          string `json:"size"` //plain
+	S             string `json:"s"`
+	N             string `json:"n"`
+	SigmaMKLRoot  string `json:"sigma_mkl_root"`
+	VRFMetaDigest string `json:"vrf_meta_digest"` // table
 }
 
 func pathExists(path string) (bool, error) {
