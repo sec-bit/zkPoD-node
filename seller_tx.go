@@ -165,15 +165,6 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("success to receive transaction request for Alice.")
 
-	rs := tx.PlainComplaint.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	tx.Count, err = calcuCntforComplaint(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -184,7 +175,7 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	Log.Debugf("success to verify transaction request and generate transaction response for Alice")
 
 	tx.Price = tx.Count * tx.UnitPrice
-	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
 		AliceTxMap[tx.SessionID] = tx
@@ -203,6 +194,16 @@ func AliceTxForPC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.PlainComplaint.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -380,16 +381,6 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 
-	rs = tx.PlainOTComplaint.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid transaction request file or transaction response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file.")
-	}
-	Log.Debugf("success to verify transaction request and generate transaction response.")
-	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	tx.Count, err = calcuCntforOtComplaint(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -418,6 +409,17 @@ func AliceTxForPOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.PlainOTComplaint.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid transaction request file or transaction response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file.")
+	}
+	Log.Debugf("success to verify transaction request and generate transaction response.")
+	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -537,16 +539,6 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.PlainAtomicSwap.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	Log.Debugf("success to verify request and generate response.")
-	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 	tx.Count, err = calcuCntforAS(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -556,7 +548,7 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 
 	tx.Price = tx.Count * tx.UnitPrice
-	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
 		AliceTxMap[tx.SessionID] = tx
@@ -575,6 +567,17 @@ func AliceTxForPAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.PlainAtomicSwap.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	Log.Debugf("success to verify request and generate response.")
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -695,16 +698,6 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.PlainAtomicSwapVc.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	Log.Debugf("success to verify request and generate response.")
-	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 	tx.Count, err = calcuCntforASVC(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -714,7 +707,7 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	AliceTxMap[tx.SessionID] = tx
 
 	tx.Price = tx.Count * tx.UnitPrice
-	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
 		AliceTxMap[tx.SessionID] = tx
@@ -733,6 +726,17 @@ func AliceTxForPASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.PlainAtomicSwapVc.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	Log.Debugf("success to verify request and generate response.")
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -852,15 +856,6 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.TableComplaint.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 	tx.Count, err = calcuCntforComplaint(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -871,7 +866,7 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	Log.Debugf("success to verify transaction request and generate transaction response.")
 
 	tx.Price = tx.Count * tx.UnitPrice
-	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
 		AliceTxMap[tx.SessionID] = tx
@@ -890,6 +885,16 @@ func AliceTxForTC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log ILo
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.TableComplaint.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -1075,15 +1080,6 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	AliceTxMap[tx.SessionID] = tx
 	Log.Debugf("receive transaction request for Alice...")
 
-	rs = tx.TableOTComplaint.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
 	tx.Count, err = calcuCntforOtComplaint(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -1113,6 +1109,16 @@ func AliceTxForTOC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.TableOTComplaint.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	tx.Status = TRANSACTION_STATUS_RECEIVED_RESPONSE
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -1232,15 +1238,6 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.TableAtomicSwap.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 	tx.Count, err = calcuCntforAS(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -1251,7 +1248,7 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	Log.Debugf("success to verify transaction request and generate response.")
 
 	tx.Price = tx.Count * tx.UnitPrice
-	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
 		AliceTxMap[tx.SessionID] = tx
@@ -1270,6 +1267,16 @@ func AliceTxForTAS(node *pod_net.Node, key *keystore.Key, tx Transaction, Log IL
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.TableAtomicSwap.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {
@@ -1389,15 +1396,6 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	tx.Status = TRANSACTION_STATUS_RECEIVED_REQUEST
 	AliceTxMap[tx.SessionID] = tx
 
-	rs := tx.TableAtomicSwapVc.AliceVerifyReq(requestFile, responseFile, Log)
-	if !rs {
-		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
-		AliceTxMap[tx.SessionID] = tx
-		Log.Warnf("invalid request file or response file. err=%v", err)
-		return fmt.Errorf(
-			"invalid request file or response file")
-	}
-	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 	tx.Count, err = calcuCntforASVC(requestFile)
 	if err != nil {
 		Log.Warnf("failed to calculate count by request")
@@ -1408,7 +1406,7 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	Log.Debugf("success to verify transaction request and generate response.")
 
 	tx.Price = tx.Count * tx.UnitPrice
-	rs, err = calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
+	rs, err := calcuDeposit(tx.AliceAddr, tx.BobAddr, tx.Price)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_DEPOSIT_NOT_ENOUGH
 		AliceTxMap[tx.SessionID] = tx
@@ -1427,6 +1425,16 @@ func AliceTxForTASVC(node *pod_net.Node, key *keystore.Key, tx Transaction, Log 
 	defer func() {
 		DepositLockMap[tx.AliceAddr+tx.BobAddr] -= tx.Price
 	}()
+
+	rs = tx.TableAtomicSwapVc.AliceVerifyReq(requestFile, responseFile, Log)
+	if !rs {
+		tx.Status = TRANSACTION_STATUS_INVALID_REQUEST
+		AliceTxMap[tx.SessionID] = tx
+		Log.Warnf("invalid request file or response file. err=%v", err)
+		return fmt.Errorf(
+			"invalid request file or response file")
+	}
+	tx.Status = TRANSACTION_STATUS_GENERATE_RESPONSE
 
 	err = AliceSendPODResp(node, responseFile)
 	if err != nil {

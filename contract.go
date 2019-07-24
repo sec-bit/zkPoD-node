@@ -171,7 +171,13 @@ func submitScrtForComplaint(tx Transaction, receiptSign []byte, Log ILogger) (st
 		return "", errors.New("failed to convert sessionId")
 	}
 
-	err = verifySigntureForComplaint(tx, sessionInt, receiptSign, receipt, Log)
+	bltKey, err := calcuBltKey(tx.Bulletin)
+	if err != nil {
+		Log.Warnf("failed to calculate blt key. tx.Bulletin=%v, err=%v", tx.Bulletin, err)
+		return "", errors.New("failed to calculate blt key")
+	}
+
+	err = verifySigntureForComplaint(tx, sessionInt, bltKey, receiptSign, receipt, Log)
 	if err != nil {
 		Log.Warnf("verify signature error! err=%v", err)
 		return "", errors.New("verify signature error")
@@ -188,15 +194,15 @@ func submitScrtForComplaint(tx Transaction, receiptSign []byte, Log ILogger) (st
 		return "", errors.New("failed to parse seed file")
 	}
 
-	bltKey, err := calcuBltKey(tx.Bulletin)
-	if err != nil {
-		Log.Warnf("failed to calculate blt key. tx.Bulletin=%v, err=%v", tx.Bulletin, err)
-		return "", errors.New("failed to calculate blt key")
-	}
-
 	t := time.Now()
-	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofComplaint(GAdminAuth, bltKey, *byte32(seedByte), sessionInt,
-		common.HexToAddress(tx.BobAddr), *byte32(seed2Byte), *byte32(mklByte), receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
+	var _addrs [2]common.Address
+	_addrs[0] = common.HexToAddress(tx.BobAddr)
+	_addrs[1] = common.HexToAddress(tx.AliceAddr)
+
+	//func (_ZkPoDExchange *ZkPoDExchangeTransactor) SubmitProofComplaint(opts *bind.TransactOpts, _seed0 [32]byte, _sid *big.Int,
+	// _addrs [2]common.Address, _bltKey [32]byte, _seed2 [32]byte, _k_mkl_root [32]byte, _count uint64, _price *big.Int, _expireAt *big.Int, _sig []byte)
+	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofComplaint(GAdminAuth, *byte32(seedByte), sessionInt,
+		_addrs, bltKey, *byte32(seed2Byte), *byte32(mklByte), receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
 		Log.Warnf("failed to submit proof. err=%v", err)
 		return "", errors.New("failed to submit proof")
@@ -206,7 +212,7 @@ func submitScrtForComplaint(tx Transaction, receiptSign []byte, Log ILogger) (st
 	return ctx.Hash().Hex(), nil
 }
 
-func verifySigntureForComplaint(tx Transaction, sessionInt *big.Int, receiptSign []byte, receipt ComplaintReceipt, Log ILogger) error {
+func verifySigntureForComplaint(tx Transaction, sessionInt *big.Int, bltKey [32]byte, receiptSign []byte, receipt ComplaintReceipt, Log ILogger) error {
 
 	if len(receiptSign) != 65 {
 		Log.Warnf("invalid signature. sig=%v, len(sig)=%v", hexutil.Encode(receiptSign), len(receiptSign))
@@ -214,12 +220,14 @@ func verifySigntureForComplaint(tx Transaction, sessionInt *big.Int, receiptSign
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "bytes32", "bytes32", "uint64", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "bytes32", "bytes32", "bytes32", "uint64", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			common.HexToAddress(tx.BobAddr),
+			common.HexToAddress(tx.AliceAddr),
+			bltKey,
 			"0x" + receipt.S,
 			"0x" + receipt.K,
 			receipt.C,
@@ -403,9 +411,11 @@ func submitScrtForAtomicSwap(tx Transaction, receiptSign []byte, Log ILogger) (s
 		*byte32(seedByte), _sCnt, sessionInt, tx.BobAddr, *byte32(seed2Byte), vwInt, receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 
 	t := time.Now()
+	var _addrs [2]common.Address
+	_addrs[0] = common.HexToAddress(tx.BobAddr)
+	_addrs[1] = common.HexToAddress(tx.AliceAddr)
 	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofAtomicSwap(GAdminAuth, *byte32(seedByte), _sCnt, sessionInt,
-		common.HexToAddress(tx.BobAddr), *byte32(seed2Byte), vwInt, receipt.C,
-		big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
+		_addrs, *byte32(seed2Byte), vwInt, receipt.C, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
 		Log.Warnf("failed to submit proof. err=%v", err)
 		return "", errors.New("failed to submit proof")
@@ -423,12 +433,13 @@ func verifySigntureForAtomicSwap(tx Transaction, sessionInt *big.Int, vwInt *big
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "bytes32", "uint256", "uint64", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "bytes32", "uint256", "uint64", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			common.HexToAddress(tx.BobAddr),
+			common.HexToAddress(tx.AliceAddr),
 			"0x" + receipt.S,
 			vwInt,
 			receipt.C,
@@ -538,12 +549,11 @@ func submitScrtForAtomicSwapVc(tx Transaction, receiptSign []byte, Log ILogger) 
 		seed0Int, randInt, sessionInt, tx.BobAddr, receipt.D, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 
 	t := time.Now()
-	// SubmitProofAtomicSwapVC func(opts *bind.TransactOpts, _seed0 *big.Int, _seed0_rand *big.Int,
-	// 	_sid *big.Int, _b common.Address, _seed0_mimc3_digest *big.Int,
-	// 	_price *big.Int, _expireAt *big.Int, _sig []byte)
+	var _addrs [2]common.Address
+	_addrs[0] = common.HexToAddress(tx.BobAddr)
+	_addrs[1] = common.HexToAddress(tx.AliceAddr)
 	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofAtomicSwapVC(GAdminAuth, seed0Int, randInt,
-		sessionInt, common.HexToAddress(tx.BobAddr), digestInt,
-		big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
+		sessionInt, _addrs, digestInt, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
 		Log.Warnf("failed to submit proof. err=%v", err)
 		return "", errors.New("failed to submit proof")
@@ -560,12 +570,13 @@ func verifySigntureForAtomicSwapVc(tx Transaction, sessionInt *big.Int, receiptS
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "uint256", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "uint256", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			common.HexToAddress(tx.BobAddr),
+			common.HexToAddress(tx.AliceAddr),
 			digestInt,
 			big.NewInt(tx.UnitPrice * tx.Count),
 			big.NewInt(tx.ExpireAt),
@@ -673,8 +684,11 @@ func submitScrtForVRFQ(tx Transaction, receiptSign []byte, Log ILogger) (string,
 	}
 
 	t := time.Now()
+	var _addrs [2]common.Address
+	_addrs[0] = common.HexToAddress(tx.BobAddr)
+	_addrs[1] = common.HexToAddress(tx.AliceAddr)
 	ctx, err := ZkPoDExchangeClient.ZkPoDExchangeTransactor.SubmitProofVRF(GAdminAuth, srInt, sessionInt,
-		common.HexToAddress(tx.BobAddr), _g_exp_r, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
+		_addrs, _g_exp_r, big.NewInt(tx.Price), big.NewInt(tx.ExpireAt), receiptSign)
 	if err != nil {
 		Log.Warnf("Failed to submit proof. err=%v", err)
 		return "", errors.New("Failed to submit proof")
@@ -692,12 +706,13 @@ func verifySigntureForVRFQ(tx Transaction, sessionInt *big.Int, _g_exp_r [2]*big
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "uint256", "uint256", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "uint256", "uint256", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			common.HexToAddress(tx.BobAddr),
+			common.HexToAddress(tx.AliceAddr),
 			_g_exp_r[0],
 			_g_exp_r[1],
 			big.NewInt(tx.UnitPrice * tx.Count),
@@ -795,7 +810,7 @@ func calcuBltKey(b Bulletin) ([32]byte, error) {
 
 	bltByte := solsha3.SoliditySHA3(
 		// types
-		[]string{"uint64", "uint64", "uint64", "uint256"},
+		[]string{"uint64", "uint64", "uint64", "bytes32"},
 
 		// values
 		[]interface{}{
@@ -805,6 +820,7 @@ func calcuBltKey(b Bulletin) ([32]byte, error) {
 			mklroot,
 		},
 	)
+
 	return *byte32(bltByte), nil
 }
 

@@ -164,7 +164,7 @@ func BobTxForPC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, demand
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, tx.Bulletin, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -410,7 +410,7 @@ func BobTxForPOC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, tx.Bulletin, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -592,7 +592,7 @@ func BobTxForPAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForAtomicSwap(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForAtomicSwap(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -755,7 +755,7 @@ func BobTxForPASVC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, dem
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForAtomicSwapVc(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForAtomicSwapVc(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -917,7 +917,7 @@ func BobTxForTC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, demand
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, tx.Bulletin, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -1164,7 +1164,7 @@ func BobTxForTOC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForComplaint(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForComplaint(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, tx.Bulletin, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -1345,7 +1345,7 @@ func BobTxForTAS(node *pod_net.Node, key *keystore.Key, tx BobTransaction, deman
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForAtomicSwap(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForAtomicSwap(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -1506,7 +1506,7 @@ func BobTxForTASVC(node *pod_net.Node, key *keystore.Key, tx BobTransaction, dem
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForAtomicSwapVc(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForAtomicSwapVc(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -1669,7 +1669,7 @@ func BobTxForTQ(node *pod_net.Node, key *keystore.Key, tx BobTransaction, keyNam
 
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForVRFQ(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForVRFQ(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx
@@ -1886,7 +1886,7 @@ func BobTxForTOQ(node *pod_net.Node, key *keystore.Key, tx BobTransaction, keyNa
 	}
 	tx.Price = tx.UnitPrice * tx.Count
 	tx.ExpireAt = time.Now().Unix() + 36000
-	sign, err := signRecptForVRFQ(key, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
+	sign, err := signRecptForVRFQ(key, tx.AliceAddr, tx.SessionID, receipt, tx.Price, tx.ExpireAt, Log)
 	if err != nil {
 		tx.Status = TRANSACTION_STATUS_RECEIVED_RECEIPT_FAILED
 		BobTxMap[tx.SessionID] = tx

@@ -178,7 +178,7 @@ func readReceiptForComplaint(filePath string, Log ILogger) ([]byte, ComplaintRec
 	return rf, r, nil
 }
 
-func signRecptForComplaint(key *keystore.Key, sessionID string, receipt ComplaintReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+func signRecptForComplaint(key *keystore.Key, AliceAddr string, sessionID string, receipt ComplaintReceipt, price int64, expireAt int64, bulletin Bulletin, Log ILogger) ([]byte, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -187,13 +187,21 @@ func signRecptForComplaint(key *keystore.Key, sessionID string, receipt Complain
 		return nil, errors.New("convert sessionId error")
 	}
 
+	bltKey, err := calcuBltKey(bulletin)
+	if err != nil {
+		Log.Warnf("failed to calculate blt key. tx.Bulletin=%v, err=%v", bulletin, err)
+		return nil, errors.New("failed to calculate blt key")
+	}
+
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "bytes32", "bytes32", "uint64", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "bytes32", "bytes32", "bytes32", "uint64", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			fmt.Sprintf("%v", key.Address.Hex()),
+			AliceAddr,
+			bltKey,
 			"0x" + receipt.S,
 			"0x" + receipt.K,
 			receipt.C,
@@ -233,7 +241,7 @@ func readReceiptForAtomicSwap(filePath string, Log ILogger) ([]byte, AtomicSwapR
 	return rf, r, nil
 }
 
-func signRecptForAtomicSwap(key *keystore.Key, sessionID string, receipt AtomicSwapReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+func signRecptForAtomicSwap(key *keystore.Key, AliceAddr string, sessionID string, receipt AtomicSwapReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -250,12 +258,13 @@ func signRecptForAtomicSwap(key *keystore.Key, sessionID string, receipt AtomicS
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "bytes32", "uint256", "uint64", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "bytes32", "uint256", "uint64", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			fmt.Sprintf("%v", key.Address.Hex()),
+			AliceAddr,
 			"0x" + receipt.S,
 			vwInt,
 			receipt.C,
@@ -304,7 +313,7 @@ func readReceiptForAtomicSwapVc(filePath string, Log ILogger) ([]byte, AtomicSwa
 	return rf, r, nil
 }
 
-func signRecptForAtomicSwapVc(key *keystore.Key, sessionID string, receipt AtomicSwapVcReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+func signRecptForAtomicSwapVc(key *keystore.Key, AliceAddr string, sessionID string, receipt AtomicSwapVcReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -320,12 +329,13 @@ func signRecptForAtomicSwapVc(key *keystore.Key, sessionID string, receipt Atomi
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "uint256", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "uint256", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			fmt.Sprintf("%v", key.Address.Hex()),
+			AliceAddr,
 			digestInt,
 			big.NewInt(price),
 			big.NewInt(expireAt),
@@ -364,7 +374,7 @@ func readVRFReceipt(filePath string, Log ILogger) ([]byte, VRFReceipt, error) {
 	return rf, r, nil
 }
 
-func signRecptForVRFQ(key *keystore.Key, sessionID string, receipt VRFReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
+func signRecptForVRFQ(key *keystore.Key, AliceAddr string, sessionID string, receipt VRFReceipt, price int64, expireAt int64, Log ILogger) ([]byte, error) {
 
 	sessionInt := new(big.Int)
 	sessionInt, rs := sessionInt.SetString(sessionID, 10)
@@ -394,12 +404,13 @@ func signRecptForVRFQ(key *keystore.Key, sessionID string, receipt VRFReceipt, p
 	}
 
 	receiptHash := solsha3.SoliditySHA3( // types
-		[]string{"uint256", "address", "uint256", "uint256", "uint256", "uint256"},
+		[]string{"uint256", "address", "address", "uint256", "uint256", "uint256", "uint256"},
 
 		// values
 		[]interface{}{
 			sessionInt,
 			fmt.Sprintf("%v", key.Address.Hex()),
+			AliceAddr,
 			_g_exp_r[0],
 			_g_exp_r[1],
 			big.NewInt(price),
