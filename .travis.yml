@@ -27,9 +27,7 @@ before_install:
   - cd ../../..
   - make -j 2
   - cd pod_go
-  # disable make test on osx due to -> pod_setup(12654,0x1184825c0) malloc: can't allocate region
-  # - if [ "$TRAVIS_OS_NAME" = "osx" ]; then make test; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then make test -j 2; fi
+  - make test
   - cd ../../zkPoD-node
   - make -j 2
   - mkdir -p zkPodParam/zksnark_key
