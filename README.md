@@ -26,7 +26,7 @@ The three main issues being tackled by zkPoD are
 
 A cryptographic protocol, PoD (proof of delivery), is developed to try to solve the issues, ensuring **fairness** between data buyers and sellers. The protocol is zero-knowledge and provable secure (*ongoing work*). See our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for more information. 
 
-zkPoD is practical and efficient. It could deliver data with TBs in theory. See [performance evaluation section](##Performance) below.
+zkPoD is practical and efficient. It could deliver data with TBs in theory. See [performance evaluation section](#Performance) below.
 
 [![asciicast-gif](img/demo.min.gif)](https://asciinema.org/a/251240?autoplay=1&speed=2.71828182846)
 
@@ -34,7 +34,7 @@ zkPoD is practical and efficient. It could deliver data with TBs in theory. See 
 
 + Decentralization:  zkPoD uses smart contracts on Ethereum as the trustless third party. In theory, zkPoD can be deployed on any blockchains with basic smart contract support. The gas cost in transactions of data exchange is moderate, and the size of data can be up to TBs.
 + Atomic-swap:  zkPoD supports atomic-swap (as in [ZKCP](https://en.bitcoin.it/wiki/Zero_Knowledge_Contingent_Payment)).
-+ Large data file support.  zkPoD supports delivering large data file within one transaction. See [performance evaluation section](##Performance).
++ Large data file support.  zkPoD supports delivering large data file within one transaction. See [performance evaluation section](#Performance).
 + Data query by keywords:  zkPoD supports pay-and-query. Before locating the records interested, a buyer may query for one or more keywords.
 + Privacy protection: The request of a buyer may be sensitive under some circumstances, the buyer can obfuscate her real intention by adding a few unrelated requests. Then the seller has to respond to all requests without knowing which one is real from the buyer, but she does know that only one response can be visible to the buyer since the buyer only paid for one request. 
 + Inspection of goods:  zkPoD supports the inspection of goods for a buyer at any scale natively. The buyer can randomly select any piece of data at any location and takes it as a sample to check whether it is something she wants or not. Then, the buyer can continue to buy a large amount of data after a satisfied inspection. zkPoD does not set a limit for the number of times a buyer could request for inspection. zkPoD also ensures that every piece of data in every inspection coming from the same data set, including the final batch purchase.
@@ -66,7 +66,7 @@ For tabulated data, each row is a record with fixed columns. The buyer may send 
 
 #### Data transaction
 
-We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes. See the [performance evaluation section](##Performance) and our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for detailed specification and comparison.
+We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes. See the [performance evaluation section](#Performance) and our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for detailed specification and comparison.
 
 For simplicity, we introduce two main types of trading mode for data delivery.
 
