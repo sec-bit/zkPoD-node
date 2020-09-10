@@ -5,7 +5,7 @@ matrix:
         - os: linux
           dist: bionic
         - os: osx
-          osx_image: xcode11.3
+          osx_image: xcode11.6
 go: 
  - "1.12.x"
 git:
@@ -13,7 +13,7 @@ git:
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libomp-dev libcrypto++-dev libboost-all-dev libgmp-dev; fi
   # - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install libcryptopp boost gmp openssl; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install libcryptopp; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install cryptopp; fi
   - cd $HOME && mkdir zkPoD && cd zkPoD
   - mv $GOPATH/src/github.com/sec-bit/zkPoD-node .
   - git clone https://github.com/sec-bit/zkPoD-lib.git
