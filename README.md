@@ -26,7 +26,7 @@ The three main issues being tackled by zkPoD are
 
 A cryptographic protocol, PoD (proof of delivery), is developed to try to solve the issues, ensuring **fairness** between data buyers and sellers. The protocol is zero-knowledge and provable secure (*ongoing work*). See our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for more information. 
 
-zkPoD is practical and efficient. It could deliver data with TBs in theory. See [performance evaluation section](##Performance) below.
+zkPoD is practical and efficient. It could deliver data with TBs in theory. See [performance evaluation section](#Performance) below.
 
 [![asciicast-gif](img/demo.min.gif)](https://asciinema.org/a/251240?autoplay=1&speed=2.71828182846)
 
@@ -66,7 +66,7 @@ For tabulated data, each row is a record with fixed columns. The buyer may send 
 
 #### Data transaction
 
-We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes. See the [performance evaluation section](##Performance) and our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for detailed specification and comparison.
+We present three variant protocols, PoD-AS, PoD-AS* and PoD-CR, used for different purposes. See the [performance evaluation section](#Performance) and our [technical paper](https://sec-bit.github.io/zkPoD-node/paper.pdf) for detailed specification and comparison.
 
 For simplicity, we introduce two main types of trading mode for data delivery.
 
