@@ -4,8 +4,8 @@ matrix:
     include:
         - os: linux
           dist: bionic
-        - os: osx
-          osx_image: xcode11.3
+        # - os: osx # disable osx https://github.com/Homebrew/homebrew-core/pull/58905
+        #   osx_image: xcode11.3
 go: 
  - "1.12.x"
 git:
